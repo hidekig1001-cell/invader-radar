@@ -1,6 +1,7 @@
 # 規則の層（SPEC.md 2 節）: ゲームの決まりの入口。
 # Meowdoku の決まり: 駒は、同じ行・同じ列・同じ区域に 2 つ置けない。
 # また、縦・横・斜めに隣り合う 2 マスにも置けない。
+# さらに、小惑星のマスには駒を置けない。
 extends RefCounted
 
 
@@ -11,6 +12,13 @@ static func conflicts(board_state, level) -> Array:
 	var pieces = board_state.pieces()
 	var conflict_set = {}
 	var n = pieces.size()
+	
+	# 小惑星のマスにある駒を conflict_set に追加
+	for piece in pieces:
+		for asteroid in level.asteroids:
+			if piece == asteroid:
+				conflict_set[piece] = true
+				break
 	
 	for i in range(n):
 		for j in range(i + 1, n):

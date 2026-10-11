@@ -39,6 +39,9 @@ static func _backtrack(level, n: int, y: int, current_solution: Array, used_cols
 		if abs(x - prev_x) <= 1:
 			continue
 		
+		if _is_asteroid(level, x, y):
+			continue
+		
 		current_solution.append(Vector2i(x, y))
 		used_cols[x] = true
 		used_regions[region] = true
@@ -48,6 +51,12 @@ static func _backtrack(level, n: int, y: int, current_solution: Array, used_cols
 		current_solution.pop_back()
 		used_cols.erase(x)
 		used_regions.erase(region)
+
+static func _is_asteroid(level, x: int, y: int) -> bool:
+	for a in level.asteroids:
+		if a.x == x and a.y == y:
+			return true
+	return false
 
 static func count_solutions(level, limit: int = 0) -> int:
 	return solutions(level, limit).size()
