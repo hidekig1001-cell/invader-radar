@@ -1,0 +1,3 @@
+- 面 `res://game/level.gd`（`const Level = preload("res://game/level.gd")`）にあるのは、変数 `id`・`width`・`height`・`target`（int）、`regions`（Grid）、`asteroids`・`radar`（Vector2i の並び）と、関数 `parse(d) -> bool`・`to_dict()`・`to_json()`・`parse_json(text) -> bool`・`load_file(path) -> bool`・`region_at(x: int, y: int) -> int`・`region_count() -> int` だけ。`get_region_at` や `region_at(Vector2i)` はない。
+- 盤 `res://core/board_state.gd` にあるのは、定数 `EMPTY`・`MARK`・`PIECE`、関数 `state_at(x, y) -> int`・`apply(action, x, y) -> int`・`undo() -> bool`・`pieces() -> Array`（Vector2i）・`marks() -> Array`・`snapshot() -> Dictionary`。
+- 型つき（`: Vector2i` など）の引数や変数に null を入れない。「まだない」を表すときは、型を付けないか、範囲の外の値（-10 など）を使う。
