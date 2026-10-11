@@ -8,6 +8,7 @@ const Session = preload("res://game/session.gd")
 const InputMapper = preload("res://scenes/input_mapper.gd")
 const RulesLabelScript = preload("res://scenes/rules_label.gd")
 const Tutorial = preload("res://game/tutorial.gd")
+const SpaceBg = preload("res://scenes/space_bg.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -18,6 +19,7 @@ var _prev_tap: Dictionary = {}
 var rules_label: Label = null
 var tutorial = null
 var start_with_tutorial: bool = false
+var space_bg = null
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -25,6 +27,10 @@ var start_with_tutorial: bool = false
 
 
 func _ready() -> void:
+	space_bg = SpaceBg.new()
+	add_child(space_bg)
+	move_child(space_bg, 0)
+
 	if session == null:
 		session = Session.new()
 	board_view.session = session
