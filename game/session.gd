@@ -7,6 +7,7 @@ signal changed
 const BoardState = preload("res://core/board_state.gd")
 const Rules = preload("res://core/rules.gd")
 const Level = preload("res://game/level.gd")
+const LevelPack = preload("res://game/level_pack.gd")
 
 const LEVEL_PATHS := [
 	"res://data/levels/level_001.json",
@@ -34,9 +35,9 @@ func _init(level_list: Array = []) -> void:
 
 static func load_default_levels() -> Array:
 	var out: Array = []
-	for path in LEVEL_PATHS:
+	for d in LevelPack.level_dicts():
 		var lv = Level.new()
-		if lv.load_file(path):
+		if lv.parse(d):
 			out.append(lv)
 	return out
 
