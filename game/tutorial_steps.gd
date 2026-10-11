@@ -24,7 +24,7 @@ static func steps() -> Array:
 			"wait": {"kind": "double_tap", "cell": Vector2i(3, 1)}
 		},
 		{
-			"text": "EACH ROW AND EACH COLUMN ALSO HAS ONE PIECE.\nTAP TO CONTINUE.",
+			"text": "ONE PIECE PER ROW AND COLUMN, TOO.\nTAP TO CONTINUE.",
 			"highlight": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2), Vector2i(3, 3)],
 			"wait": {"kind": "next"}
 		},
