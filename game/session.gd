@@ -8,6 +8,7 @@ const BoardState = preload("res://core/board_state.gd")
 const Rules = preload("res://core/rules.gd")
 const Level = preload("res://game/level.gd")
 const LevelPack = preload("res://game/level_pack.gd")
+const Hint = preload("res://core/hint.gd")
 
 const LEVEL_PATHS := [
 	"res://data/levels/level_001.json",
@@ -25,6 +26,7 @@ var moves: int = 0
 var score: int = 0
 var hints: int = DEFAULT_HINTS
 var status: String = "playing"  # "playing" | "cleared"
+var current_hint: Dictionary = {}
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
@@ -111,12 +113,43 @@ func snapshot() -> Dictionary:
 		"hints": hints, "status": status, "board": board.snapshot() if board != null else {}}
 
 
+# ヒントを求める。出せたら残りを 1 減らして true
+func request_hint() -> bool:
+	if status != "playing" or hints <= 0:
+		return false
+	var hint_data = Hint.next_hint(board, level)
+	if hint_data.is_empty():
+		return false
+	hints -= 1
+	current_hint = hint_data
+	changed.emit()
+	return true
+
+
+# 今のヒントのとおりに盤を直す。直したら true
+func apply_hint() -> bool:
+	if current_hint.is_empty():
+		return false
+	var cell: Vector2i = current_hint["cell"]
+	var kind: String = current_hint["kind"]
+	var x: int = cell.x
+	var y: int = cell.y
+	var did_change := false
+	if kind == "wrong_mark" or kind == "wrong_piece":
+		did_change = board.apply("clear", x, y) == OK
+	elif kind == "next_piece":
+		did_change = board.apply("place", x, y) == OK
+	current_hint = {}
+	return _commit(did_change)
+
+
 func _start_level(index: int) -> void:
 	level_index = index
 	level = levels[index] if index < levels.size() else null
 	board = BoardState.new(level.width, level.height) if level != null else null
 	moves = 0
 	status = "playing"
+	current_hint = {}
 	changed.emit()
 
 
