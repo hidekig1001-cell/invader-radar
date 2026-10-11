@@ -46,7 +46,11 @@ func test_level_dicts_ids_are_sequential() -> void:
 func test_level_dicts_regions_match_table() -> void:
 	var dicts := LevelPack.level_dicts()
 	assert_eq(dicts[0]["regions"], [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]])
-	for i in range(1, 10):
+	assert_eq(dicts[1]["regions"], [[0, 0, 2, 1], [0, 0, 1, 1], [0, 0, 1, 1], [0, 3, 3, 1]])
+	assert_eq(dicts[2]["regions"], EXPECTED_REGIONS[2])
+	assert_eq(dicts[3]["regions"], EXPECTED_REGIONS[3])
+	assert_eq(dicts[4]["regions"], [[2, 2, 1, 1], [2, 0, 1, 3], [0, 0, 1, 3], [0, 0, 0, 3]])
+	for i in range(5, 10):
 		assert_eq(dicts[i]["regions"], EXPECTED_REGIONS[i])
 
 ## CHECK: 4
