@@ -5,6 +5,7 @@ extends Control
 signal undo_pressed
 signal hint_pressed
 signal settings_pressed
+signal apply_pressed
 
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
@@ -15,6 +16,7 @@ var hint_label: Label
 var undo_button: Button
 var settings_button: Button
 var hint_button: Button
+var apply_button: Button
 
 
 func _ready() -> void:
@@ -27,6 +29,8 @@ func _ready() -> void:
 	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
 	settings_button = _make_button("SETTINGS", Rect2(740, 200, 300, 110), settings_pressed)
 	hint_button = _make_button("HINT", Rect2(240, 1560, 600, 150), hint_pressed)
+	apply_button = _make_button("APPLY", Rect2(850, 1560, 200, 150), apply_pressed)
+	apply_button.visible = false
 
 
 # session.snapshot() の内容を表示する。
@@ -37,6 +41,10 @@ func update_from(snap: Dictionary) -> void:
 	hint_button.text = "HINT (%d)" % int(snap.get("hints", 0))
 	hint_button.disabled = int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
 	undo_button.disabled = snap.get("status", "") != "playing"
+
+
+func set_apply_visible(on: bool) -> void:
+	apply_button.visible = on
 
 
 func _make_label(r: Rect2, align: HorizontalAlignment) -> Label:

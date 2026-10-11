@@ -27,6 +27,7 @@ func _ready() -> void:
 	hud.undo_pressed.connect(func() -> void: session.undo())
 	hud.hint_pressed.connect(_on_hint)
 	hud.settings_pressed.connect(func() -> void: bubble.show_text("SETTINGS: COMING SOON", 2.0))
+	hud.apply_pressed.connect(on_apply)
 	_refresh()
 	bubble.show_text(HELP_TEXT, 4.0)
 
@@ -79,8 +80,17 @@ func _on_touch_up(pos: Vector2) -> void:
 
 
 func _on_hint() -> void:
-	if session.use_hint():
-		bubble.show_text("HINT: COMING SOON", 2.0)
+	if session.request_hint():
+		bubble.show_text(session.current_hint["text"], 0.0)
+		board_view.hint_cell = session.current_hint["cell"]
+		hud.set_apply_visible(true)
+
+
+func on_apply() -> void:
+	bubble.clear_text()
+	board_view.hint_cell = Vector2i(-1, -1)
+	hud.set_apply_visible(false)
+	session.apply_hint()
 
 
 func _refresh() -> void:
@@ -92,3 +102,6 @@ func _refresh() -> void:
 		bubble.show_text(CLEARED_TEXT, 0.0)
 	elif bubble.text == CLEARED_TEXT:
 		bubble.clear_text()
+	if session.current_hint.is_empty():
+		board_view.hint_cell = Vector2i(-1, -1)
+		hud.set_apply_visible(false)

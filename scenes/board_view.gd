@@ -27,6 +27,11 @@ var session = null:
 		session = value
 		queue_redraw()
 
+var hint_cell: Vector2i = Vector2i(-1, -1):
+	set(value):
+		hint_cell = value
+		queue_redraw()
+
 
 # 盤の大きさ（マス）。session がなければ 0。
 func grid_size() -> Vector2i:
@@ -88,6 +93,10 @@ func _draw() -> void:
 					_draw_mark(r)
 				"P":
 					_draw_piece(r, piece_fill(x, y))
+
+	if hint_cell.x >= 0 and hint_cell.y >= 0:
+		var r := cell_rect(hint_cell.x, hint_cell.y)
+		draw_rect(r, Color(1.0, 0.9, 0.2), false, 14.0)
 
 
 func _draw_mark(r: Rect2) -> void:
