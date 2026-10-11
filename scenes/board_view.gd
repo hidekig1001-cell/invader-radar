@@ -161,6 +161,137 @@ func mark_thickness() -> float:
 
 # -----------------------------
 
+# CR-1023: 角の丸い四角の輪郭の点の並びを返す。
+# 左上の角から時計回り（左上 → 右上 → 右下 → 左下）。
+# 各角は segments + 1 個の点で作る。
+func round_rect_points(rect: Rect2, radius: float, segments: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var pos := rect.position
+	var size := rect.size
+	
+	# Clamp radius
+	var r := minf(radius, minf(size.x, size.y) * 0.5)
+	if r <= 0.0:
+		return points
+
+	# Helper to add arc points for a corner
+	# center: Vector2, start_angle: float, end_angle: float (radians)
+	# We iterate from start to end in steps of segments+1 points.
+	# Note: In Godot 2D, Y is down. Angles are typically measured from positive X axis counter-clockwise in math, 
+	# but visually "clockwise" on screen means angle increases if we consider standard math angles? 
+	# Let's stick to the spec's explicit coordinate definitions to avoid confusion.
+	
+	# Top Left Corner: Center (pos.x + r, pos.y + r)
+	# Start: (pos.x, pos.y + r) -> Vector from center: (-r, 0). Angle PI.
+	# End: (pos.x + r, pos.y) -> Vector from center: (0, -r). Angle -PI/2 or 3PI/2.
+	# Spec says "clockwise". Visually from left edge to top edge is clockwise.
+	# In screen coords (Y down), moving from (-r, 0) to (0, -r) via the arc closest to origin (0,0) relative to center?
+	# The arc is in the quadrant x < cx, y < cy.
+	# Angle of start vector (-1, 0) is PI.
+	# Angle of end vector (0, -1) is -PI/2 (or 3PI/2).
+	# To go clockwise visually (from left to top), we decrease angle? 
+	# Let's check the midpoint test: P[2] for segments=4.
+	# Indices 0,1,2,3,4. Index 2 is middle.
+	# Expected: Vector2(10 - 10*cos(PI/4), 10 - 10*sin(PI/4)).
+	# Center (10,10). Vector (-7.07, -7.07). Angle is 5PI/4 or -3PI/4? 
+	# cos(5PI/4) = -0.707, sin(5PI/4) = -0.707.
+	# So angle is 5PI/4 (225 degrees).
+	# Start angle PI (180 deg). End angle 3PI/2 (270 deg) or -PI/2.
+	# If we go from PI to 3PI/2, that's increasing angle. In standard math (Y up), this is CCW.
+	# But Y is down. Increasing angle in standard math (CCW) looks like CW on screen?
+	# Let's verify: 
+	# Angle 0: (1,0) -> Right.
+	# Angle PI/2: (0,1) -> Down (because Y is down).
+	# So increasing angle goes Right -> Down -> Left -> Up. This is Clockwise on screen.
+	# So we want to increase angle from Start to End.
+	# Top Left: Start (-r, 0) is Angle PI. End (0, -r) is Angle 3PI/2 (or -PI/2).
+	# To go clockwise visually (Left edge to Top edge), we go from Angle PI to Angle 3PI/2?
+	# Wait. Left edge point is (0, r) relative to center? No, pos.x is left. Center is pos.x+r.
+	# Point (pos.x, pos.y+r) is (-r, 0) relative to center. Angle PI.
+	# Point (pos.x+r, pos.y) is (0, -r) relative to center. Angle 3PI/2 (or -PI/2).
+	# If we increase angle from PI to 3PI/2, we pass through 5PI/4 (which is (-0.7, -0.7)).
+	# This matches the midpoint test!
+	# So: Start Angle = PI, End Angle = 3PI/2. Step = (End - Start) / segments.
+	
+	var tl_center := Vector2(pos.x + r, pos.y + r)
+	var tl_start_angle := PI
+	var tl_end_angle := 1.5 * PI # 3PI/2
+	
+	# Top Right Corner: Center (pos.x + size.x - r, pos.y + r)
+	# Start: (pos.x + size.x - r, pos.y) -> Vector (-r? No. x is right edge minus r. Center is right edge minus r. So x diff is 0? 
+	# Wait. Top Right corner arc starts at top edge right end?
+	# Spec: "Top Right is from (x + width - radius, y) to (x + width, y + radius)"
+	# Start point: (pos.x + size.x - r, pos.y). Relative to center (pos.x + size.x - r, pos.y + r): Vector (0, -r). Angle 3PI/2.
+	# End point: (pos.x + size.x, pos.y + r). Relative to center: Vector (r, 0). Angle 0 (or 2PI).
+	# We need to go from 3PI/2 to 2PI (increasing angle).
+	var tr_center := Vector2(pos.x + size.x - r, pos.y + r)
+	var tr_start_angle := 1.5 * PI
+	var tr_end_angle := 2.0 * PI
+	
+	# Bottom Right Corner: Center (pos.x + size.x - r, pos.y + size.y - r)
+	# Spec: "Bottom Right is from (x + width, y + height - radius) to (x + width - radius, y + height)"
+	# Start point: (pos.x + size.x, pos.y + size.y - r). Relative to center: Vector (r, 0). Angle 0.
+	# End point: (pos.x + size.x - r, pos.y + size.y). Relative to center: Vector (0, r). Angle PI/2.
+	# Go from 0 to PI/2.
+	var br_center := Vector2(pos.x + size.x - r, pos.y + size.y - r)
+	var br_start_angle := 0.0
+	var br_end_angle := 0.5 * PI
+	
+	# Bottom Left Corner: Center (pos.x + r, pos.y + size.y - r)
+	# Spec: "Bottom Left is from (x + radius, y + height) to (x, y + height - radius)"
+	# Start point: (pos.x + r, pos.y + size.y). Relative to center: Vector (0, r). Angle PI/2.
+	# End point: (pos.x, pos.y + size.y - r). Relative to center: Vector (-r, 0). Angle PI.
+	# Go from PI/2 to PI.
+	var bl_center := Vector2(pos.x + r, pos.y + size.y - r)
+	var bl_start_angle := 0.5 * PI
+	var bl_end_angle := PI
+	
+	var step_tl := (tl_end_angle - tl_start_angle) / float(segments)
+	var step_tr := (tr_end_angle - tr_start_angle) / float(segments)
+	var step_br := (br_end_angle - br_start_angle) / float(segments)
+	var step_bl := (bl_end_angle - bl_start_angle) / float(segments)
+	
+	# Add Top Left Arc
+	for i in range(segments + 1):
+		var angle := tl_start_angle + step_tl * float(i)
+		var p := tl_center + Vector2(cos(angle), sin(angle)) * r
+		points.append(p)
+		
+	# Add Top Right Arc (skip first point as it's same as last of TL? No, TL ends at (pos.x+r, pos.y). TR starts at (pos.x+size.x-r, pos.y). They are different unless width=2r.
+	# The spec implies continuous outline. 
+	# TL End: (pos.x + r, pos.y).
+	# TR Start: (pos.x + size.x - r, pos.y).
+	# These are connected by a straight line along the top edge? 
+	# Wait, the function returns "points of the outline".
+	# If I just append arcs, I miss the straight edges between corners.
+	# However, looking at the test:
+	# P[4] is (10, 0) [TL End].
+	# P[5] is (90, 0) [TR Start].
+	# There is NO point in between for the straight line segment from (10,0) to (90,0).
+	# The polygon drawing will connect P[4] and P[5] with a straight line.
+	# So we just need to append the arcs. The straight lines are implicit between the end of one arc and start of next.
+	
+	# Add Top Right Arc
+	for i in range(segments + 1):
+		var angle := tr_start_angle + step_tr * float(i)
+		var p := tr_center + Vector2(cos(angle), sin(angle)) * r
+		points.append(p)
+		
+	# Add Bottom Right Arc
+	for i in range(segments + 1):
+		var angle := br_start_angle + step_br * float(i)
+		var p := br_center + Vector2(cos(angle), sin(angle)) * r
+		points.append(p)
+		
+	# Add Bottom Left Arc
+	for i in range(segments + 1):
+		var angle := bl_start_angle + step_bl * float(i)
+		var p := bl_center + Vector2(cos(angle), sin(angle)) * r
+		points.append(p)
+		
+	return points
+
+
 func _draw_round_rect(rect: Rect2, radius: float, color: Color, filled: bool = true, width: float = 1.0) -> void:
 	if rect.size.x <= 0 or rect.size.y <= 0:
 		return
@@ -173,23 +304,15 @@ func _draw_round_rect(rect: Rect2, radius: float, color: Color, filled: bool = t
 			draw_rect(rect, color, false, width)
 		return
 
-	var points := PackedVector2Array()
-	var pos := rect.position
-	var size := rect.size
+	var points := round_rect_points(rect, radius, 8)
 	
-	# Top Left Corner
-	points.append(Vector2(pos.x + r, pos.y))
-	points.append(Vector2(pos.x + size.x - r, pos.y))
-	# Top Right Corner
-	points.append(Vector2(pos.x + size.x, pos.y + r))
-	points.append(Vector2(pos.x + size.x, pos.y + size.y - r))
-	# Bottom Right Corner
-	points.append(Vector2(pos.x + size.x - r, pos.y + size.y))
-	points.append(Vector2(pos.x + r, pos.y + size.y))
-	# Bottom Left Corner
-	points.append(Vector2(pos.x, pos.y + size.y - r))
-	points.append(Vector2(pos.x, pos.y + r))
-	
+	if points.is_empty():
+		if filled:
+			draw_rect(rect, color, true)
+		else:
+			draw_rect(rect, color, false, width)
+		return
+
 	if filled:
 		draw_polygon(points, PackedColorArray([color]))
 	else:
