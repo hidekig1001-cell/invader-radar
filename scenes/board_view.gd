@@ -32,6 +32,11 @@ var hint_cell: Vector2i = Vector2i(-1, -1):
 		hint_cell = value
 		queue_redraw()
 
+var highlight_cells: Array = []:
+	set(value):
+		highlight_cells = value
+		queue_redraw()
+
 
 # 盤の大きさ（マス）。session がなければ 0。
 func grid_size() -> Vector2i:
@@ -93,6 +98,14 @@ func _draw() -> void:
 					_draw_mark(r)
 				"P":
 					_draw_piece(r, piece_fill(x, y))
+
+	if highlight_cells.size() > 0:
+		for y in range(gs.y):
+			for x in range(gs.x):
+				var cell := Vector2i(x, y)
+				if not (cell in highlight_cells):
+					var r := cell_rect(x, y)
+					draw_rect(r, Color(0, 0, 0, 0.6), true)
 
 	if hint_cell.x >= 0 and hint_cell.y >= 0:
 		var r := cell_rect(hint_cell.x, hint_cell.y)

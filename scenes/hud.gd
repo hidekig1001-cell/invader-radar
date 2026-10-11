@@ -47,6 +47,11 @@ func set_apply_visible(on: bool) -> void:
 	apply_button.visible = on
 
 
+func set_tutorial_mode(on: bool) -> void:
+	hint_button.disabled = on
+	undo_button.disabled = on
+
+
 func _make_label(r: Rect2, align: HorizontalAlignment) -> Label:
 	var l := Label.new()
 	l.position = r.position

@@ -5,6 +5,7 @@ extends Node2D
 const Session = preload("res://game/session.gd")
 const InputMapper = preload("res://scenes/input_mapper.gd")
 const RulesLabelScript = preload("res://scenes/rules_label.gd")
+const Tutorial = preload("res://game/tutorial.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -13,6 +14,8 @@ var session = null  # add_child の前に置けば、その session を使う（
 var _stroke: Array = []  # 今の指のなぞり [{"pos", "t"}]
 var _prev_tap: Dictionary = {}
 var rules_label: Label = null
+var tutorial = null
+var start_with_tutorial: bool = false
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -42,6 +45,9 @@ func _ready() -> void:
 	rules_label.position = Vector2(54, 1730)
 	rules_label.size = Vector2(972, 140)
 
+	if start_with_tutorial:
+		start_tutorial()
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.index == 0:
@@ -55,11 +61,13 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_down(pos: Vector2) -> void:
 	_stroke = []
-	if session.status == "cleared":
+	if not is_tutorial() and session.status == "cleared":
 		session.next_level()
 		return
 	if board_view.board_rect().has_point(pos):
 		_stroke.append({"pos": pos, "t": Time.get_ticks_msec()})
+	elif is_tutorial():
+		tutorial_input("next", Vector2i(-1, -1))
 
 
 func _on_touch_up(pos: Vector2) -> void:
@@ -72,11 +80,18 @@ func _on_touch_up(pos: Vector2) -> void:
 	var c: Vector2i = r["cell"]
 	match r["kind"]:
 		"tap":
-			session.tap(c.x, c.y)
+			if is_tutorial():
+				tutorial_input("tap", c)
+			else:
+				session.tap(c.x, c.y)
 		"double_tap":
-			session.double_tap(c.x, c.y)
+			if is_tutorial():
+				tutorial_input("double_tap", c)
+			else:
+				session.double_tap(c.x, c.y)
 		"swipe":
-			session.swipe(r["cells"])
+			if not is_tutorial():
+				session.swipe(r["cells"])
 
 
 func _on_hint() -> void:
@@ -105,3 +120,47 @@ func _refresh() -> void:
 	if session.current_hint.is_empty():
 		board_view.hint_cell = Vector2i(-1, -1)
 		hud.set_apply_visible(false)
+
+
+func start_tutorial() -> void:
+	tutorial = Tutorial.new()
+	board_view.session = tutorial.session
+	hud.set_tutorial_mode(true)
+	var step = tutorial.current_step()
+	if not step.is_empty():
+		board_view.highlight_cells = step["highlight"]
+		bubble.show_text(step["text"], 0.0)
+	else:
+		board_view.highlight_cells = []
+		bubble.clear_text()
+	board_view.queue_redraw()
+
+
+func end_tutorial() -> void:
+	tutorial = null
+	board_view.session = session
+	board_view.highlight_cells = []
+	hud.set_tutorial_mode(false)
+	bubble.show_text(HELP_TEXT, 4.0)
+	_refresh()
+
+
+func is_tutorial() -> bool:
+	return tutorial != null
+
+
+func tutorial_input(kind: String, cell: Vector2i) -> void:
+	if tutorial == null:
+		return
+	tutorial.handle(kind, cell)
+	if tutorial.is_finished():
+		end_tutorial()
+	else:
+		var step = tutorial.current_step()
+		if not step.is_empty():
+			board_view.highlight_cells = step["highlight"]
+			bubble.show_text(step["text"], 0.0)
+		else:
+			board_view.highlight_cells = []
+			bubble.clear_text()
+		board_view.queue_redraw()
