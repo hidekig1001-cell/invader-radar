@@ -34,22 +34,12 @@ func _ready() -> void:
 	add_child(rules_label)
 	rules_label.text = RulesLabelScript.RULES_TEXT
 	rules_label.visible = true
-	rules_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rules_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	rules_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rules_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	rules_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	rules_label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	
-	# Position the label below the board area to avoid overlap.
-	# Assuming standard 1080x1920 layout where board is centered or top-aligned,
-	# and HINT button is above y=1720.
-	# We place it at y=1720 with a width that fits the screen.
-	var viewport_size := get_viewport().get_visible_rect().size
-	var label_width := viewport_size.x * 0.9
-	var label_height := 100.0 # Approximate height for 2 lines of text
-	
-	rules_label.position = Vector2((viewport_size.x - label_width) / 2.0, 1720.0)
-	rules_label.size = Vector2(label_width, label_height)
+	rules_label.add_theme_font_size_override("font_size", 36)
+	rules_label.position = Vector2(54, 1730)
+	rules_label.size = Vector2(972, 140)
 
 
 func _input(event: InputEvent) -> void:
