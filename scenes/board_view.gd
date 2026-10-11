@@ -1,4 +1,4 @@
-# 画面の層（SPEC.md 3 節）: 盤を描く。区域の色、白い ×、駒（仮の四角。あとで宇宙人の絵にする）。
+# 画面の層（SPEC.md 3 節）: 盤を描く。区域の色、白い ×、駒（宇宙人の絵）。
 # 状態は変えない。session を読んで描くだけ。
 extends Node2D
 
@@ -21,6 +21,18 @@ const MARK_COLOR := Color(1, 1, 1)
 const PIECE_FILL := Color(0.08, 0.08, 0.12)
 const CONFLICT_FILL := Color(0.90, 0.15, 0.15)
 const GRID_LINE := Color(0, 0, 0, 0.55)
+
+# 宇宙人の絵（幅 8・高さ 8）
+const ALIEN_ROWS := [
+	"....1...",
+	"...1....",
+	"..1111..",
+	".111111.",
+	"11122111",
+	"11122111",
+	".111111.",
+	"..1..1.."
+]
 
 var session = null:
 	set(value):
@@ -82,6 +94,20 @@ func piece_fill(x: int, y: int) -> Color:
 	return PIECE_FILL
 
 
+func alien_rows() -> Array:
+	return ALIEN_ROWS
+
+
+func alien_pixel_rect(r: Rect2, col: int, row: int) -> Rect2:
+	var inner := r.grow(-r.size.x * 0.22)
+	var w := inner.size.x / 8.0
+	var h := inner.size.y / 8.0
+	return Rect2(
+		inner.position + Vector2(col * w, row * h),
+		Vector2(w, h)
+	)
+
+
 func _draw() -> void:
 	var gs := grid_size()
 	if gs == Vector2i.ZERO:
@@ -122,5 +148,17 @@ func _draw_mark(r: Rect2) -> void:
 
 func _draw_piece(r: Rect2, fill: Color) -> void:
 	var inner := r.grow(-r.size.x * 0.22)
-	draw_rect(inner, fill, true)
-	draw_rect(inner, MARK_COLOR, false, 6.0)
+	# 背景の半透明四角（暗い区域でも見えるように）
+	draw_rect(inner.grow(4.0), Color(1, 1, 1, 0.25), true)
+	
+	var rows := alien_rows()
+	for row_idx in range(rows.size()):
+		var line: String = rows[row_idx]
+		for col_idx in range(line.length()):
+			var char := line[col_idx]
+			if char == "1":
+				var rect := alien_pixel_rect(r, col_idx, row_idx)
+				draw_rect(rect, fill, true)
+			elif char == "2":
+				var rect := alien_pixel_rect(r, col_idx, row_idx)
+				draw_rect(rect, Color(1, 1, 1), true)
