@@ -6,18 +6,18 @@ const Rules = preload("res://core/rules.gd")
 
 # 1080 x 1920 の画面での盤の置き場所（正方形）
 const AREA := Rect2(40, 480, 1000, 1000)
-# 区域の色（先頭の 4 色は見分けやすい色。大きな盤のための 4 色は後ろに）
+# 区域の色（パステル調）
 const REGION_COLORS := [
-	Color(0.93, 0.55, 0.16),  # 橙
-	Color(0.20, 0.60, 0.90),  # 青
-	Color(0.30, 0.72, 0.35),  # 緑
-	Color(0.70, 0.40, 0.80),  # 紫
-	Color(0.90, 0.30, 0.35),
-	Color(0.95, 0.85, 0.30),
-	Color(0.35, 0.80, 0.80),
-	Color(0.60, 0.60, 0.60),
+	Color(1.0, 0.72, 0.45),   # 橙
+	Color(0.55, 0.78, 1.0),   # 青
+	Color(0.58, 0.88, 0.55),  # 緑
+	Color(0.80, 0.65, 0.95),  # 紫
+	Color(1.0, 0.62, 0.66),   # 赤
+	Color(1.0, 0.90, 0.50),   # 黄
+	Color(0.55, 0.90, 0.88),  # 水色
+	Color(0.80, 0.80, 0.82),  # 灰
 ]
-const MARK_COLOR := Color(1, 1, 1)
+const MARK_COLOR := Color(0.25, 0.22, 0.40)
 const PIECE_FILL := Color(0.08, 0.08, 0.12)
 const CONFLICT_FILL := Color(0.90, 0.15, 0.15)
 const GRID_LINE := Color(0, 0, 0, 0.55)
@@ -136,19 +136,110 @@ func alien_pixel_rect(r: Rect2, col: int, row: int) -> Rect2:
 		Vector2(w, h)
 	)
 
+# --- CR-1022 New Functions ---
+
+func tile_rect(x: int, y: int) -> Rect2:
+	var r := cell_rect(x, y)
+	var inset := r.size.x * 0.04
+	return r.grow(-inset)
+
+func corner_radius() -> float:
+	var g := geometry()
+	var cs: float = g["cell"]
+	if cs <= 0.0:
+		return 0.0
+	return cs * 0.18
+
+func board_bg_rect() -> Rect2:
+	return board_rect().grow(14.0)
+
+func mark_color() -> Color:
+	return MARK_COLOR
+
+func mark_thickness() -> float:
+	return 12.0
+
+# -----------------------------
+
+func _draw_round_rect(rect: Rect2, radius: float, color: Color, filled: bool = true, width: float = 1.0) -> void:
+	if rect.size.x <= 0 or rect.size.y <= 0:
+		return
+	
+	var r := minf(radius, minf(rect.size.x, rect.size.y) * 0.5)
+	if r <= 0.0:
+		if filled:
+			draw_rect(rect, color, true)
+		else:
+			draw_rect(rect, color, false, width)
+		return
+
+	var points := PackedVector2Array()
+	var pos := rect.position
+	var size := rect.size
+	
+	# Top Left Corner
+	points.append(Vector2(pos.x + r, pos.y))
+	points.append(Vector2(pos.x + size.x - r, pos.y))
+	# Top Right Corner
+	points.append(Vector2(pos.x + size.x, pos.y + r))
+	points.append(Vector2(pos.x + size.x, pos.y + size.y - r))
+	# Bottom Right Corner
+	points.append(Vector2(pos.x + size.x - r, pos.y + size.y))
+	points.append(Vector2(pos.x + r, pos.y + size.y))
+	# Bottom Left Corner
+	points.append(Vector2(pos.x, pos.y + size.y - r))
+	points.append(Vector2(pos.x, pos.y + r))
+	
+	if filled:
+		draw_polygon(points, PackedColorArray([color]))
+	else:
+		# Draw outline by drawing lines between points and closing the loop
+		for i in range(points.size()):
+			var p1 := points[i]
+			var p2 := points[(i + 1) % points.size()]
+			draw_line(p1, p2, color, width)
+
 
 func _draw() -> void:
 	var gs := grid_size()
 	if gs == Vector2i.ZERO:
 		return
+	
+	# 1. Draw Board Background (CR-1022)
+	var bg_rect := board_bg_rect()
+	_draw_round_rect(bg_rect, 36.0, Color(0.20, 0.18, 0.32), true)
+
 	var snap: Dictionary = session.board.snapshot()
+	var radius := corner_radius()
+	
 	for y in range(gs.y):
 		var row: String = snap["rows"][y]
 		for x in range(gs.x):
 			var r := cell_rect(x, y)
-			draw_rect(r, region_color(session.level.region_at(x, y)), true)
-			draw_rect(r, GRID_LINE, false, 4.0)
+			var t_r := tile_rect(x, y)
+			var region_col := region_color(session.level.region_at(x, y))
 			
+			# 2. Draw Tile Shadow (CR-1022)
+			var shadow_offset := r.size.x * 0.03
+			var shadow_rect := t_r
+			shadow_rect.position.y += shadow_offset
+			# "0.75 times darker" interpreted as multiplying brightness by 0.75
+			var shadow_col := region_col * Color(0.75, 0.75, 0.75)
+			_draw_round_rect(shadow_rect, radius, shadow_col, true)
+
+			# 3. Draw Tile Base (CR-1022)
+			_draw_round_rect(t_r, radius, region_col, true)
+			
+			# 4. Draw Tile Highlight (CR-1022)
+			var highlight_height := t_r.size.y * 0.35
+			var highlight_width_inset := t_r.size.x * 0.08
+			var highlight_rect := Rect2(
+				t_r.position + Vector2(highlight_width_inset, 0),
+				Vector2(t_r.size.x - 2 * highlight_width_inset, highlight_height)
+			)
+			_draw_round_rect(highlight_rect, radius, Color(1, 1, 1, 0.22), true)
+
+			# Draw Content (Rock or Piece/Mark)
 			if is_rock(x, y):
 				_draw_rock(r)
 			else:
@@ -158,31 +249,42 @@ func _draw() -> void:
 					"P":
 						_draw_piece(r, piece_fill(x, y))
 
+	# 5. Draw Highlight/Darkening (CR-1022)
 	if highlight_cells.size() > 0:
 		for y in range(gs.y):
 			for x in range(gs.x):
 				var cell := Vector2i(x, y)
 				if not (cell in highlight_cells):
-					var r := cell_rect(x, y)
-					draw_rect(r, Color(0, 0, 0, 0.6), true)
+					var t_r := tile_rect(x, y)
+					_draw_round_rect(t_r, radius, Color(0.10, 0.08, 0.20, 0.65), true)
 
+	# 6. Draw Hint (CR-1022)
 	if hint_cell.x >= 0 and hint_cell.y >= 0:
-		var r := cell_rect(hint_cell.x, hint_cell.y)
-		draw_rect(r, Color(1.0, 0.9, 0.2), false, 14.0)
+		var t_r := tile_rect(hint_cell.x, hint_cell.y)
+		_draw_round_rect(t_r, radius, Color(1.0, 0.9, 0.2), false, 12.0)
 
 
 func _draw_mark(r: Rect2) -> void:
 	var m := r.size.x * 0.28
 	var a := r.position + Vector2(m, m)
 	var b := r.end - Vector2(m, m)
-	draw_line(a, b, MARK_COLOR, 10.0)
-	draw_line(Vector2(a.x, b.y), Vector2(b.x, a.y), MARK_COLOR, 10.0)
+	var thickness := mark_thickness()
+	var color := mark_color()
+	
+	# Draw lines
+	draw_line(a, b, color, thickness)
+	draw_line(Vector2(a.x, b.y), Vector2(b.x, a.y), color, thickness)
+	
+	# Draw rounded caps (circles at ends)
+	var cap_radius := thickness * 0.5
+	draw_circle(a, cap_radius, color)
+	draw_circle(b, cap_radius, color)
+	draw_circle(Vector2(a.x, b.y), cap_radius, color)
+	draw_circle(Vector2(b.x, a.y), cap_radius, color)
 
 
 func _draw_piece(r: Rect2, fill: Color) -> void:
-	var inner := r.grow(-r.size.x * 0.22)
-	# 背景の半透明四角（暗い区域でも見えるように）
-	draw_rect(inner.grow(4.0), Color(1, 1, 1, 0.25), true)
+	# CR-1022: Removed white background rect behind piece
 	
 	var rows := alien_rows()
 	for row_idx in range(rows.size()):
