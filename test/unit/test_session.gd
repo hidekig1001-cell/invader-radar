@@ -3,10 +3,30 @@ extends GutTest
 
 const Session = preload("res://game/session.gd")
 const BoardState = preload("res://core/board_state.gd")
+const Level = preload("res://game/level.gd")
+
+# テストの中の 3 面（data/levels の面が変わっても、このテストは変わらない）
+const LEVEL_DICTS := [
+	{"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[3, 3, 0, 0], [3, 3, 1, 2], [1, 1, 1, 2], [1, 1, 1, 2]]},
+	{"id": 2, "width": 4, "height": 4, "target": 4, "regions": [[2, 2, 1, 1], [2, 2, 2, 1], [2, 3, 3, 3], [0, 0, 3, 3]]},
+	{"id": 3, "width": 4, "height": 4, "target": 4, "regions": [[2, 2, 2, 2], [0, 0, 2, 1], [3, 3, 2, 1], [3, 3, 3, 1]]},
+]
+# 3 面に共通の答え（x, y）。区域・行・列に 1 つずつ、斜めも含めて隣り合わない
+const ANSWER := [Vector2i(2, 0), Vector2i(0, 1), Vector2i(3, 2), Vector2i(1, 3)]
 
 
 func _session():
-	return Session.new()
+	var list: Array = []
+	for d in LEVEL_DICTS:
+		var lv = Level.new()
+		lv.parse(d)
+		list.append(lv)
+	return Session.new(list)
+
+
+func _solve(s) -> void:
+	for c in ANSWER:
+		s.double_tap(c.x, c.y)
 
 
 func test_initial_state() -> void:
@@ -93,9 +113,9 @@ func test_hints_decrease_to_zero() -> void:
 func test_clear_when_target_pieces_placed() -> void:
 	var s = _session()
 	for i in range(3):
-		s.double_tap(i, i)
+		s.double_tap(ANSWER[i].x, ANSWER[i].y)
 	assert_eq(s.status, "playing")
-	s.double_tap(3, 3)
+	s.double_tap(ANSWER[3].x, ANSWER[3].y)
 	assert_eq(s.status, "cleared")
 	assert_eq(s.score, Session.CLEAR_SCORE)
 	assert_eq(s.snapshot()["status"], "cleared")
@@ -103,10 +123,9 @@ func test_clear_when_target_pieces_placed() -> void:
 
 func test_no_input_after_clear() -> void:
 	var s = _session()
-	for i in range(4):
-		s.double_tap(i, i)
+	_solve(s)
 	var moves: int = s.moves
-	assert_false(s.tap(0, 1))
+	assert_false(s.tap(0, 0))
 	assert_false(s.double_tap(1, 0))
 	assert_false(s.swipe([Vector2i(0, 1)]))
 	assert_false(s.use_hint())
@@ -116,8 +135,7 @@ func test_no_input_after_clear() -> void:
 func test_next_level_resets_board_and_keeps_score_and_hints() -> void:
 	var s = _session()
 	s.use_hint()
-	for i in range(4):
-		s.double_tap(i, i)
+	_solve(s)
 	assert_true(s.next_level())
 	assert_eq(s.snapshot()["level"], 2)
 	assert_eq(s.status, "playing")

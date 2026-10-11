@@ -45,24 +45,25 @@ func test_load_missing_file() -> void:
 	assert_false(lv.load_file("res://data/levels/nope.json"))
 
 
-func test_default_levels_are_three_4x4_levels() -> void:
+# 面の数と大きさは CR で変わるので、どの面にも言える形だけを確かめる
+func test_default_levels_are_square_with_one_region_per_row() -> void:
 	var levels: Array = Session.load_default_levels()
-	assert_eq(levels.size(), 3)
+	assert_true(levels.size() >= 1)
 	for lv in levels:
-		assert_eq(lv.width, 4)
-		assert_eq(lv.height, 4)
-		assert_eq(lv.target, 4)
-		assert_eq(lv.region_count(), 4, "区域は 4 つ")
+		assert_true(lv.width >= 4)
+		assert_eq(lv.height, lv.width)
+		assert_eq(lv.target, lv.width)
+		assert_eq(lv.region_count(), lv.width, "区域の数は 1 辺のマスの数")
 
 
 func test_default_levels_have_distinct_ids_and_valid_regions() -> void:
 	var levels: Array = Session.load_default_levels()
-	assert_eq(levels.size(), 3)
+	assert_true(levels.size() >= 1)
 	var ids := {}
 	for lv in levels:
 		ids[lv.id] = true
 		for y in range(lv.height):
 			for x in range(lv.width):
 				var r: int = lv.region_at(x, y)
-				assert_true(r >= 0 and r < 4, "区域の番号は 0〜3")
-	assert_eq(ids.size(), 3)
+				assert_true(r >= 0 and r < lv.width, "区域の番号は 0〜(1 辺 - 1)")
+	assert_eq(ids.size(), levels.size())

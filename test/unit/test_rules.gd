@@ -21,17 +21,21 @@ func test_not_solved_when_fewer_pieces() -> void:
 	assert_false(Rules.is_solved(b, _level(4)))
 
 
+# _level の区域での答え（x, y）。区域・行・列に 1 つずつ、斜めも含めて隣り合わない
+const ANSWER := [Vector2i(2, 0), Vector2i(0, 1), Vector2i(3, 2), Vector2i(1, 3)]
+
+
 func test_solved_when_target_pieces() -> void:
 	var b = BoardState.new(4, 4)
-	for i in range(4):
-		b.apply("place", i, i)
+	for c in ANSWER:
+		b.apply("place", c.x, c.y)
 	assert_true(Rules.is_solved(b, _level(4)))
 
 
 func test_marks_do_not_count() -> void:
 	var b = BoardState.new(4, 4)
-	for i in range(4):
-		b.apply("mark", i, i)
+	for c in ANSWER:
+		b.apply("mark", c.x, c.y)
 	assert_false(Rules.is_solved(b, _level(4)))
 
 
