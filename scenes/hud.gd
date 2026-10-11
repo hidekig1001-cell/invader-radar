@@ -27,7 +27,7 @@ func _ready() -> void:
 	score_label = _make_label(Rect2(380, 90, 320, 80), HORIZONTAL_ALIGNMENT_CENTER)
 	hint_label = _make_label(Rect2(720, 90, 320, 80), HORIZONTAL_ALIGNMENT_RIGHT)
 	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
-	settings_button = _make_button("SETTINGS", Rect2(740, 200, 300, 110), settings_pressed)
+	settings_button = _make_button("HOW TO PLAY", Rect2(640, 200, 400, 110), settings_pressed)
 	hint_button = _make_button("HINT", Rect2(240, 1560, 600, 150), hint_pressed)
 	apply_button = _make_button("APPLY", Rect2(850, 1560, 200, 150), apply_pressed)
 	apply_button.visible = false

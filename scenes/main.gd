@@ -2,6 +2,8 @@
 # 規則・状態の判断は session（game/session.gd）に任せる。`session` は撮影（.autedev/shot.gd）が読む。
 extends Node2D
 
+signal tutorial_finished
+
 const Session = preload("res://game/session.gd")
 const InputMapper = preload("res://scenes/input_mapper.gd")
 const RulesLabelScript = preload("res://scenes/rules_label.gd")
@@ -29,7 +31,10 @@ func _ready() -> void:
 	session.changed.connect(_refresh)
 	hud.undo_pressed.connect(func() -> void: session.undo())
 	hud.hint_pressed.connect(_on_hint)
-	hud.settings_pressed.connect(func() -> void: bubble.show_text("SETTINGS: COMING SOON", 2.0))
+	hud.settings_pressed.connect(func() -> void:
+		if not is_tutorial():
+			start_tutorial()
+	)
 	hud.apply_pressed.connect(on_apply)
 	_refresh()
 	bubble.show_text(HELP_TEXT, 4.0)
@@ -151,6 +156,7 @@ func end_tutorial() -> void:
 	hud.set_tutorial_mode(false)
 	bubble.show_text(HELP_TEXT, 4.0)
 	_refresh()
+	tutorial_finished.emit()
 
 
 func is_tutorial() -> bool:
