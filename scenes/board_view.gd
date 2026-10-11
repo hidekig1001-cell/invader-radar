@@ -1,4 +1,4 @@
-# 画面の層（SPEC.md 3 節）: 盤を描く。区域の色、白い ×、駒（宇宙人の絵）。
+# 画面の層（SPEC.md 3 節）: 盤を描く。区域の色、白い ×、駒（宇宙人の絵）、岩（小惑星）。
 # 状態は変えない。session を読んで描くだけ。
 extends Node2D
 
@@ -33,6 +33,21 @@ const ALIEN_ROWS := [
 	".111111.",
 	"..1..1.."
 ]
+
+# 岩の絵（幅 8・高さ 8）
+const ROCK_ROWS := [
+	"..1111..",
+	".111211.",
+	"11112111",
+	"11211111",
+	"11111121",
+	"12111111",
+	".111121.",
+	"..1111.."
+]
+
+const ROCK_COLOR := Color(0.55, 0.52, 0.5)
+const ROCK_SHADOW_COLOR := Color(0.35, 0.33, 0.32)
 
 var session = null:
 	set(value):
@@ -98,6 +113,20 @@ func alien_rows() -> Array:
 	return ALIEN_ROWS
 
 
+func rock_rows() -> Array:
+	return ROCK_ROWS
+
+
+func is_rock(x: int, y: int) -> bool:
+	if session == null or session.level == null:
+		return false
+	var target := Vector2i(x, y)
+	for a in session.level.asteroids:
+		if a == target:
+			return true
+	return false
+
+
 func alien_pixel_rect(r: Rect2, col: int, row: int) -> Rect2:
 	var inner := r.grow(-r.size.x * 0.22)
 	var w := inner.size.x / 8.0
@@ -119,11 +148,15 @@ func _draw() -> void:
 			var r := cell_rect(x, y)
 			draw_rect(r, region_color(session.level.region_at(x, y)), true)
 			draw_rect(r, GRID_LINE, false, 4.0)
-			match row[x]:
-				"x":
-					_draw_mark(r)
-				"P":
-					_draw_piece(r, piece_fill(x, y))
+			
+			if is_rock(x, y):
+				_draw_rock(r)
+			else:
+				match row[x]:
+					"x":
+						_draw_mark(r)
+					"P":
+						_draw_piece(r, piece_fill(x, y))
 
 	if highlight_cells.size() > 0:
 		for y in range(gs.y):
@@ -162,3 +195,17 @@ func _draw_piece(r: Rect2, fill: Color) -> void:
 			elif char == "2":
 				var rect := alien_pixel_rect(r, col_idx, row_idx)
 				draw_rect(rect, Color(1, 1, 1), true)
+
+
+func _draw_rock(r: Rect2) -> void:
+	var rows := rock_rows()
+	for row_idx in range(rows.size()):
+		var line: String = rows[row_idx]
+		for col_idx in range(line.length()):
+			var char := line[col_idx]
+			if char == "1":
+				var rect := alien_pixel_rect(r, col_idx, row_idx)
+				draw_rect(rect, ROCK_COLOR, true)
+			elif char == "2":
+				var rect := alien_pixel_rect(r, col_idx, row_idx)
+				draw_rect(rect, ROCK_SHADOW_COLOR, true)
