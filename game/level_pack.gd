@@ -7,7 +7,7 @@ static func level_dicts() -> Array:
 			"width": 4,
 			"height": 4,
 			"target": 4,
-			"regions": [[0, 0, 0, 1], [0, 0, 1, 1], [2, 2, 2, 1], [2, 2, 3, 1]]
+			"regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]
 		},
 		{
 			"id": 2,
