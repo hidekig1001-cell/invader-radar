@@ -160,5 +160,6 @@ func _commit(did_change: bool) -> bool:
 	if Rules.is_solved(board, level):
 		status = "cleared"
 		score += CLEAR_SCORE
+		hints = mini(hints + 1, DEFAULT_HINTS)
 	changed.emit()
 	return true

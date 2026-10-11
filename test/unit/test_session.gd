@@ -142,7 +142,7 @@ func test_next_level_resets_board_and_keeps_score_and_hints() -> void:
 	assert_eq(s.moves, 0)
 	assert_eq(s.board.pieces().size(), 0)
 	assert_eq(s.score, Session.CLEAR_SCORE)
-	assert_eq(s.hints, 2)
+	assert_eq(s.hints, 3)
 
 
 func test_next_level_wraps_after_last() -> void:
