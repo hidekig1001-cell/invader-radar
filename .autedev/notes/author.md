@@ -5,3 +5,4 @@
 - 画面に文字を出す CR では、文字を値まで決めた定数（`const X := "..."`）を確かめる項目にしない（雛形にも同じ値が入るので R3 で止まる）。確かめるのは、画面のノード（例: `scenes/main.tscn` を立ち上げた `main` の子のラベル）の `text` が決まった文字列と同じこと、またはラベルが見えること（`visible`）・盤と重ならないこと（`get_global_rect()` が `board_view.board_rect()` と交わらない）にする。
 - 規則（core/）と表示（scenes/）は 1 つの CR で両方を変えない。表示の CR は、`session` や `Rules` の関数を読むだけにする。
 - 盤の場所は `scenes/board_view.gd` の `AREA`（1080×1920 の画面で Rect2(40, 480, 1000, 1000)）。盤の上は 480 まで HUD と吹き出し、盤の下は 1480 から下が空いている（HINT のボタンがある）。
+- 決まり・操作・画面の言葉（HELP_TEXT、ルールの説明、ヒントの言葉など）を変える CR は、チュートリアルの段のデータ `game/tutorial_steps.gd`（CR-1011 から）の文と手順も同じ CR で直す。対象の候補に `game/tutorial_steps.gd` を入れ、そのテスト（test/cr/test_cr_1011.gd など）の期待値が変わるなら「変わる既存のテスト」に書く（SPEC.md の 5 章）。
