@@ -1,0 +1,7 @@
+.godot/
+.test_tmp/
+*.apk
+*.exe
+*.pck
+*.keystore
+/android/

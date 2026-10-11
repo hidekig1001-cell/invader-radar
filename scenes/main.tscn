@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scenes/board_view.gd" id="2_board"]
+[ext_resource type="Script" path="res://scenes/hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://scenes/message_bubble.gd" id="4_bubble"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="BoardView" type="Node2D" parent="."]
+script = ExtResource("2_board")
+
+[node name="Ui" type="CanvasLayer" parent="."]
+
+[node name="Hud" type="Control" parent="Ui"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("3_hud")
+
+[node name="MessageBubble" type="Label" parent="Ui"]
+script = ExtResource("4_bubble")
