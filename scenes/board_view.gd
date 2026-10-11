@@ -2,6 +2,8 @@
 # 状態は変えない。session を読んで描くだけ。
 extends Node2D
 
+const Rules = preload("res://core/rules.gd")
+
 # 1080 x 1920 の画面での盤の置き場所（正方形）
 const AREA := Rect2(40, 480, 1000, 1000)
 # 区域の色（先頭の 4 色は見分けやすい色。大きな盤のための 4 色は後ろに）
@@ -17,6 +19,7 @@ const REGION_COLORS := [
 ]
 const MARK_COLOR := Color(1, 1, 1)
 const PIECE_FILL := Color(0.08, 0.08, 0.12)
+const CONFLICT_FILL := Color(0.90, 0.15, 0.15)
 const GRID_LINE := Color(0, 0, 0, 0.55)
 
 var session = null:
@@ -60,6 +63,15 @@ func region_color(region: int) -> Color:
 	return REGION_COLORS[posmod(region, REGION_COLORS.size())]
 
 
+func piece_fill(x: int, y: int) -> Color:
+	if session == null or session.board == null or session.level == null:
+		return PIECE_FILL
+	var conflicts = Rules.conflicts(session.board, session.level)
+	if Vector2i(x, y) in conflicts:
+		return CONFLICT_FILL
+	return PIECE_FILL
+
+
 func _draw() -> void:
 	var gs := grid_size()
 	if gs == Vector2i.ZERO:
@@ -75,7 +87,7 @@ func _draw() -> void:
 				"x":
 					_draw_mark(r)
 				"P":
-					_draw_piece(r)
+					_draw_piece(r, piece_fill(x, y))
 
 
 func _draw_mark(r: Rect2) -> void:
@@ -86,7 +98,7 @@ func _draw_mark(r: Rect2) -> void:
 	draw_line(Vector2(a.x, b.y), Vector2(b.x, a.y), MARK_COLOR, 10.0)
 
 
-func _draw_piece(r: Rect2) -> void:
+func _draw_piece(r: Rect2, fill: Color) -> void:
 	var inner := r.grow(-r.size.x * 0.22)
-	draw_rect(inner, PIECE_FILL, true)
+	draw_rect(inner, fill, true)
 	draw_rect(inner, MARK_COLOR, false, 6.0)
