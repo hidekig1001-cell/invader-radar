@@ -48,6 +48,8 @@ static func load_default_levels() -> Array:
 func tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
 		return false
+	if is_asteroid(x, y):
+		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY:
 			return _commit(board.apply("mark", x, y) == OK)
@@ -59,6 +61,8 @@ func tap(x: int, y: int) -> bool:
 # ダブルタップ: 空・×→駒を置く、駒→取り除く。
 func double_tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
+		return false
+	if is_asteroid(x, y):
 		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY, BoardState.MARK:
@@ -72,8 +76,14 @@ func double_tap(x: int, y: int) -> bool:
 func swipe(cells: Array) -> bool:
 	if status != "playing" or board == null:
 		return false
-	var changed_any := false
+	var filtered_cells: Array = []
 	for c in cells:
+		if not is_asteroid(c.x, c.y):
+			filtered_cells.append(c)
+	if filtered_cells.is_empty():
+		return false
+	var changed_any := false
+	for c in filtered_cells:
 		if board.state_at(c.x, c.y) == BoardState.EMPTY and board.apply("mark", c.x, c.y) == OK:
 			changed_any = true
 	return _commit(changed_any)
@@ -141,6 +151,16 @@ func apply_hint() -> bool:
 		did_change = board.apply("place", x, y) == OK
 	current_hint = {}
 	return _commit(did_change)
+
+
+func is_asteroid(x: int, y: int) -> bool:
+	if level == null:
+		return false
+	var target_pos = Vector2i(x, y)
+	for a in level.asteroids:
+		if a == target_pos:
+			return true
+	return false
 
 
 func _start_level(index: int) -> void:
