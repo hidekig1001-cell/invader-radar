@@ -1,0 +1,2 @@
+- 面（`res://game/level.gd`）の `parse(d)` は、読めたかどうかの bool を返す（面そのものは返さない）。面は `var level = Level.new()` のあと `level.parse({...})` を呼び、その `level` を使う。`return Level.new().parse(...)` や `return l.parse(...)` の形で面を返す補助の関数は書かない。
+- `Rules.conflicts` などが返す Vector2i の並びの期待値は、CR の項目に書いてある並びの順をそのまま写す（自分で並べ替えない）。
