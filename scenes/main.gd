@@ -81,12 +81,20 @@ func _on_touch_up(pos: Vector2) -> void:
 	match r["kind"]:
 		"tap":
 			if is_tutorial():
-				tutorial_input("tap", c)
+				var step = tutorial.current_step()
+				if not step.is_empty() and step.get("wait", {}).get("kind", "") == "next":
+					tutorial_input("next", Vector2i(-1, -1))
+				else:
+					tutorial_input("tap", c)
 			else:
 				session.tap(c.x, c.y)
 		"double_tap":
 			if is_tutorial():
-				tutorial_input("double_tap", c)
+				var step = tutorial.current_step()
+				if not step.is_empty() and step.get("wait", {}).get("kind", "") == "next":
+					pass
+				else:
+					tutorial_input("double_tap", c)
 			else:
 				session.double_tap(c.x, c.y)
 		"swipe":
