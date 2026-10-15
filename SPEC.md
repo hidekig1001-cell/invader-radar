@@ -9,7 +9,7 @@
 - 決まりをすべて満たして N 個置くと、その面はクリア（`core/rules.gd` の `is_solved`）。決まりに反している駒は `Rules.conflicts` で分かる（まだ画面には出していない）。
 - どの面も答えはちょうど 1 つ（`core/solver.gd` で確かめている）。
 - 遊び手は、駒が入らないと分かったマスに × を付けて考える（× は答えに関係しない、メモ）。
-- 画面の文字は英語だけ（既定のフォントに日本語がない）。今ある画面: 上に HUD（LEVEL・SCORE・HINT の残り、UNDO・SETTINGS のボタン）、その下に吹き出し（最初の 4 秒だけ操作の説明 "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"）、真ん中に盤、下に HINT のボタン（今は残りの数を減らすだけ）。
+- 画面の文字は、HUD などの今ある文字は英語。日本語も端末のフォントで出る（CR-1025 の起動画面で実機で確かめた）。今ある画面: 起動画面（`scenes/title_screen.gd`。言語の選択 "English"・"日本語" のあと、選んだ言語で 2 つの開始ボタンを出す）のあと、上に HUD（LEVEL・SCORE・HINT の残り、UNDO・HOW TO PLAY のボタン）、その下に吹き出し（最初の 4 秒だけ操作の説明 "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"）、真ん中に盤、下に HINT のボタン（今は残りの数を減らすだけ）。
 - まだないもの: ルールの説明の表示、ぶつかっている駒の表示、ヒントの中身、小惑星、レーダーの数字、インベーダーの絵、効果音。
 
 ## 1. 層の分け方（mobile-invaders と同じ並び）
@@ -28,7 +28,7 @@
 - `game/session.gd`: 面の並び・今の面・`moves`・`score`・`hints`（既定 3）・`status`（"playing" か "cleared"）。`tap`・`double_tap`・`swipe`・`undo`・`use_hint`・`next_level`・`restart_level`・`snapshot()`（"level"・"moves"・"score"・"hints"・"status"・"board"）。状態が変わると `changed` を出す。
 - `scenes/main.gd`・`main.tscn`: 縦 1080x1920。`session` を持つ（撮影が読む）。タッチを集めて `input_mapper` で読み、session に渡す。
 - `scenes/input_mapper.gd`: Node に触れない関数。`cell_at`・`classify`（1 本のなぞり → tap・double_tap・swipe・none）・`map_all`・`cells_along`。
-- `scenes/board_view.gd`（盤・色・× ・駒）、`hud.gd`（面・スコア・ヒントの残り・ボタン）、`message_bubble.gd`（吹き出し）。文字は英語（既定のフォントに日本語が無い）。
+- `scenes/board_view.gd`（盤・色・× ・駒）、`hud.gd`（面・スコア・ヒントの残り・ボタン）、`message_bubble.gd`（吹き出し）。今ある文字は英語（日本語は端末のフォントで出る）。`title_screen.gd`（起動画面。`app.gd` が最初に出す）。
 
 ## 3. 操作の決まり（覚え書きより）
 - 1 回タップ: 空→×、× をもう一度タップ→消す。駒の上のタップは何もしない。
