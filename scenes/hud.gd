@@ -13,6 +13,7 @@ const SCREEN := Vector2(1080, 1920)
 var level_label: Label
 var score_label: Label
 var hint_label: Label
+var moves_label: Label
 var undo_button: Button
 var settings_button: Button
 var hint_button: Button
@@ -26,6 +27,7 @@ func _ready() -> void:
 	level_label = _make_label(Rect2(40, 90, 320, 80), HORIZONTAL_ALIGNMENT_LEFT)
 	score_label = _make_label(Rect2(380, 90, 320, 80), HORIZONTAL_ALIGNMENT_CENTER)
 	hint_label = _make_label(Rect2(720, 90, 320, 80), HORIZONTAL_ALIGNMENT_RIGHT)
+	moves_label = _make_label(Rect2(40, 170, 1000, 80), HORIZONTAL_ALIGNMENT_CENTER)
 	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
 	settings_button = _make_button("HOW TO PLAY", Rect2(640, 200, 400, 110), settings_pressed)
 	hint_button = _make_button("HINT", Rect2(240, 1560, 600, 150), hint_pressed)
@@ -38,6 +40,7 @@ func update_from(snap: Dictionary) -> void:
 	level_label.text = "LEVEL %d" % int(snap.get("level", 0))
 	score_label.text = "SCORE %d" % int(snap.get("score", 0))
 	hint_label.text = "HINT x%d" % int(snap.get("hints", 0))
+	moves_label.text = "MOVES %d" % int(snap.get("moves", 0))
 	hint_button.text = "HINT (%d)" % int(snap.get("hints", 0))
 	hint_button.disabled = int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
 	undo_button.disabled = snap.get("status", "") != "playing"
