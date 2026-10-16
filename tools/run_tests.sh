@@ -3,8 +3,8 @@
 #   環境変数 GODOT_BIN（Godot 4.7.x の実行ファイル）が必要。なければ PATH の godot を使う。
 #   GUT_DIRS=<res:// のフォルダをカンマ区切り> で、3) で走らせるテストのフォルダを差し替えられる（未設定なら test/unit と test/integration）。
 #   Godot の周辺環境（HOME の差し替えなど）を読み込みたいときは GODOT_ENV=<source するファイル> を渡す。
-#   1) プロジェクトがエラーなく読み込めるか（godot --headless --quit）
-#   2) 本物のタイマーで 600 フレーム（10 ゲーム秒）動かす煙テスト
+#   1) プロジェクトがエラーなく読み込めるか（tools/smoke.gd で最初のシーンを 3 フレーム動かす）
+#   2) 本物のタイマーで 600 フレーム（10 ゲーム秒）動かす煙テスト（tools/smoke.gd。終わる前に音を止めて実時間 150ms 待つ。Godot 4.7.2 は鳴らしたまま終わると "resources still in use at exit" を出すため）
 #   3) モバイル規則の単体テスト＋シーンの結合テスト（GUT、ヘッドレス）
 # 画面は開かない。ネットワークは使わない。終了コードは失敗した段階の数。
 set -u
@@ -23,13 +23,13 @@ mkdir -p "$ROOT/.test_tmp"
 
 echo "== 1) load check"
 [ -d "$ROOT/.godot" ] || "$GODOT_BIN" --headless --path "$ROOT" --import > "$ROOT/.test_tmp/import.log" 2>&1
-"$GODOT_BIN" --headless --path "$ROOT" --quit > "$ROOT/.test_tmp/quit.log" 2>&1
+"$GODOT_BIN" --headless --path "$ROOT" --fixed-fps 60 -s tools/smoke.gd -- --frames=3 --scene=res://scenes/app.tscn > "$ROOT/.test_tmp/quit.log" 2>&1
 if grep -qE 'ERROR|SCRIPT ERROR|Parse Error|Failed' "$ROOT/.test_tmp/quit.log"; then
   grep -E -A2 'ERROR|Parse Error|Failed' "$ROOT/.test_tmp/quit.log" | head -20; fail=$((fail+1))
 else echo "OK"; fi
 
 echo "== 2) smoke run (main scene with real timers, 10 game-seconds, 600 frames at fixed 60 fps)"
-timeout 120 "$GODOT_BIN" --headless --path "$ROOT" --fixed-fps 60 --quit-after 600 > "$ROOT/.test_tmp/smoke.log" 2>&1
+timeout 120 "$GODOT_BIN" --headless --path "$ROOT" --fixed-fps 60 -s tools/smoke.gd -- --frames=600 --scene=res://scenes/app.tscn > "$ROOT/.test_tmp/smoke.log" 2>&1
 if grep -qE 'ERROR|Parse Error|Failed' "$ROOT/.test_tmp/smoke.log"; then
   grep -E -A2 'ERROR|Parse Error|Failed' "$ROOT/.test_tmp/smoke.log" | head -20; fail=$((fail+1))
 else echo "OK"; fi
