@@ -29,6 +29,22 @@ func is_finished() -> bool:
 	return step_index >= steps.size()
 
 
+func step_has_mark_cells() -> bool:
+	if is_finished():
+		return false
+	var step = current_step()
+	var wait = step["wait"]
+	return wait["kind"] == "mark"
+
+
+func marks_covered(cells: Array) -> bool:
+	var board_marks = session.board.marks()
+	for cell in cells:
+		if not board_marks.has(cell):
+			return false
+	return true
+
+
 func handle(kind: String, cell: Vector2i) -> bool:
 	if is_finished():
 		return false
@@ -66,6 +82,17 @@ func handle(kind: String, cell: Vector2i) -> bool:
 				if session.status == "cleared":
 					step_index += 1
 				return true
+			else:
+				return false
+		"mark":
+			if kind == "tap":
+				session.tap(cell.x, cell.y)
+				var mark_cells = TutorialSteps.mark_cells()
+				if marks_covered(mark_cells):
+					step_index += 1
+				return true
+			elif kind == "double_tap":
+				return false
 			else:
 				return false
 	

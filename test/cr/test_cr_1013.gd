@@ -53,18 +53,24 @@ func test_cr_1013_check_2() -> void:
 
 	await wait_frames(30)
 
-	# Tap (0, 0) once to advance to step 2 ("next")
+	# Tap (0, 0) once to advance to step 2 ("mark")
 	_tap_cell(m, 0, 0)
 	assert_eq(m.tutorial.step_index, 2)
 
 	# Immediately tap (0, 0) again. This should be read as double_tap.
-	# In a "next" step, double_tap should do nothing.
+	# In a "mark" step, double_tap should do nothing.
 	_tap_cell(m, 0, 0)
 	assert_eq(m.tutorial.step_index, 2)
 	assert_eq(m.tutorial.session.board.state_at(0, 0), BoardState.EMPTY)
 
 	await wait_frames(30)
 
-	# Tap (1, 1) once. Since step 2 is "next", this should advance to step 3.
-	_tap_cell(m, 1, 1)
+	# Tap (2, 0). Step 2 is "mark", so this places an X but does not advance yet.
+	_tap_cell(m, 2, 0)
+	assert_eq(m.tutorial.step_index, 2)
+
+	await wait_frames(30)
+
+	# Tap (2, 2). Now both mark cells are covered, so step advances to 3.
+	_tap_cell(m, 2, 2)
 	assert_eq(m.tutorial.step_index, 3)

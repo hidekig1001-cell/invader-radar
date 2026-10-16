@@ -29,9 +29,9 @@ static func steps() -> Array:
 			"wait": {"kind": "next"}
 		},
 		{
-			"text": "PIECES MUST NOT TOUCH, EVEN DIAGONALLY.\nTAP TO CONTINUE.",
-			"highlight": [Vector2i(2, 0), Vector2i(2, 2)],
-			"wait": {"kind": "next"}
+			"text": "PIECES CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.",
+			"highlight": mark_cells(),
+			"wait": {"kind": "mark"}
 		},
 		{
 			"text": "THE PURPLE COLOR HAS ONLY ONE CELL.\nDOUBLE TAP IT.",
@@ -49,3 +49,18 @@ static func steps() -> Array:
 			"wait": {"kind": "next"}
 		}
 	]
+
+
+static func diagonal_cells(cell: Vector2i, width: int, height: int) -> Array:
+	var result = []
+	for dx in [-1, 1]:
+		for dy in [-1, 1]:
+			var x = cell.x + dx
+			var y = cell.y + dy
+			if x >= 0 and x < width and y >= 0 and y < height:
+				result.append(Vector2i(x, y))
+	return result
+
+
+static func mark_cells() -> Array:
+	return [Vector2i(2, 0), Vector2i(2, 2)]
