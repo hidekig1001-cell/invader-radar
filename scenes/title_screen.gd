@@ -8,9 +8,18 @@ var _lang_btn_en: Button
 var _lang_btn_ja: Button
 var _start_btn_tutorial: Button
 var _start_btn_now: Button
+var background: TextureRect
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
+
+	background = TextureRect.new()
+	var tex = load("res://assets/title_bg_1080x1920.png")
+	if tex != null:
+		background.texture = tex
+	background.position = Vector2(0, 0)
+	background.size = Vector2(1080, 1920)
+	add_child(background)
 
 	_title_label = Label.new()
 	_title_label.text = "INVADER RADAR"
