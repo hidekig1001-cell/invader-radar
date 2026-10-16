@@ -28,7 +28,7 @@ func star_list(seed_value: int, count: int) -> Array:
 func planet_list() -> Array:
 	return [
 		{
-			"pos": Vector2(950, 1840),
+			"pos": Vector2(120, 1620),
 			"radius": 80.0,
 			"color": Color(1.0, 0.70, 0.80)
 		},
