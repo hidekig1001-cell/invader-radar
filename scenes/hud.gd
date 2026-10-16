@@ -6,6 +6,7 @@ signal undo_pressed
 signal hint_pressed
 signal settings_pressed
 signal apply_pressed
+signal restart_pressed
 
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
@@ -18,6 +19,7 @@ var undo_button: Button
 var settings_button: Button
 var hint_button: Button
 var apply_button: Button
+var restart_button: Button
 
 var language: String = "en"
 
@@ -32,6 +34,7 @@ func _ready() -> void:
 	moves_label = _make_label(Rect2(40, 170, 1000, 80), HORIZONTAL_ALIGNMENT_CENTER)
 	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
 	settings_button = _make_button("HOW TO PLAY", Rect2(640, 200, 400, 110), settings_pressed)
+	restart_button = _make_button("RESTART", Rect2(340, 250, 300, 80), restart_pressed)
 	hint_button = _make_button("HINT", Rect2(240, 1560, 600, 150), hint_pressed)
 	apply_button = _make_button("APPLY", Rect2(850, 1560, 200, 150), apply_pressed)
 	apply_button.visible = false
@@ -41,6 +44,7 @@ func set_language(lang: String) -> void:
 	language = lang
 	undo_button.text = localized("UNDO", "戻す")
 	settings_button.text = localized("HOW TO PLAY", "遊び方")
+	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
 
 

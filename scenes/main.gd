@@ -43,6 +43,7 @@ func _ready() -> void:
 			start_tutorial()
 	)
 	hud.apply_pressed.connect(on_apply)
+	hud.restart_pressed.connect(func() -> void: session.restart_level())
 	hud.set_language(language)
 	_refresh()
 	bubble.show_text(help_text(), 4.0)
