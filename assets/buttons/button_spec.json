@@ -1,0 +1,112 @@
+{
+  "A": {
+    "title": "盤のマスと同じパステル（ミントの緑）",
+    "states": {
+      "normal": {
+        "face": "#94E08C",
+        "edge": "#5EA857",
+        "line": "#2B4A2A",
+        "band": "#B9EBB4",
+        "text": "#1F3A1E",
+        "alpha": 255
+      },
+      "pressed": {
+        "face": "#82C57B",
+        "edge": "#53944D",
+        "line": "#2B4A2A",
+        "band": "#98CF93",
+        "text": "#1F3A1E",
+        "alpha": 255
+      },
+      "disabled": {
+        "face": "#AFBFB6",
+        "edge": "#809088",
+        "line": "#515B59",
+        "band": "#CBD5D0",
+        "text": "#4E4A60",
+        "alpha": 140
+      }
+    }
+  },
+  "B": {
+    "title": "淡い紫（宇宙の紫に合わせる）",
+    "states": {
+      "normal": {
+        "face": "#CCB4F5",
+        "edge": "#9374CF",
+        "line": "#3A2A5E",
+        "band": "#DECEF8",
+        "text": "#2E2150",
+        "alpha": 255
+      },
+      "pressed": {
+        "face": "#B49ED8",
+        "edge": "#8166B6",
+        "line": "#3A2A5E",
+        "band": "#C2AFDF",
+        "text": "#2E2150",
+        "alpha": 255
+      },
+      "disabled": {
+        "face": "#BDB4D0",
+        "edge": "#8E83A6",
+        "line": "#574E6E",
+        "band": "#D4CEE0",
+        "text": "#4E4A60",
+        "alpha": 140
+      }
+    }
+  },
+  "C": {
+    "title": "星を飾ったクリーム色（四隅に小さな星）",
+    "states": {
+      "normal": {
+        "face": "#FFE38A",
+        "edge": "#E0A83C",
+        "line": "#5A3D12",
+        "band": "#FFEDB3",
+        "text": "#4A320A",
+        "alpha": 255
+      },
+      "pressed": {
+        "face": "#E0C879",
+        "edge": "#C59435",
+        "line": "#5A3D12",
+        "band": "#E6D291",
+        "text": "#4A320A",
+        "alpha": 255
+      },
+      "disabled": {
+        "face": "#CAC0B6",
+        "edge": "#A19082",
+        "line": "#64564F",
+        "band": "#DDD6D0",
+        "text": "#4E4A60",
+        "alpha": 140
+      }
+    }
+  },
+  "geometry": {
+    "size": [
+      360,
+      140
+    ],
+    "corner_radius": 28,
+    "outline": 3,
+    "bottom_edge_normal": 8,
+    "bottom_edge_pressed": 2,
+    "pressed_face_offset_y": 6,
+    "band": {
+      "inset_lr": 14,
+      "y_from": 8,
+      "y_to": 40,
+      "radius": 14
+    },
+    "nine_slice_margin": {
+      "left": 32,
+      "right": 32,
+      "top": 44,
+      "bottom": 40
+    }
+  }
+}
