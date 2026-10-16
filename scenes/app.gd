@@ -31,4 +31,14 @@ func start_game(with_tutorial: bool) -> void:
 	main = MainScene.instantiate()
 	main.start_with_tutorial = with_tutorial
 	main.language = lang
+	main.title_requested.connect(show_title)
 	add_child(main)
+
+
+func show_title() -> void:
+	if main != null:
+		main.queue_free()
+		main = null
+	title_screen = TitleScreen.new()
+	title_screen.start_requested.connect(start_game)
+	add_child(title_screen)

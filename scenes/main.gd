@@ -3,6 +3,7 @@
 extends Node2D
 
 signal tutorial_finished
+signal title_requested
 
 const Session = preload("res://game/session.gd")
 const InputMapper = preload("res://scenes/input_mapper.gd")
@@ -44,6 +45,7 @@ func _ready() -> void:
 	)
 	hud.apply_pressed.connect(on_apply)
 	hud.restart_pressed.connect(func() -> void: session.restart_level())
+	hud.title_requested.connect(on_title_requested)
 	hud.set_language(language)
 	_refresh()
 	bubble.show_text(help_text(), 4.0)
@@ -199,3 +201,7 @@ func cleared_text() -> String:
 	if language == "ja":
 		return "クリア！  タップで次の面"
 	return CLEARED_TEXT
+
+
+func on_title_requested() -> void:
+	title_requested.emit()

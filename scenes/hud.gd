@@ -7,6 +7,7 @@ signal hint_pressed
 signal settings_pressed
 signal apply_pressed
 signal restart_pressed
+signal title_requested
 
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
@@ -20,6 +21,7 @@ var settings_button: Button
 var hint_button: Button
 var apply_button: Button
 var restart_button: Button
+var title_button: Button
 
 var language: String = "en"
 
@@ -35,9 +37,11 @@ func _ready() -> void:
 	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
 	settings_button = _make_button("HOW TO PLAY", Rect2(640, 200, 400, 110), settings_pressed)
 	restart_button = _make_button("RESTART", Rect2(340, 250, 300, 80), restart_pressed)
-	hint_button = _make_button("HINT", Rect2(240, 1560, 600, 150), hint_pressed)
-	apply_button = _make_button("APPLY", Rect2(850, 1560, 200, 150), apply_pressed)
+	hint_button = _make_button("HINT", Rect2(250, 1560, 380, 150), hint_pressed)
+	apply_button = _make_button("APPLY", Rect2(640, 1560, 160, 150), apply_pressed)
+	apply_button.add_theme_font_size_override("font_size", 40)
 	apply_button.visible = false
+	title_button = make_title_button()
 
 
 func set_language(lang: String) -> void:
@@ -92,5 +96,23 @@ func _make_button(text: String, r: Rect2, sig: Signal) -> Button:
 	b.size = r.size
 	b.add_theme_font_size_override("font_size", FONT_SIZE)
 	b.pressed.connect(func() -> void: sig.emit())
+	add_child(b)
+	return b
+
+
+func make_title_button() -> Button:
+	var b := Button.new()
+	b.text = "タイトルに\n戻る"
+	b.position = Vector2(810, 1560)
+	b.size = Vector2(230, 150)
+	b.add_theme_font_size_override("font_size", 36)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.25, 0.45, 0.85)
+	sb.corner_radius_top_left = 12
+	sb.corner_radius_top_right = 12
+	sb.corner_radius_bottom_left = 12
+	sb.corner_radius_bottom_right = 12
+	b.add_theme_stylebox_override("normal", sb)
+	b.pressed.connect(func() -> void: title_requested.emit())
 	add_child(b)
 	return b
