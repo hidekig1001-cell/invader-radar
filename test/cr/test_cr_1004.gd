@@ -20,7 +20,8 @@ func test_rules_label_exists_and_is_label() -> void:
 ## CHECK: 2
 func test_rules_label_text_matches_spec() -> void:
 	var m = await _start()
-	var expected_text := "ONE PIECE PER ROW, COLUMN AND COLOR.\nPIECES MUST NOT TOUCH, EVEN DIAGONALLY."
+	m.rules_label.apply_language("ja")
+	var expected_text := "各行・各列・各色に駒を 1 つ置く。\n駒どうしは縦・横・斜めにも隣り合ってはいけない。"
 	assert_eq(m.rules_label.text, expected_text)
 
 

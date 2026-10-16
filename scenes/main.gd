@@ -52,7 +52,7 @@ func _ready() -> void:
 
 	rules_label = RulesLabelScript.new()
 	add_child(rules_label)
-	rules_label.text = RulesLabelScript.RULES_TEXT
+	rules_label.apply_language(language)
 	rules_label.visible = true
 	rules_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	rules_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
