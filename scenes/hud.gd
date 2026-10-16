@@ -19,6 +19,8 @@ var settings_button: Button
 var hint_button: Button
 var apply_button: Button
 
+var language: String = "en"
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -35,13 +37,26 @@ func _ready() -> void:
 	apply_button.visible = false
 
 
+func set_language(lang: String) -> void:
+	language = lang
+	undo_button.text = localized("UNDO", "戻す")
+	settings_button.text = localized("HOW TO PLAY", "遊び方")
+	apply_button.text = localized("APPLY", "決定")
+
+
+func localized(en_text: String, ja_text: String) -> String:
+	if language == "ja":
+		return ja_text
+	return en_text
+
+
 # session.snapshot() の内容を表示する。
 func update_from(snap: Dictionary) -> void:
-	level_label.text = "LEVEL %d" % int(snap.get("level", 0))
-	score_label.text = "SCORE %d" % int(snap.get("score", 0))
-	hint_label.text = "HINT x%d" % int(snap.get("hints", 0))
-	moves_label.text = "MOVES %d" % int(snap.get("moves", 0))
-	hint_button.text = "HINT (%d)" % int(snap.get("hints", 0))
+	level_label.text = localized("LEVEL %d", "レベル %d") % int(snap.get("level", 0))
+	score_label.text = localized("SCORE %d", "スコア %d") % int(snap.get("score", 0))
+	hint_label.text = localized("HINT x%d", "ヒント x%d") % int(snap.get("hints", 0))
+	moves_label.text = localized("MOVES %d", "手数 %d") % int(snap.get("moves", 0))
+	hint_button.text = localized("HINT (%d)", "ヒント (%d)") % int(snap.get("hints", 0))
 	hint_button.disabled = int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
 	undo_button.disabled = snap.get("status", "") != "playing"
 

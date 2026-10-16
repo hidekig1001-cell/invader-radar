@@ -14,10 +14,21 @@ func _ready() -> void:
 	add_child(title_screen)
 
 
+func chosen_language() -> String:
+	if title_screen != null and title_screen.has_method("language"):
+		var lang = title_screen.language()
+		if lang == "":
+			return "en"
+		return lang
+	return "en"
+
+
 func start_game(with_tutorial: bool) -> void:
+	var lang = chosen_language()
 	if title_screen != null:
 		title_screen.queue_free()
 		title_screen = null
 	main = MainScene.instantiate()
 	main.start_with_tutorial = with_tutorial
+	main.language = lang
 	add_child(main)

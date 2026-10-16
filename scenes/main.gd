@@ -20,6 +20,7 @@ var rules_label: Label = null
 var tutorial = null
 var start_with_tutorial: bool = false
 var space_bg = null
+var language: String = "en"
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -42,8 +43,9 @@ func _ready() -> void:
 			start_tutorial()
 	)
 	hud.apply_pressed.connect(on_apply)
+	hud.set_language(language)
 	_refresh()
-	bubble.show_text(HELP_TEXT, 4.0)
+	bubble.show_text(help_text(), 4.0)
 
 	rules_label = RulesLabelScript.new()
 	add_child(rules_label)
@@ -133,8 +135,8 @@ func _refresh() -> void:
 	hud.update_from(session.snapshot())
 	board_view.queue_redraw()
 	if session.status == "cleared":
-		bubble.show_text(CLEARED_TEXT, 0.0)
-	elif bubble.text == CLEARED_TEXT:
+		bubble.show_text(cleared_text(), 0.0)
+	elif bubble.text == cleared_text():
 		bubble.clear_text()
 	if session.current_hint.is_empty():
 		board_view.hint_cell = Vector2i(-1, -1)
@@ -160,7 +162,7 @@ func end_tutorial() -> void:
 	board_view.session = session
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
-	bubble.show_text(HELP_TEXT, 4.0)
+	bubble.show_text(help_text(), 4.0)
 	_refresh()
 	tutorial_finished.emit()
 
@@ -184,3 +186,15 @@ func tutorial_input(kind: String, cell: Vector2i) -> void:
 			board_view.highlight_cells = []
 			bubble.clear_text()
 		board_view.queue_redraw()
+
+
+func help_text() -> String:
+	if language == "ja":
+		return "タップ: ×   ダブルタップ: 駒   スワイプ: ×"
+	return HELP_TEXT
+
+
+func cleared_text() -> String:
+	if language == "ja":
+		return "クリア！  タップで次の面"
+	return CLEARED_TEXT
