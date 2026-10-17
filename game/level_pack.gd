@@ -1,7 +1,21 @@
 extends RefCounted
 
+const ASTEROID_CELLS := {6: [[2, 2], [4, 0]], 8: [[0, 0], [2, 4]], 9: [[0, 0], [3, 3]]}
+
+static func with_asteroids(dicts: Array) -> Array:
+	var result: Array = []
+	for d in dicts:
+		var id = d.get("id", -1)
+		if ASTEROID_CELLS.has(id):
+			var new_d = d.duplicate(true)
+			new_d["asteroids"] = ASTEROID_CELLS[id]
+			result.append(new_d)
+		else:
+			result.append(d)
+	return result
+
 static func level_dicts() -> Array:
-	return [
+	return with_asteroids([
 		{
 			"id": 1,
 			"width": 4,
@@ -72,4 +86,4 @@ static func level_dicts() -> Array:
 			"target": 5,
 			"regions": [[1, 2, 2, 2, 1], [1, 1, 1, 1, 1], [3, 0, 0, 0, 1], [3, 3, 0, 0, 1], [3, 3, 4, 4, 1]]
 		}
-	]
+	])
