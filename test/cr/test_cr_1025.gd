@@ -60,6 +60,9 @@ func test_press_start_emits_signal() -> void:
 ## CHECK: 5
 func test_app_starts_with_title_screen_and_start_game_true() -> void:
 	var app = await _make_app()
+	assert_not_null(app.splash)
+	app.on_splash_finished()
+	await wait_frames(1)
 	assert_not_null(app.title_screen)
 	assert_null(app.main)
 	app.start_game(true)
