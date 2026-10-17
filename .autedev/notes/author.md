@@ -7,6 +7,7 @@
 - 盤の場所は `scenes/board_view.gd` の `AREA`（1080×1920 の画面で Rect2(40, 480, 1000, 1000)）。盤の上は 480 まで HUD と吹き出し、盤の下は 1480 から下が空いている（HINT のボタンがある）。
 - 決まり・操作・画面の言葉（HELP_TEXT、ルールの説明、ヒントの言葉など）を変える CR は、チュートリアルの段のデータ `game/tutorial_steps.gd`（CR-1011 から）の文と手順も同じ CR で直す。対象の候補に `game/tutorial_steps.gd` を入れ、そのテスト（test/cr/test_cr_1011.gd など）の期待値が変わるなら「変わる既存のテスト」に書く（SPEC.md の 5 章）。
 - 実装役は `OS.`・`Engine.`・`Time.`・`ProjectSettings.`・`FileAccess`・`DirAccess` を新しく使えない（改修 run の禁止 API。今のファイルにある数より増やすと R4・R5 で止まる）。CR の「変えること」にこれらを使う作り方を書かない。今の `scenes/main.gd` の `Time.get_ticks_msec()` は、なぞりを集める 3 か所だけにある。
+- ファイルの読み書き（FileAccess）は game/session_save.gd の中だけで使える（D-20261018-0430）。ほかのファイルで保存・読み込みをするときは SessionSave の関数を呼ぶ。DirAccess・OS. などはどのファイルでも使えない。テストでの FileAccess の書き込みは使えず、テストでファイルを作るときは SessionSave.write_text を使う。
 - 「新しい宣言」の名前は `_` で始めない（改修 run の宣言の検査が数えない）。
 - テストでマスのタップを続けるときは、同じマスを 300ms 以内に 2 回タップすると double_tap と読まれる。ヘッドレスのテストではフレームが速く進むので、`await wait_frames(30)` を挟んでも 300ms を超えるとは限らない。続けて 1 回ずつのタップを確かめるときは、違うマスをタップする。
 - アプリの起動のシーンは `scenes/app.tscn`（`scenes/app.gd` を付けただけ）。`app.gd` は最初に起動画面 `scenes/title_screen.gd` を出し、ボタンで `start_game(with_tutorial)` が呼ばれて main.tscn を立ち上げ、`main.start_with_tutorial` に選んだ値を入れる。テストと撮影は main.tscn をそのまま立ち上げるので、起動画面もチュートリアルも出ない。
