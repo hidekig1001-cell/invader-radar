@@ -47,6 +47,11 @@ static func conflicts(board_state, level) -> Array:
 				conflict_set[a] = true
 				conflict_set[b] = true
 	
+	# レーダーの衝突を追加
+	var radar_conf = radar_conflicts(board_state, level)
+	for piece in radar_conf:
+		conflict_set[piece] = true
+	
 	var result = []
 	for key in conflict_set.keys():
 		result.append(key)
@@ -66,4 +71,57 @@ static func is_solved(board_state, level) -> bool:
 		return false
 	if board_state.pieces().size() != level.target:
 		return false
-	return conflicts(board_state, level).is_empty()
+	if not conflicts(board_state, level).is_empty():
+		return false
+	if not radar_satisfied(board_state.pieces(), level):
+		return false
+	return true
+
+
+static func radar_count(pieces, x: int, y: int) -> int:
+	var count = 0
+	for piece in pieces:
+		var dx = abs(piece.x - x)
+		var dy = abs(piece.y - y)
+		if dx <= 1 and dy <= 1 and not (dx == 0 and dy == 0):
+			count += 1
+	return count
+
+
+static func radar_conflicts(board_state, level) -> Array:
+	if board_state == null or level == null:
+		return []
+	
+	var result = []
+	var pieces = board_state.pieces()
+	
+	for r in level.radar:
+		var rx = r[0]
+		var ry = r[1]
+		var n = r[2]
+		
+		var count = radar_count(pieces, rx, ry)
+		if count > n:
+			for piece in pieces:
+				var dx = abs(piece.x - rx)
+				var dy = abs(piece.y - ry)
+				if dx <= 1 and dy <= 1 and not (dx == 0 and dy == 0):
+					result.append(piece)
+	
+	return result
+
+
+static func radar_satisfied(pieces, level) -> bool:
+	if level == null:
+		return true
+	
+	for r in level.radar:
+		var rx = r[0]
+		var ry = r[1]
+		var n = r[2]
+		
+		var count = radar_count(pieces, rx, ry)
+		if count != n:
+			return false
+	
+	return true

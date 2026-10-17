@@ -1,5 +1,5 @@
 # 面の層（SPEC.md 2 節）: 1 面の情報と、JSON の読み書き。
-# JSON: {"id", "width", "height", "regions": 行ごとの区域番号の配列, "asteroids": [[x,y]...], "radar": [[x,y]...], "target"}
+# JSON: {"id", "width", "height", "regions": 行ごとの区域番号の配列, "asteroids": [[x,y]...], "radar": [[x,y,n]...], "target"}
 extends RefCounted
 
 const Grid = preload("res://core/grid.gd")
@@ -9,7 +9,7 @@ var width: int = 0
 var height: int = 0
 var regions = null  # Grid: 区域の番号
 var asteroids: Array = []  # Vector2i のマス（土台では使わない）
-var radar: Array = []  # レーダーの数字を出すマス（Vector2i。土台では使わない）
+var radar: Array = []  # レーダーの数字を出すマス [x, y, n]
 var target: int = 0
 
 
@@ -29,7 +29,7 @@ func parse(d: Dictionary) -> bool:
 		for x in range(w):
 			g.set_cell(x, y, int(rows[y][x]))
 	var ast = _read_cells(d.get("asteroids", []), w, h)
-	var rad = _read_cells(d.get("radar", []), w, h)
+	var rad = parse_radar(d.get("radar", []), w, h)
 	if ast == null or rad == null:
 		return false
 	id = int(d.get("id", 0))
@@ -50,7 +50,7 @@ func to_dict() -> Dictionary:
 			row.append(regions.get_cell(x, y))
 		rows.append(row)
 	return {"id": id, "width": width, "height": height, "regions": rows,
-		"asteroids": _write_cells(asteroids), "radar": _write_cells(radar), "target": target}
+		"asteroids": _write_cells(asteroids), "radar": write_radar(radar), "target": target}
 
 
 func to_json() -> String:
@@ -101,4 +101,31 @@ func _write_cells(cells: Array) -> Array:
 	var out: Array = []
 	for p in cells:
 		out.append([p.x, p.y])
+	return out
+
+
+# 面の辞書の radar の [x, y, n] の並びを検査して読み、形が違う・盤外のマス・0 未満の n のとき null を返す（成功は [x, y, n] の並び）。
+func parse_radar(list, w: int, h: int):
+	var out: Array = []
+	if not (list is Array):
+		return null
+	for c in list:
+		if not (c is Array) or c.size() != 3:
+			return null
+		var x := int(c[0])
+		var y := int(c[1])
+		var n := int(c[2])
+		if x < 0 or y < 0 or x >= w or y >= h:
+			return null
+		if n < 0:
+			return null
+		out.append([x, y, n])
+	return out
+
+
+# radar の [x, y, n] の並びを to_dict の "radar" の出力（[[x, y, n]]）として複製して返す。
+func write_radar(radar: Array) -> Array:
+	var out: Array = []
+	for c in radar:
+		out.append([c[0], c[1], c[2]])
 	return out

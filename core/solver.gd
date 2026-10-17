@@ -1,5 +1,7 @@
 extends RefCounted
 
+const Rules = preload("res://core/rules.gd")
+
 static func solutions(level, limit: int = 0) -> Array:
 	if level == null:
 		return []
@@ -25,7 +27,8 @@ static func _backtrack(level, n: int, y: int, current_solution: Array, used_cols
 		return
 	
 	if y == n:
-		results.append(current_solution.duplicate())
+		if Rules.radar_satisfied(current_solution, level):
+			results.append(current_solution.duplicate())
 		return
 	
 	for x in range(n):

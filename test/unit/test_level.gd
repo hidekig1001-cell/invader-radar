@@ -5,7 +5,7 @@ const Level = preload("res://game/level.gd")
 const Session = preload("res://game/session.gd")
 
 const SAMPLE := {"id": 9, "width": 3, "height": 2, "target": 2,
-	"regions": [[0, 0, 1], [2, 1, 1]], "asteroids": [[1, 1]], "radar": [[0, 1]]}
+	"regions": [[0, 0, 1], [2, 1, 1]], "asteroids": [[1, 1]], "radar": [[0, 1, 1]]}
 
 
 func test_parse_sample() -> void:
@@ -18,7 +18,7 @@ func test_parse_sample() -> void:
 	assert_eq(lv.region_at(2, 0), 1)
 	assert_eq(lv.region_at(0, 1), 2)
 	assert_eq(lv.asteroids, [Vector2i(1, 1)])
-	assert_eq(lv.radar, [Vector2i(0, 1)])
+	assert_eq(lv.radar, [[0, 1, 1]])
 	assert_eq(lv.region_count(), 3)
 
 
@@ -28,6 +28,7 @@ func test_round_trip_through_json_text() -> void:
 	var again = Level.new()
 	assert_true(again.parse_json(lv.to_json()))
 	assert_eq(again.to_dict(), lv.to_dict())
+	assert_eq(again.radar, [[0, 1, 1]])
 
 
 func test_rejects_bad_shapes() -> void:
