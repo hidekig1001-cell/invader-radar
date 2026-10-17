@@ -35,6 +35,7 @@ static func attempt_level(rng: RandomNumberGenerator, width: int) -> Dictionary:
 		
 	var region_rows = grow_regions(rng, width, solution)
 	var level_dict = build_level_dict(width, solution, region_rows)
+	level_dict["radar"] = pick_radar(rng, solution)
 	return level_dict
 
 static func pick_solution(rng: RandomNumberGenerator, size: int) -> Array:
@@ -115,3 +116,40 @@ static func has_unique_solution(level_dict: Dictionary) -> bool:
 		return false
 		
 	return Solver.count_solutions(level, 2) == 1
+
+static func pick_radar(rng: RandomNumberGenerator, solution: Array) -> Array:
+	var Rules = preload("res://core/rules.gd")
+	var size = solution.size()
+	var pieces = []
+	for y in range(size):
+		pieces.append(Vector2i(solution[y], y))
+		
+	var empty_cells = []
+	for y in range(size):
+		for x in range(size):
+			if x != solution[y]:
+				empty_cells.append([x, y])
+				
+	if empty_cells.is_empty():
+		return []
+		
+	# Shuffle empty cells deterministically using rng
+	for i in range(empty_cells.size() - 1, 0, -1):
+		var j = rng.randi_range(0, i)
+		var temp = empty_cells[i]
+		empty_cells[i] = empty_cells[j]
+		empty_cells[j] = temp
+		
+	var count = rng.randi_range(1, 2)
+	if count > empty_cells.size():
+		count = empty_cells.size()
+		
+	var result = []
+	for i in range(count):
+		var cell = empty_cells[i]
+		var x = cell[0]
+		var y = cell[1]
+		var n = Rules.radar_count(pieces, x, y)
+		result.append([x, y, n])
+		
+	return result
