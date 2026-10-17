@@ -32,6 +32,10 @@ func test_font_sizes() -> void:
 	var m = await _start_main()
 	assert_eq(m.hud.apply_button.get_theme_font_size("font_size"), 40)
 	assert_eq(m.hud.title_button.get_theme_font_size("font_size"), 36)
+	assert_true(m.hud.apply_button.get_theme_stylebox("normal") is StyleBoxTexture)
+	assert_eq((m.hud.apply_button.get_theme_stylebox("normal") as StyleBoxTexture).texture.resource_path, "res://assets/buttons/button_normal.png")
+	assert_eq(m.hud.apply_button.get_theme_color("font_color"), Color8(74, 50, 10))
+	assert_eq(m.hud.apply_button.get_theme_color("font_disabled_color"), Color8(78, 74, 96))
 
 
 ## CHECK: 4
@@ -45,12 +49,9 @@ func test_title_button_text_and_rect() -> void:
 ## CHECK: 5
 func test_title_button_stylebox() -> void:
 	var m = await _start_main()
-	var sb: StyleBoxFlat = m.hud.title_button.get_theme_stylebox("normal")
-	assert_true(sb.bg_color.is_equal_approx(Color(0.25, 0.45, 0.85)))
-	assert_eq(sb.corner_radius_top_left, 12)
-	assert_eq(sb.corner_radius_top_right, 12)
-	assert_eq(sb.corner_radius_bottom_left, 12)
-	assert_eq(sb.corner_radius_bottom_right, 12)
+	var sb: StyleBoxTexture = m.hud.title_button.get_theme_stylebox("normal")
+	assert_true(sb is StyleBoxTexture)
+	assert_eq(sb.texture.resource_path, "res://assets/buttons/button_normal.png")
 
 
 ## CHECK: 6

@@ -11,6 +11,7 @@ signal title_requested
 
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
+const ButtonStyle = preload("res://scenes/button_style.gd")
 
 var level_label: Label
 var score_label: Label
@@ -42,6 +43,13 @@ func _ready() -> void:
 	apply_button.add_theme_font_size_override("font_size", 40)
 	apply_button.visible = false
 	title_button = make_title_button()
+
+	ButtonStyle.apply_to(undo_button)
+	ButtonStyle.apply_to(settings_button)
+	ButtonStyle.apply_to(hint_button)
+	ButtonStyle.apply_to(apply_button)
+	ButtonStyle.apply_to(restart_button)
+	ButtonStyle.apply_to(title_button)
 
 
 func set_language(lang: String) -> void:
@@ -106,13 +114,6 @@ func make_title_button() -> Button:
 	b.position = Vector2(810, 1560)
 	b.size = Vector2(230, 150)
 	b.add_theme_font_size_override("font_size", 36)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.25, 0.45, 0.85)
-	sb.corner_radius_top_left = 12
-	sb.corner_radius_top_right = 12
-	sb.corner_radius_bottom_left = 12
-	sb.corner_radius_bottom_right = 12
-	b.add_theme_stylebox_override("normal", sb)
 	b.pressed.connect(func() -> void: title_requested.emit())
 	add_child(b)
 	return b

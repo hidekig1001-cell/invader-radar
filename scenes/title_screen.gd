@@ -3,6 +3,7 @@ extends Control
 signal start_requested(with_tutorial: bool)
 
 const Sound = preload("res://scenes/sound.gd")
+const ButtonStyle = preload("res://scenes/button_style.gd")
 
 var _language: String = ""
 var _title_label: Label
@@ -47,6 +48,7 @@ func _ready() -> void:
 		select_language("en")
 	)
 	add_child(_lang_btn_en)
+	ButtonStyle.apply_to(_lang_btn_en)
 
 	_lang_btn_ja = Button.new()
 	_lang_btn_ja.text = "日本語"
@@ -58,6 +60,7 @@ func _ready() -> void:
 		select_language("ja")
 	)
 	add_child(_lang_btn_ja)
+	ButtonStyle.apply_to(_lang_btn_ja)
 
 	_start_btn_tutorial = Button.new()
 	_start_btn_tutorial.position = Vector2(150, 1200)
@@ -69,6 +72,7 @@ func _ready() -> void:
 		press_start(true)
 	)
 	add_child(_start_btn_tutorial)
+	ButtonStyle.apply_to(_start_btn_tutorial)
 
 	_start_btn_now = Button.new()
 	_start_btn_now.position = Vector2(150, 1400)
@@ -80,6 +84,7 @@ func _ready() -> void:
 		press_start(false)
 	)
 	add_child(_start_btn_now)
+	ButtonStyle.apply_to(_start_btn_now)
 
 func title_text() -> String:
 	return _title_label.text
