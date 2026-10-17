@@ -10,6 +10,8 @@ const InputMapper = preload("res://scenes/input_mapper.gd")
 const RulesLabelScript = preload("res://scenes/rules_label.gd")
 const Tutorial = preload("res://game/tutorial.gd")
 const SpaceBg = preload("res://scenes/space_bg.gd")
+const Rules = preload("res://core/rules.gd")
+const Sound = preload("res://scenes/sound.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -22,6 +24,9 @@ var tutorial = null
 var start_with_tutorial: bool = false
 var space_bg = null
 var language: String = "en"
+var sound = null
+var last_snapshot: Dictionary = {}
+var last_conflicts: int = 0
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -29,6 +34,11 @@ var language: String = "en"
 
 
 func _ready() -> void:
+	sound = Sound.new()
+	add_child(sound)
+	sound.setup()
+	sound.play_music("bgm_main")
+
 	space_bg = SpaceBg.new()
 	add_child(space_bg)
 	move_child(space_bg, 0)
@@ -37,9 +47,13 @@ func _ready() -> void:
 		session = Session.new()
 	board_view.session = session
 	session.changed.connect(_refresh)
-	hud.undo_pressed.connect(func() -> void: session.undo())
+	hud.undo_pressed.connect(func() -> void:
+		sound.play_sfx("button")
+		session.undo()
+	)
 	hud.hint_pressed.connect(_on_hint)
 	hud.settings_pressed.connect(func() -> void:
+		sound.play_sfx("button")
 		if not is_tutorial():
 			start_tutorial()
 	)
@@ -126,6 +140,7 @@ func _on_hint() -> void:
 
 
 func on_apply() -> void:
+	sound.play_sfx("button")
 	bubble.clear_text()
 	board_view.hint_cell = Vector2i(-1, -1)
 	hud.set_apply_visible(false)
@@ -135,7 +150,15 @@ func on_apply() -> void:
 func _refresh() -> void:
 	if not is_node_ready():
 		return
-	hud.update_from(session.snapshot())
+	var curr_snapshot = session.snapshot()
+	var curr_conflicts = Rules.conflicts(session.board, session.level).size()
+	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
+	if sfx_name != "":
+		sound.play_sfx(sfx_name)
+	last_snapshot = curr_snapshot
+	last_conflicts = curr_conflicts
+
+	hud.update_from(curr_snapshot)
 	board_view.queue_redraw()
 	if session.status == "cleared":
 		bubble.show_text(cleared_text(), 0.0)
