@@ -51,6 +51,30 @@ static func steps() -> Array:
 	]
 
 
+static func apply_language(lang_code: String, step_index: int) -> String:
+	if lang_code == "ja":
+		match step_index:
+			0:
+				return "各色に駒を 1 つ置く。\n緑のマスをダブルタップ"
+			1:
+				return "各行・各列にも 1 つ。\nタップで次へ"
+			2:
+				return "斜めにも隣り合えない。\n斜めのマスに × を付ける"
+			3:
+				return "紫は 1 マスだけ。\nそこをダブルタップ"
+			4:
+				return "残りの 2 つの駒を置く。"
+			5:
+				return "よくできました！\nタップで開始"
+			_:
+				return ""
+	else:
+		var all_steps = steps()
+		if step_index >= 0 and step_index < all_steps.size():
+			return all_steps[step_index]["text"]
+		return ""
+
+
 static func diagonal_cells(cell: Vector2i, width: int, height: int) -> Array:
 	var result = []
 	for dx in [-1, 1]:

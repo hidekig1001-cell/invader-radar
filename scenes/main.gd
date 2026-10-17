@@ -12,6 +12,7 @@ const Tutorial = preload("res://game/tutorial.gd")
 const SpaceBg = preload("res://scenes/space_bg.gd")
 const Rules = preload("res://core/rules.gd")
 const Sound = preload("res://scenes/sound.gd")
+const TutorialSteps = preload("res://game/tutorial_steps.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -176,7 +177,7 @@ func start_tutorial() -> void:
 	var step = tutorial.current_step()
 	if not step.is_empty():
 		board_view.highlight_cells = step["highlight"]
-		bubble.show_text(step["text"], 0.0)
+		bubble.show_text(TutorialSteps.apply_language(language, tutorial.step_index), 0.0)
 	else:
 		board_view.highlight_cells = []
 		bubble.clear_text()
@@ -207,7 +208,7 @@ func tutorial_input(kind: String, cell: Vector2i) -> void:
 		var step = tutorial.current_step()
 		if not step.is_empty():
 			board_view.highlight_cells = step["highlight"]
-			bubble.show_text(step["text"], 0.0)
+			bubble.show_text(TutorialSteps.apply_language(language, tutorial.step_index), 0.0)
 		else:
 			board_view.highlight_cells = []
 			bubble.clear_text()
