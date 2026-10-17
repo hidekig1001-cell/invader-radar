@@ -4,6 +4,7 @@ signal start_requested(with_tutorial: bool)
 
 const Sound = preload("res://scenes/sound.gd")
 const ButtonStyle = preload("res://scenes/button_style.gd")
+const SpaceBg = preload("res://scenes/space_bg.gd")
 
 var _language: String = ""
 var _title_label: Label
@@ -13,6 +14,7 @@ var _start_btn_tutorial: Button
 var _start_btn_now: Button
 var background: TextureRect
 var sound = null
+var base_positions: Dictionary = {}
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
@@ -85,6 +87,33 @@ func _ready() -> void:
 	)
 	add_child(_start_btn_now)
 	ButtonStyle.apply_to(_start_btn_now)
+
+	base_positions["title"] = _title_label.position
+	base_positions["lang_en"] = _lang_btn_en.position
+	base_positions["lang_ja"] = _lang_btn_ja.position
+	base_positions["start_tut"] = _start_btn_tutorial.position
+	base_positions["start_now"] = _start_btn_now.position
+
+	var visible_size = get_viewport().get_visible_rect().size
+	var display_name = DisplayServer.get_name()
+	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
+	apply_screen_layout(layout_size)
+
+func apply_screen_layout(size: Vector2) -> void:
+	var offset = SpaceBg.layout_offsets(size.x, size.y)
+	
+	background.size = size
+	
+	if base_positions.has("title"):
+		_title_label.position = base_positions["title"] + offset
+	if base_positions.has("lang_en"):
+		_lang_btn_en.position = base_positions["lang_en"] + offset
+	if base_positions.has("lang_ja"):
+		_lang_btn_ja.position = base_positions["lang_ja"] + offset
+	if base_positions.has("start_tut"):
+		_start_btn_tutorial.position = base_positions["start_tut"] + offset
+	if base_positions.has("start_now"):
+		_start_btn_now.position = base_positions["start_now"] + offset
 
 func title_text() -> String:
 	return _title_label.text

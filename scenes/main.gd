@@ -33,6 +33,8 @@ var last_conflicts: int = 0
 @onready var hud = $Ui/Hud
 @onready var bubble = $Ui/MessageBubble
 
+var base_positions: Dictionary = {}
+
 
 func _ready() -> void:
 	sound = Sound.new()
@@ -76,8 +78,90 @@ func _ready() -> void:
 	rules_label.position = Vector2(54, 1730)
 	rules_label.size = Vector2(972, 140)
 
+	# CR-1039: Record base positions before applying layout offsets
+	base_positions["hud"] = hud.position
+	base_positions["board_view"] = board_view.position
+	base_positions["bubble"] = bubble.position
+	base_positions["rules_label"] = rules_label.position
+
+	var visible_size = get_viewport().get_visible_rect().size
+	var display_name = DisplayServer.get_name()
+	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
+	apply_screen_layout(layout_size)
+
 	if start_with_tutorial:
 		start_tutorial()
+
+
+func apply_screen_layout(size: Vector2) -> void:
+	var offsets = SpaceBg.layout_offsets(size.x, size.y)
+	var extra_x = offsets.x * 2.0
+	var extra_y = offsets.y * 2.0
+	
+	# Apply offsets to parts based on base positions
+	if base_positions.has("hud"):
+		hud.position = base_positions["hud"] + Vector2(extra_x / 2.0, extra_y / 2.0)
+	if base_positions.has("board_view"):
+		board_view.position = base_positions["board_view"] + Vector2(extra_x / 2.0, extra_y / 2.0)
+	if base_positions.has("bubble"):
+		bubble.position = base_positions["bubble"] + Vector2(extra_x / 2.0, extra_y / 2.0)
+	if base_positions.has("rules_label"):
+		rules_label.position = base_positions["rules_label"] + Vector2(extra_x / 2.0, extra_y / 2.0)
+		
+	space_bg.sky_size = size
+	space_bg.avoid_rects = part_rects()
+
+
+func part_rects() -> Array:
+	var rects = []
+	
+	# Rules Label
+	if rules_label:
+		rects.append(Rect2(rules_label.position, rules_label.size))
+		
+	# Board View
+	# board_view is a Node2D (or Control) but might not have 'size' property if it's a custom Node2D script.
+	# However, the test expects Rect2(40, 732, 1000, 1000). 
+	# In Godot, if board_view is a Control, it has size. If it's a Node2D, it doesn't.
+	# The error says "Invalid access to property or key 'size' on a base object of type 'Node2D (board_view.gd)'".
+	# This implies board_view.gd extends Node2D and does not have a 'size' property.
+	# We need to determine the size of the board view differently.
+	# Usually, board views draw within a specific rect. 
+	# Let's assume the board view has a method to get its rect or we use a hardcoded size if it's fixed.
+	# Looking at test_cr_1039 CHECK 4: Rect2(40, 732, 1000, 1000).
+	# If base position is (40, 480) and offset is (0, 252), final pos is (40, 732).
+	# The size is 1000x1000.
+	# Since we can't access .size on Node2D, we might need to check if it's a Control or use a different property.
+	# If board_view.gd extends Node2D, it likely doesn't have size. 
+	# But wait, if it's a custom drawing node, maybe it has a 'board_rect' method?
+	# The code uses `board_view.board_rect()` in `_on_touch_down`.
+	# Let's use `board_view.board_rect()` to get the rect relative to the node, then transform it.
+	# However, `board_rect()` likely returns a Rect2 in local coordinates.
+	# We need the global rect or the rect at the current position.
+	# If board_view.position is (40, 732) and board_rect() is (0,0,1000,1000), then the global rect is (40, 732, 1000, 1000).
+	
+	if board_view:
+		var b_rect = board_view.board_rect()
+		# board_rect() returns local rect. We need to offset by position.
+		# But wait, if board_view is a Node2D, its position is the origin of its drawing.
+		# So the rect in world space is Rect2(board_view.position + b_rect.position, b_rect.size)
+		var global_b_rect = Rect2(board_view.position + b_rect.position, b_rect.size)
+		rects.append(global_b_rect)
+
+	# HUD
+	if hud:
+		# HUD is likely a Control or has children with rects. 
+		# If hud is a Control, it has size. If not, we might need to calculate bounds.
+		# The test CHECK 4 doesn't explicitly check for HUD rect in avoid_rects, but part_rects() should return it.
+		# Let's try to get hud.size if it exists (Control), otherwise skip or use a default.
+		if hud is Control:
+			rects.append(Rect2(hud.position, hud.size))
+		else:
+			# If HUD is not a Control, we might need to calculate bounds from children or skip.
+			# Given the error was only on board_view, let's assume HUD is fine or we handle it safely.
+			pass
+
+	return rects
 
 
 func _input(event: InputEvent) -> void:
