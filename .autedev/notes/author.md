@@ -10,3 +10,4 @@
 - 「新しい宣言」の名前は `_` で始めない（改修 run の宣言の検査が数えない）。
 - テストでマスのタップを続けるときは、同じマスを 300ms 以内に 2 回タップすると double_tap と読まれる。ヘッドレスのテストではフレームが速く進むので、`await wait_frames(30)` を挟んでも 300ms を超えるとは限らない。続けて 1 回ずつのタップを確かめるときは、違うマスをタップする。
 - アプリの起動のシーンは `scenes/app.tscn`（`scenes/app.gd` を付けただけ）。`app.gd` は最初に起動画面 `scenes/title_screen.gd` を出し、ボタンで `start_game(with_tutorial)` が呼ばれて main.tscn を立ち上げ、`main.start_with_tutorial` に選んだ値を入れる。テストと撮影は main.tscn をそのまま立ち上げるので、起動画面もチュートリアルも出ない。
+- 盤に駒・× を置く・消すのは board.apply("place" / "mark" / "clear", x, y)。place・mark などの関数は board_state.gd に無い

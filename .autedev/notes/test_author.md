@@ -1,3 +1,4 @@
 - 面（`res://game/level.gd`）の `parse(d)` は、読めたかどうかの bool を返す（面そのものは返さない）。面は `var level = Level.new()` のあと `level.parse({...})` を呼び、その `level` を使う。`return Level.new().parse(...)` や `return l.parse(...)` の形で面を返す補助の関数は書かない。
 - `Rules.conflicts` などが返す Vector2i の並びの期待値は、CR の項目に書いてある並びの順をそのまま写す（自分で並べ替えない）。
 - 色（Color）・四角（Rect2）・点（Vector2）を誤差を許して比べるときは `assert_true(実際.is_equal_approx(期待))` と書く。GUT に `assert_eq_approx` という関数はない。`assert_almost_eq` は float と int にだけ使う（Color には使えない）。
+- 盤に駒・× を置く・消すのは board.apply("place" / "mark" / "clear", x, y)。place・mark などの関数は board_state.gd に無い
