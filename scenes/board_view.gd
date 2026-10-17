@@ -322,6 +322,45 @@ func _draw_round_rect(rect: Rect2, radius: float, color: Color, filled: bool = t
 			var p2 := points[(i + 1) % points.size()]
 			draw_line(p1, p2, color, width)
 
+# --- CR-1048 New Functions ---
+
+func radar_font_size() -> float:
+	if session == null or session.level == null:
+		return 0.0
+	var g := geometry()
+	var cs: float = g["cell"]
+	if cs <= 0.0:
+		return 0.0
+	return cs / 3.0
+
+func radar_label_center(x: int, y: int) -> Vector2:
+	return cell_rect(x, y).get_center()
+
+func radar_text_color(x: int, y: int) -> Color:
+	if session == null or session.level == null:
+		return MARK_COLOR
+	
+	var limit := -1
+	for r in session.level.radar:
+		if r is Array and r.size() >= 3:
+			if int(r[0]) == x and int(r[1]) == y:
+				limit = int(r[2])
+				break
+		elif r is Vector3i:
+			if r.x == x and r.y == y:
+				limit = r.z
+				break
+				
+	if limit < 0:
+		return MARK_COLOR
+		
+	var count := Rules.radar_count(session.board.pieces(), x, y)
+	if count > limit:
+		return Color.RED
+	return MARK_COLOR
+
+# -----------------------------
+
 
 func _draw() -> void:
 	var gs := grid_size()
@@ -385,6 +424,38 @@ func _draw() -> void:
 	if hint_cell.x >= 0 and hint_cell.y >= 0:
 		var t_r := tile_rect(hint_cell.x, hint_cell.y)
 		_draw_round_rect(t_r, radius, Color(1.0, 0.9, 0.2), false, 12.0)
+
+	# 7. Draw Radar Labels (CR-1048)
+	if session != null and session.level != null:
+		var font_size := radar_font_size()
+		if font_size > 0.0:
+			for r in session.level.radar:
+				var rx := -1
+				var ry := -1
+				var rn := -1
+				
+				if r is Array and r.size() >= 3:
+					rx = int(r[0])
+					ry = int(r[1])
+					rn = int(r[2])
+				elif r is Vector3i:
+					rx = r.x
+					ry = r.y
+					rn = r.z
+				
+				if rx >= 0 and ry >= 0 and rn >= 0:
+					var center := radar_label_center(rx, ry)
+					var color := radar_text_color(rx, ry)
+					var text := str(rn)
+					# Calculate position to center the text
+					# draw_string expects baseline position. 
+					# To center vertically, we need to account for font ascent/descent.
+					# A simple approximation for centering: y = center.y + font_size * 0.35 (approx baseline offset)
+					# And x = center.x - text_width / 2
+					var font := ThemeDB.fallback_font
+					var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+					var draw_pos := Vector2(center.x - text_width * 0.5, center.y + font_size * 0.35)
+					draw_string(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 
 func _draw_mark(r: Rect2) -> void:
