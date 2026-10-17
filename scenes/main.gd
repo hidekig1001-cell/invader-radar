@@ -151,8 +151,14 @@ func on_apply() -> void:
 func _refresh() -> void:
 	if not is_node_ready():
 		return
-	var curr_snapshot = session.snapshot()
-	var curr_conflicts = Rules.conflicts(session.board, session.level).size()
+	var curr_snapshot
+	var curr_conflicts
+	if is_tutorial():
+		curr_snapshot = tutorial.session.snapshot()
+		curr_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
+	else:
+		curr_snapshot = session.snapshot()
+		curr_conflicts = Rules.conflicts(session.board, session.level).size()
 	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
 	if sfx_name != "":
 		sound.play_sfx(sfx_name)
@@ -173,6 +179,9 @@ func _refresh() -> void:
 func start_tutorial() -> void:
 	tutorial = Tutorial.new()
 	board_view.session = tutorial.session
+	last_snapshot = tutorial.session.snapshot()
+	last_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
+	tutorial.session.changed.connect(_refresh)
 	hud.set_tutorial_mode(true)
 	var step = tutorial.current_step()
 	if not step.is_empty():
@@ -185,8 +194,12 @@ func start_tutorial() -> void:
 
 
 func end_tutorial() -> void:
+	if tutorial != null:
+		tutorial.session.changed.disconnect(_refresh)
 	tutorial = null
 	board_view.session = session
+	last_snapshot = session.snapshot()
+	last_conflicts = Rules.conflicts(session.board, session.level).size()
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
 	bubble.show_text(help_text(), 4.0)
