@@ -14,8 +14,17 @@ static func with_asteroids(dicts: Array) -> Array:
 			result.append(d)
 	return result
 
+static func generated_levels() -> Array:
+	var LevelMaker = preload("res://game/level_maker.gd")
+	var levels: Array = []
+	for i in range(1, 4):
+		var d = LevelMaker.make_level(6, 6, i)
+		d["id"] = 10 + i
+		levels.append(d)
+	return levels
+
 static func level_dicts() -> Array:
-	return with_asteroids([
+	var base_levels = [
 		{
 			"id": 1,
 			"width": 4,
@@ -86,4 +95,7 @@ static func level_dicts() -> Array:
 			"target": 5,
 			"regions": [[1, 2, 2, 2, 1], [1, 1, 1, 1, 1], [3, 0, 0, 0, 1], [3, 3, 0, 0, 1], [3, 3, 4, 4, 1]]
 		}
-	])
+	]
+	var gen = generated_levels()
+	base_levels.append_array(gen)
+	return with_asteroids(base_levels)

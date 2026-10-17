@@ -3,30 +3,39 @@ extends RefCounted
 const MAX_ATTEMPTS := 2000
 
 static func make_level(width: int, height: int, seed: int) -> Dictionary:
-	var current_seed = seed
-	for attempt in range(MAX_ATTEMPTS):
-		var rng = RandomNumberGenerator.new()
-		rng.seed = current_seed
-		
-		var solution = pick_solution(rng, width)
-		if solution.is_empty():
-			current_seed += 1
-			continue
-			
-		var region_rows = grow_regions(rng, width, solution)
-		var level_dict = build_level_dict(width, solution, region_rows)
-		
-		if has_unique_solution(level_dict):
-			return level_dict
-			
-		current_seed += 1
-		
-	# Fallback: return the last generated one even if not unique (should not happen with enough attempts)
 	var rng = RandomNumberGenerator.new()
-	rng.seed = current_seed
+	rng.seed = seed
+	
+	for attempt in range(MAX_ATTEMPTS):
+		var level_dict = attempt_level(rng, width)
+		if not level_dict.is_empty():
+			if has_unique_solution(level_dict):
+				return level_dict
+	
+	# Fallback: return the last generated one even if not unique (should not happen with enough attempts)
+	# Note: rng state has advanced through MAX_ATTEMPTS calls. 
+	# We try one more time to get a valid structure, though uniqueness might fail.
+	var final_dict = attempt_level(rng, width)
+	if not final_dict.is_empty():
+		return final_dict
+		
+	# If everything fails (extremely unlikely), return an empty dict or handle error.
+	# Based on original code, it returned the last built one. 
+	# attempt_level returns {} if solution is empty. 
+	# If we reach here, all attempts had empty solutions or non-unique solutions.
+	# The original code fell back to building with the current seed.
+	# Here, since we don't change seed, we just return the last attempt_level result if it exists,
+	# otherwise an empty dict.
+	return {}
+
+static func attempt_level(rng: RandomNumberGenerator, width: int) -> Dictionary:
 	var solution = pick_solution(rng, width)
+	if solution.is_empty():
+		return {}
+		
 	var region_rows = grow_regions(rng, width, solution)
-	return build_level_dict(width, solution, region_rows)
+	var level_dict = build_level_dict(width, solution, region_rows)
+	return level_dict
 
 static func pick_solution(rng: RandomNumberGenerator, size: int) -> Array:
 	var cols := []
