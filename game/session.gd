@@ -183,3 +183,20 @@ func _commit(did_change: bool) -> bool:
 		hints = mini(hints + 1, DEFAULT_HINTS)
 	changed.emit()
 	return true
+
+
+func save_dict() -> Dictionary:
+	return {
+		"level_index": level_index,
+		"score": score,
+		"hints": hints
+	}
+
+
+func restore_dict(data: Dictionary) -> void:
+	var li = int(data.get("level_index", 0))
+	if li < 0 or li >= levels.size():
+		li = 0
+	score = int(data.get("score", 0))
+	hints = int(data.get("hints", DEFAULT_HINTS))
+	_start_level(li)
