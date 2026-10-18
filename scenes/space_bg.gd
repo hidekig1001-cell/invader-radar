@@ -60,23 +60,122 @@ func planet_list() -> Array:
 		}
 	]
 
+static func pink_draw_extent(radius: float) -> float:
+	return radius * 130.0 / 80.0
+
+static func pink_scale(radius: float) -> float:
+	return radius / 80.0
+
+static func pink_ring_size(radius: float) -> Vector2:
+	var e = pink_draw_extent(radius)
+	var h = 30.0 * radius / 80.0
+	return Vector2(e, h)
+
+func guard_planets() -> Array:
+	var guards = []
+	for p in planet_list():
+		var color = p["color"]
+		if color == Color(1.0, 0.90, 0.50): # Yellow
+			var pos = p["pos"]
+			var radius = p["radius"]
+			var max_y = 0.0
+			for r in avoid_rects:
+				if r.end.y > max_y:
+					max_y = r.end.y
+			
+			var band_top = max_y
+			var band_bottom = sky_size.y
+			
+			if band_bottom > band_top:
+				var min_y = band_top + radius
+				var max_y_pos = band_bottom - radius
+				
+				if min_y <= max_y_pos:
+					pos = Vector2(pos.x, (min_y + max_y_pos) / 2.0)
+				else:
+					var available_height = band_bottom - band_top
+					if available_height > 10:
+						radius = available_height / 2.0
+						pos = Vector2(pos.x, band_top + radius)
+					else:
+						continue # Invalid yellow, skip adding to guards? Or add with invalid state? 
+						# CR says "return same values as planet_positions". If planet_positions skips it, guard_planets should too?
+						# But planet_positions logic for yellow is complex. Let's assume valid for now based on tests.
+						continue
+			else:
+				continue
+				
+			guards.append({"pos": pos, "radius": radius})
+			
+		elif color == Color(0.60, 0.95, 0.80): # Green
+			guards.append({"pos": p["pos"], "radius": p["radius"]})
+			
+	return guards
+
+func pink_spot_ok(pos: Vector2, radius: float, rects: Array) -> bool:
+	var e = pink_draw_extent(radius)
+	var check_rect = Rect2(pos.x - e, pos.y - e, 2 * e, 2 * e)
+	var sky_rect = Rect2(Vector2.ZERO, sky_size)
+	
+	if not sky_rect.encloses(check_rect):
+		return false
+		
+	for r in rects:
+		if check_rect.intersects(r):
+			return false
+			
+	var guards = guard_planets()
+	for g in guards:
+		var dist = pos.distance_to(g["pos"])
+		if dist <= radius + g["radius"]:
+			return false
+			
+	return true
+
+func pink_placement(rects: Array) -> Dictionary:
+	var radii = []
+	for r in range(80, 4, -5):
+		radii.append(float(r))
+		
+	for radius in radii:
+		var e = pink_draw_extent(radius)
+		# y from 0 to sky_size.y step 5
+		# x from 0 to sky_size.x step 5
+		# We need to find the FIRST one.
+		# The loop order in CR: "radius ... y ... x"
+		
+		var max_y = int(sky_size.y)
+		var max_x = int(sky_size.x)
+		
+		for y in range(0, max_y + 1, 5):
+			for x in range(0, max_x + 1, 5):
+				var pos = Vector2(float(x), float(y))
+				if pink_spot_ok(pos, radius, rects):
+					return {"pos": pos, "radius": radius}
+					
+	return {}
+
 func planet_positions(rects: Array) -> Array:
-	var base_planets = planet_list()
 	var result = []
 	
-	for p in base_planets:
+	# Handle Yellow and Green using guard_planets logic to ensure consistency
+	var guards = guard_planets()
+	for g in guards:
+		# Determine color based on radius/pos from original list? 
+		# guard_planets returns pos/radius. We need to map back to color.
+		# Since guard_planets iterates planet_list, we can just re-iterate planet_list and filter.
+		pass
+		
+	# Re-implement planet_positions to match CR requirements exactly
+	# 1. Yellow/Green: Use logic from guard_planets (which mirrors original planet_positions for Y/G)
+	# 2. Pink: Use pink_placement
+	
+	for p in planet_list():
+		var color = p["color"]
 		var pos = p["pos"]
 		var radius = p["radius"]
-		var color = p["color"]
 		
-		var is_yellow = (color == Color(1.0, 0.90, 0.50))
-		var is_pink = (color == Color(1.0, 0.70, 0.80))
-		
-		var new_pos = pos
-		var new_radius = radius
-		var valid = true
-		
-		if is_yellow:
+		if color == Color(1.0, 0.90, 0.50): # Yellow
 			var max_y = 0.0
 			for r in rects:
 				if r.end.y > max_y:
@@ -90,90 +189,31 @@ func planet_positions(rects: Array) -> Array:
 				var max_y_pos = band_bottom - radius
 				
 				if min_y <= max_y_pos:
-					new_pos = Vector2(pos.x, (min_y + max_y_pos) / 2.0)
+					pos = Vector2(pos.x, (min_y + max_y_pos) / 2.0)
 				else:
 					var available_height = band_bottom - band_top
 					if available_height > 10:
-						new_radius = available_height / 2.0
-						new_pos = Vector2(pos.x, band_top + new_radius)
+						radius = available_height / 2.0
+						pos = Vector2(pos.x, band_top + radius)
 					else:
-						valid = false
+						continue # Skip if invalid
 			else:
-				valid = false
+				continue
 				
-		elif is_pink:
-			var draw_extent = 130.0
-			var check_rect = Rect2(new_pos.x - draw_extent, new_pos.y - draw_extent, draw_extent * 2, draw_extent * 2)
+			result.append({"pos": pos, "radius": radius, "color": color})
 			
-			var intersects = false
-			for r in rects:
-				if check_rect.intersects(r):
-					intersects = true
-					break
+		elif color == Color(0.60, 0.95, 0.80): # Green
+			result.append({"pos": pos, "radius": radius, "color": color})
 			
-			if intersects:
-				var found = false
-				# Try moving up first (to the top area above the board)
-				for dy in range(0, 1500, 20):
-					var test_pos = Vector2(pos.x, pos.y - dy)
-					var test_rect = Rect2(test_pos.x - draw_extent, test_pos.y - draw_extent, draw_extent * 2, draw_extent * 2)
-					var hit = false
-					for r in rects:
-						if test_rect.intersects(r):
-							hit = true
-							break
-					if not hit and test_pos.y - draw_extent >= 0:
-						new_pos = test_pos
-						found = true
-						break
+		elif color == Color(1.0, 0.70, 0.80): # Pink
+			var placement = pink_placement(rects)
+			if not placement.is_empty():
+				result.append({
+					"pos": placement["pos"],
+					"radius": placement["radius"],
+					"color": color
+				})
 				
-				if not found:
-					# Try moving down (to the bottom area below the rules label)
-					for dy in range(0, 1500, 20):
-						var test_pos = Vector2(pos.x, pos.y + dy)
-						var test_rect = Rect2(test_pos.x - draw_extent, test_pos.y - draw_extent, draw_extent * 2, draw_extent * 2)
-						var hit = false
-						for r in rects:
-							if test_rect.intersects(r):
-								hit = true
-								break
-						if not hit and test_pos.y + draw_extent <= sky_size.y:
-							new_pos = test_pos
-							found = true
-							break
-				
-				if not found:
-					# Try moving left/right if vertical fails? 
-					# Or just keep original if we can't find a spot, but test requires it to exist and be valid.
-					# If we absolutely cannot find a non-intersecting spot, we might have to shrink or skip.
-					# But the prompt says "place in non-intersecting position". 
-					# Let's try a more robust search: scan the whole sky for a valid spot for the pink planet.
-					var step = 50.0
-					for x in range(0, int(sky_size.x), int(step)):
-						for y in range(0, int(sky_size.y), int(step)):
-							var test_pos = Vector2(float(x), float(y))
-							var test_rect = Rect2(test_pos.x - draw_extent, test_pos.y - draw_extent, draw_extent * 2, draw_extent * 2)
-							var hit = false
-							for r in rects:
-								if test_rect.intersects(r):
-									hit = true
-									break
-							if not hit:
-								new_pos = test_pos
-								found = true
-								break
-						if found: break
-				
-				if not found:
-					valid = false
-
-		if valid:
-			result.append({
-				"pos": new_pos,
-				"radius": new_radius,
-				"color": color
-			})
-			
 	return result
 
 func _draw() -> void:
@@ -227,9 +267,13 @@ func _draw() -> void:
 		draw_circle(pos, radius, color)
 		
 		if color == Color(1.0, 0.70, 0.80):
+			var scale = pink_scale(radius)
+			var ring_size = pink_ring_size(radius)
+			
 			var ring_color = Color(1.0, 0.92, 0.96, 0.8)
-			var ring_width = 130.0
-			var ring_height = 30.0
+			var ring_width = ring_size.x
+			var ring_height = ring_size.y
+			
 			var ring_points = []
 			for i in range(32):
 				var angle = (float(i) / 32.0) * TAU
@@ -237,20 +281,23 @@ func _draw() -> void:
 				var y = pos.y + sin(angle) * ring_height
 				ring_points.append(Vector2(x, y))
 			for i in range(32):
-				draw_line(ring_points[i], ring_points[(i + 1) % 32], ring_color, 8.0)
+				draw_line(ring_points[i], ring_points[(i + 1) % 32], ring_color, 8.0 * scale)
 			
 			var eye_color = Color(0.25, 0.15, 0.30)
 			var cheek_color = Color(1.0, 0.50, 0.65, 0.8)
 			
-			draw_circle(pos + Vector2(-26, -10), 8.0, eye_color)
-			draw_circle(pos + Vector2(26, -10), 8.0, eye_color)
+			# Eyes
+			draw_circle(pos + Vector2(-26 * scale, -10 * scale), 8.0 * scale, eye_color)
+			draw_circle(pos + Vector2(26 * scale, -10 * scale), 8.0 * scale, eye_color)
 			
-			draw_circle(pos + Vector2(-44, 14), 10.0, cheek_color)
-			draw_circle(pos + Vector2(44, 14), 10.0, cheek_color)
+			# Cheeks
+			draw_circle(pos + Vector2(-44 * scale, 14 * scale), 10.0 * scale, cheek_color)
+			draw_circle(pos + Vector2(44 * scale, 14 * scale), 10.0 * scale, cheek_color)
 			
-			var mouth_center = pos + Vector2(0, 12)
-			var mouth_radius = 14.0
-			draw_arc(mouth_center, mouth_radius, 0.0, PI, 16, eye_color, 5.0)
+			# Mouth
+			var mouth_center = pos + Vector2(0, 12 * scale)
+			var mouth_radius = 14.0 * scale
+			draw_arc(mouth_center, mouth_radius, 0.0, PI, 16, eye_color, 5.0 * scale)
 			
 		elif color == Color(1.0, 0.90, 0.50):
 			var pattern_color = Color(0.95, 0.80, 0.40)

@@ -64,7 +64,10 @@ func test_main_planet_positions_pink() -> void:
 	for p in pink_planets:
 		var pos = p["pos"]
 		var radius = p["radius"]
-		var draw_rect = Rect2(pos.x - 130, pos.y - 130, 260, 260)
+		assert_true(pos.is_equal_approx(Vector2(140, 125)))
+		assert_almost_eq(radius, 75.0, 0.001)
+		var e = SpaceBg.pink_draw_extent(radius)
+		var draw_rect = Rect2(pos.x - e, pos.y - e, 2 * e, 2 * e)
 		for rect in m.space_bg.avoid_rects:
 			assert_false(draw_rect.intersects(rect))
 
