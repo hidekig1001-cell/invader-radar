@@ -13,6 +13,7 @@ const SpaceBg = preload("res://scenes/space_bg.gd")
 const Rules = preload("res://core/rules.gd")
 const Sound = preload("res://scenes/sound.gd")
 const TutorialSteps = preload("res://game/tutorial_steps.gd")
+const SessionSave = preload("res://game/session_save.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -28,6 +29,7 @@ var language: String = "en"
 var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
+var save_path := ""
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -48,6 +50,12 @@ func _ready() -> void:
 
 	if session == null:
 		session = Session.new()
+	
+	if save_path != "":
+		var data = SessionSave.read_json(save_path)
+		if not data.is_empty():
+			session.restore_dict(data)
+
 	board_view.session = session
 	session.changed.connect(_refresh)
 	hud.undo_pressed.connect(func() -> void:
@@ -91,6 +99,11 @@ func _ready() -> void:
 
 	if start_with_tutorial:
 		start_tutorial()
+
+
+func save_progress() -> void:
+	if save_path != "":
+		SessionSave.write_json(save_path, session.save_dict())
 
 
 func apply_screen_layout(size: Vector2) -> void:
@@ -159,6 +172,7 @@ func _on_touch_down(pos: Vector2) -> void:
 	_stroke = []
 	if not is_tutorial() and session.status == "cleared":
 		session.next_level()
+		save_progress()
 		return
 	
 	var local_pos = to_board_pos(pos)

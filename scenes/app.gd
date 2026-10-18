@@ -4,10 +4,12 @@ const MainScene = preload("res://scenes/main.tscn")
 const TitleScreen = preload("res://scenes/title_screen.gd")
 const SplashScreen = preload("res://scenes/splash_screen.gd")
 const SEEN_PATH := "user://tutorial_seen"
+const SAVE_PATH := "user://progress.json"
 
 var main = null
 var title_screen = null
 var splash = null
+var save_path := SAVE_PATH
 
 
 func _ready() -> void:
@@ -46,6 +48,7 @@ func start_game(with_tutorial: bool) -> void:
 	main = MainScene.instantiate()
 	main.start_with_tutorial = with_tutorial
 	main.language = lang
+	main.save_path = save_path
 	main.title_requested.connect(show_title)
 	add_child(main)
 
