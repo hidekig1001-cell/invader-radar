@@ -27,7 +27,7 @@ func test_restart_button_text_ja() -> void:
 func test_restart_button_rect() -> void:
 	var m = await _start()
 	var r := Rect2(m.hud.restart_button.position, m.hud.restart_button.size)
-	assert_true(r.is_equal_approx(Rect2(340, 250, 300, 80)))
+	assert_true(r.is_equal_approx(Rect2(380, 260, 320, 100)))
 
 
 ## CHECK: 4

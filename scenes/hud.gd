@@ -13,6 +13,9 @@ const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
 const ButtonStyle = preload("res://scenes/button_style.gd")
 
+const ROW_BUTTON_RECTS := [Rect2(40, 260, 320, 100), Rect2(380, 260, 320, 100), Rect2(720, 260, 320, 100)]
+const ROW_BUTTON_SIZE := Vector2(320, 100)
+
 var level_label: Label
 var score_label: Label
 var hint_label: Label
@@ -35,9 +38,9 @@ func _ready() -> void:
 	score_label = _make_label(Rect2(380, 90, 320, 80), HORIZONTAL_ALIGNMENT_CENTER)
 	hint_label = _make_label(Rect2(720, 90, 320, 80), HORIZONTAL_ALIGNMENT_RIGHT)
 	moves_label = _make_label(Rect2(40, 170, 1000, 80), HORIZONTAL_ALIGNMENT_CENTER)
-	undo_button = _make_button("UNDO", Rect2(40, 200, 300, 110), undo_pressed)
-	settings_button = _make_button("HOW TO PLAY", Rect2(640, 200, 400, 110), settings_pressed)
-	restart_button = _make_button("RESTART", Rect2(340, 250, 300, 80), restart_pressed)
+	undo_button = _make_button("UNDO", ROW_BUTTON_RECTS[0], undo_pressed)
+	settings_button = _make_button("HOW TO PLAY", ROW_BUTTON_RECTS[2], settings_pressed)
+	restart_button = _make_button("RESTART", ROW_BUTTON_RECTS[1], restart_pressed)
 	hint_button = _make_button("HINT", Rect2(250, 1560, 380, 150), hint_pressed)
 	apply_button = _make_button("APPLY", Rect2(640, 1560, 160, 150), apply_pressed)
 	apply_button.add_theme_font_size_override("font_size", 40)
@@ -51,6 +54,8 @@ func _ready() -> void:
 	ButtonStyle.apply_to(restart_button)
 	ButtonStyle.apply_to(title_button)
 
+	finish_row_buttons([undo_button, restart_button, settings_button], 320)
+
 
 func set_language(lang: String) -> void:
 	language = lang
@@ -58,6 +63,7 @@ func set_language(lang: String) -> void:
 	settings_button.text = localized("HOW TO PLAY", "遊び方")
 	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
+	finish_row_buttons([undo_button, restart_button, settings_button], 320)
 
 
 func localized(en_text: String, ja_text: String) -> String:
@@ -117,3 +123,25 @@ func make_title_button() -> Button:
 	b.pressed.connect(func() -> void: title_requested.emit())
 	add_child(b)
 	return b
+
+
+func fit_row_font_size(buttons: Array, max_width: int) -> int:
+	var best_n := 1
+	for n in range(52, 0, -1):
+		var fits := true
+		for b in buttons:
+			b.add_theme_font_size_override("font_size", n)
+			if b.get_combined_minimum_size().x > max_width:
+				fits = false
+				break
+		if fits:
+			best_n = n
+			break
+	return best_n
+
+
+func finish_row_buttons(buttons: Array, max_width: int) -> void:
+	var n := fit_row_font_size(buttons, max_width)
+	for b in buttons:
+		b.add_theme_font_size_override("font_size", n)
+		b.size = ROW_BUTTON_SIZE
