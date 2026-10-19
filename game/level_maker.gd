@@ -2,12 +2,12 @@ extends RefCounted
 
 const MAX_ATTEMPTS := 2000
 
-static func make_level(width: int, height: int, seed: int) -> Dictionary:
+static func make_level(width: int, height: int, seed: int, radar: int = -1, asteroids: int = -1) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = seed
 	
 	for attempt in range(MAX_ATTEMPTS):
-		var level_dict = attempt_level(rng, width)
+		var level_dict = attempt_level(rng, width, radar, asteroids)
 		if not level_dict.is_empty():
 			if has_unique_solution(level_dict):
 				return level_dict
@@ -15,7 +15,7 @@ static func make_level(width: int, height: int, seed: int) -> Dictionary:
 	# Fallback: return the last generated one even if not unique (should not happen with enough attempts)
 	# Note: rng state has advanced through MAX_ATTEMPTS calls. 
 	# We try one more time to get a valid structure, though uniqueness might fail.
-	var final_dict = attempt_level(rng, width)
+	var final_dict = attempt_level(rng, width, radar, asteroids)
 	if not final_dict.is_empty():
 		return final_dict
 		
@@ -28,16 +28,18 @@ static func make_level(width: int, height: int, seed: int) -> Dictionary:
 	# otherwise an empty dict.
 	return {}
 
-static func attempt_level(rng: RandomNumberGenerator, width: int) -> Dictionary:
+static func attempt_level(rng: RandomNumberGenerator, width: int, radar: int = -1, asteroids: int = -1) -> Dictionary:
 	var solution = pick_solution(rng, width)
 	if solution.is_empty():
 		return {}
 		
 	var region_rows = grow_regions(rng, width, solution)
 	var level_dict = build_level_dict(width, solution, region_rows)
-	level_dict["radar"] = pick_radar(rng, solution)
+	level_dict["radar"] = pick_radar(rng, solution, radar)
 	
-	if width >= 7:
+	if asteroids >= 1:
+		level_dict["asteroids"] = pick_asteroids(rng, solution, level_dict["radar"], asteroids)
+	elif asteroids == -1 and width >= 7:
 		level_dict["asteroids"] = pick_asteroids(rng, solution, level_dict["radar"])
 		
 	return level_dict
@@ -126,7 +128,7 @@ static func has_unique_solution(level_dict: Dictionary) -> bool:
 		
 	return Solver.count_solutions(level, 2) == 1
 
-static func pick_radar(rng: RandomNumberGenerator, solution: Array) -> Array:
+static func pick_radar(rng: RandomNumberGenerator, solution: Array, count: int = -1) -> Array:
 	var Rules = preload("res://core/rules.gd")
 	var size = solution.size()
 	var pieces = []
@@ -149,17 +151,20 @@ static func pick_radar(rng: RandomNumberGenerator, solution: Array) -> Array:
 		empty_cells[i] = empty_cells[j]
 		empty_cells[j] = temp
 		
-	var count: int
-	if size >= 8:
-		count = rng.randi_range(3, 5)
+	var actual_count: int
+	if count >= 0:
+		actual_count = count
 	else:
-		count = rng.randi_range(1, 2)
+		if size >= 8:
+			actual_count = rng.randi_range(3, 5)
+		else:
+			actual_count = rng.randi_range(1, 2)
 		
-	if count > empty_cells.size():
-		count = empty_cells.size()
+	if actual_count > empty_cells.size():
+		actual_count = empty_cells.size()
 		
 	var result = []
-	for i in range(count):
+	for i in range(actual_count):
 		var cell = empty_cells[i]
 		var x = cell[0]
 		var y = cell[1]
@@ -168,7 +173,7 @@ static func pick_radar(rng: RandomNumberGenerator, solution: Array) -> Array:
 		
 	return result
 
-static func pick_asteroids(rng: RandomNumberGenerator, solution: Array, radar: Array) -> Array:
+static func pick_asteroids(rng: RandomNumberGenerator, solution: Array, radar: Array, count: int = -1) -> Array:
 	var size = solution.size()
 	var empty_cells = []
 	
@@ -199,12 +204,17 @@ static func pick_asteroids(rng: RandomNumberGenerator, solution: Array, radar: A
 		empty_cells[i] = empty_cells[j]
 		empty_cells[j] = temp
 		
-	var count = rng.randi_range(1, 2)
-	if count > empty_cells.size():
-		count = empty_cells.size()
+	var actual_count: int
+	if count >= 0:
+		actual_count = count
+	else:
+		actual_count = rng.randi_range(1, 2)
+		
+	if actual_count > empty_cells.size():
+		actual_count = empty_cells.size()
 		
 	var result = []
-	for i in range(count):
+	for i in range(actual_count):
 		result.append(empty_cells[i])
 		
 	return result
