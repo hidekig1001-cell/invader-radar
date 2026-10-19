@@ -144,7 +144,12 @@ static func pick_radar(rng: RandomNumberGenerator, solution: Array) -> Array:
 		empty_cells[i] = empty_cells[j]
 		empty_cells[j] = temp
 		
-	var count = rng.randi_range(1, 2)
+	var count: int
+	if size >= 8:
+		count = rng.randi_range(3, 5)
+	else:
+		count = rng.randi_range(1, 2)
+		
 	if count > empty_cells.size():
 		count = empty_cells.size()
 		
