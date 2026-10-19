@@ -1,6 +1,7 @@
 extends RefCounted
 
 const ASTEROID_CELLS := {6: [[2, 2], [4, 0]], 8: [[0, 0], [2, 4]], 9: [[0, 0], [3, 3]]}
+const GENERATED_SPECS := [[11, 6, 1], [12, 6, 2], [13, 6, 3], [14, 6, 4], [15, 6, 5]]
 
 static func with_asteroids(dicts: Array) -> Array:
 	var result: Array = []
@@ -14,16 +15,7 @@ static func with_asteroids(dicts: Array) -> Array:
 			result.append(d)
 	return result
 
-static func generated_levels() -> Array:
-	var LevelMaker = preload("res://game/level_maker.gd")
-	var levels: Array = []
-	for i in range(1, 6):
-		var d = LevelMaker.make_level(6, 6, i)
-		d["id"] = 10 + i
-		levels.append(d)
-	return levels
-
-static func level_dicts() -> Array:
+static func fixed_level_dicts() -> Array:
 	var base_levels = [
 		{
 			"id": 1,
@@ -96,6 +88,22 @@ static func level_dicts() -> Array:
 			"regions": [[1, 2, 2, 2, 1], [1, 1, 1, 1, 1], [3, 0, 0, 0, 1], [3, 3, 0, 0, 1], [3, 3, 4, 4, 1]]
 		}
 	]
-	var gen = generated_levels()
-	base_levels.append_array(gen)
 	return with_asteroids(base_levels)
+
+static func generated_levels() -> Array:
+	var LevelMaker = preload("res://game/level_maker.gd")
+	var levels: Array = []
+	for spec in GENERATED_SPECS:
+		var id = spec[0]
+		var w = spec[1]
+		var seed = spec[2]
+		var d = LevelMaker.make_level(w, w, seed)
+		d["id"] = id
+		levels.append(d)
+	return levels
+
+static func level_dicts() -> Array:
+	var fixed = fixed_level_dicts()
+	var gen = generated_levels()
+	fixed.append_array(gen)
+	return fixed

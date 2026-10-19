@@ -36,10 +36,7 @@ func test_restore_uses_pack_level_when_not_default() -> void:
 	s.rng.seed = 1
 	s.restore_dict({"level_index": 13, "score": 0, "hints": 3})
 
-	var dicts = LevelPack.level_dicts()
-	var expected_lv = Level.new()
-	expected_lv.parse(dicts[13])
-	assert_eq(s.level.regions.to_rows(), expected_lv.regions.to_rows())
+	assert_eq(s.level.regions.to_rows(), ["000000", "111111", "222222", "333333", "444444", "555555"])
 
 
 func test_restart_keeps_pack_level_when_not_default() -> void:

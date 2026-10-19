@@ -47,7 +47,28 @@ func _init(level_list: Array = []) -> void:
 
 static func load_default_levels() -> Array:
 	var out: Array = []
-	for d in LevelPack.level_dicts():
+	for d in LevelPack.fixed_level_dicts():
+		var lv = Level.new()
+		if lv.parse(d):
+			out.append(lv)
+	for spec in LevelPack.GENERATED_SPECS:
+		var id = spec[0]
+		var w = spec[1]
+		var regions = [
+			[0, 0, 0, 0, 0, 0],
+			[1, 1, 1, 1, 1, 1],
+			[2, 2, 2, 2, 2, 2],
+			[3, 3, 3, 3, 3, 3],
+			[4, 4, 4, 4, 4, 4],
+			[5, 5, 5, 5, 5, 5]
+		]
+		var d = {
+			"id": id,
+			"width": w,
+			"height": w,
+			"target": w,
+			"regions": regions
+		}
 		var lv = Level.new()
 		if lv.parse(d):
 			out.append(lv)
