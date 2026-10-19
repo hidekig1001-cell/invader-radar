@@ -29,13 +29,19 @@ var hints: int = DEFAULT_HINTS
 var status: String = "playing"  # "playing" | "cleared"
 var current_hint: Dictionary = {}
 var rng: RandomNumberGenerator
+var uses_default_levels: bool = false
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
 func _init(level_list: Array = []) -> void:
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
-	levels = level_list if not level_list.is_empty() else load_default_levels()
+	if level_list.is_empty():
+		uses_default_levels = true
+		levels = load_default_levels()
+	else:
+		uses_default_levels = false
+		levels = level_list
 	_start_level(0)
 
 
@@ -119,7 +125,7 @@ func next_level() -> bool:
 
 
 func restart_level() -> void:
-	_start_level(level_index)
+	_start_level(level_index, false)
 
 
 func snapshot() -> Dictionary:
@@ -167,13 +173,13 @@ func is_asteroid(x: int, y: int) -> bool:
 	return false
 
 
-func _start_level(index: int) -> void:
+func _start_level(index: int, regenerate: bool = true) -> void:
 	level_index = index
 	if levels.is_empty():
 		level = null
 	else:
 		var original_level = levels[index]
-		if index >= 10 and original_level != null:
+		if uses_default_levels and index >= 10 and regenerate and original_level != null:
 			var dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi())
 			dict["id"] = original_level.id
 			var new_level = Level.new()
