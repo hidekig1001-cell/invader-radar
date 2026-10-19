@@ -1,6 +1,7 @@
 extends RefCounted
 
-const ASTEROID_CELLS := {6: [[2, 2], [4, 0]], 8: [[0, 0], [2, 4]], 9: [[0, 0], [3, 3]]}
+const ASTEROID_CELLS := {6: [[2, 2], [4, 0]], 7: [[4, 0], [1, 3]], 8: [[0, 0], [2, 4]], 9: [[0, 0], [3, 3]], 10: [[0, 0], [2, 4]]}
+const RADAR_CELLS := {6: [[1, 0, 2], [3, 3, 2], [0, 4, 1]], 7: [[0, 4, 0], [2, 1, 2], [3, 2, 2]], 8: [[1, 1, 2], [3, 2, 2], [4, 4, 1]], 9: [[0, 4, 0], [2, 1, 2], [2, 2, 2]], 10: [[1, 1, 2], [3, 3, 2], [4, 0, 1]]}
 const GENERATED_SPECS := [
 	[11, 6, 1], [12, 6, 2], [13, 6, 3], [14, 6, 4], [15, 6, 5],
 	[16, 7, 1], [17, 7, 2], [18, 7, 3], [19, 7, 4], [20, 7, 5],
@@ -15,9 +16,12 @@ static func with_asteroids(dicts: Array) -> Array:
 	var result: Array = []
 	for d in dicts:
 		var id = d.get("id", -1)
-		if ASTEROID_CELLS.has(id):
+		if ASTEROID_CELLS.has(id) or RADAR_CELLS.has(id):
 			var new_d = d.duplicate(true)
-			new_d["asteroids"] = ASTEROID_CELLS[id]
+			if ASTEROID_CELLS.has(id):
+				new_d["asteroids"] = ASTEROID_CELLS[id]
+			if RADAR_CELLS.has(id):
+				new_d["radar"] = RADAR_CELLS[id]
 			result.append(new_d)
 		else:
 			result.append(d)
