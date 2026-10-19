@@ -1,6 +1,7 @@
 extends Control
 
 signal start_requested(with_tutorial: bool)
+signal fresh_start_requested
 
 const Sound = preload("res://scenes/sound.gd")
 const ButtonStyle = preload("res://scenes/button_style.gd")
@@ -12,6 +13,7 @@ var _lang_btn_en: Button
 var _lang_btn_ja: Button
 var _start_btn_tutorial: Button
 var _start_btn_now: Button
+var _start_btn_fresh: Button
 var background: TextureRect
 var sound = null
 var base_positions: Dictionary = {}
@@ -88,11 +90,24 @@ func _ready() -> void:
 	add_child(_start_btn_now)
 	ButtonStyle.apply_to(_start_btn_now)
 
+	_start_btn_fresh = Button.new()
+	_start_btn_fresh.position = Vector2(150, 1600)
+	_start_btn_fresh.size = Vector2(780, 160)
+	_start_btn_fresh.add_theme_font_size_override("font_size", 60)
+	_start_btn_fresh.visible = false
+	_start_btn_fresh.pressed.connect(func(): 
+		sound.play_sfx("button")
+		press_fresh_start()
+	)
+	add_child(_start_btn_fresh)
+	ButtonStyle.apply_to(_start_btn_fresh)
+
 	base_positions["title"] = _title_label.position
 	base_positions["lang_en"] = _lang_btn_en.position
 	base_positions["lang_ja"] = _lang_btn_ja.position
 	base_positions["start_tut"] = _start_btn_tutorial.position
 	base_positions["start_now"] = _start_btn_now.position
+	base_positions["start_fresh"] = _start_btn_fresh.position
 
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
@@ -114,6 +129,8 @@ func apply_screen_layout(size: Vector2) -> void:
 		_start_btn_tutorial.position = base_positions["start_tut"] + offset
 	if base_positions.has("start_now"):
 		_start_btn_now.position = base_positions["start_now"] + offset
+	if base_positions.has("start_fresh"):
+		_start_btn_fresh.position = base_positions["start_fresh"] + offset
 
 func title_text() -> String:
 	return _title_label.text
@@ -126,11 +143,14 @@ func select_language(lang: String) -> void:
 	if lang == "en":
 		_start_btn_tutorial.text = "START WITH TUTORIAL"
 		_start_btn_now.text = "START NOW"
+		_start_btn_fresh.text = "START OVER"
 	elif lang == "ja":
 		_start_btn_tutorial.text = "チュートリアルから始める"
 		_start_btn_now.text = "すぐに始める"
+		_start_btn_fresh.text = "はじめから"
 	_start_btn_tutorial.visible = true
 	_start_btn_now.visible = true
+	_start_btn_fresh.visible = true
 
 func language() -> String:
 	return _language
@@ -144,3 +164,7 @@ func start_labels() -> Array:
 func press_start(with_tutorial: bool) -> void:
 	sound.stop_music()
 	start_requested.emit(with_tutorial)
+
+func press_fresh_start() -> void:
+	sound.stop_music()
+	fresh_start_requested.emit()

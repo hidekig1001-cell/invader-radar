@@ -3,6 +3,7 @@ extends Node
 const MainScene = preload("res://scenes/main.tscn")
 const TitleScreen = preload("res://scenes/title_screen.gd")
 const SplashScreen = preload("res://scenes/splash_screen.gd")
+const SessionSave = preload("res://game/session_save.gd")
 const SEEN_PATH := "user://tutorial_seen"
 const SAVE_PATH := "user://progress.json"
 
@@ -34,6 +35,7 @@ func on_splash_finished() -> void:
 	splash = null
 	title_screen = TitleScreen.new()
 	title_screen.start_requested.connect(start_game)
+	title_screen.fresh_start_requested.connect(start_fresh_game)
 	add_child(title_screen)
 
 
@@ -53,10 +55,16 @@ func start_game(with_tutorial: bool) -> void:
 	add_child(main)
 
 
+func start_fresh_game() -> void:
+	SessionSave.write_text(save_path, "")
+	start_game(false)
+
+
 func show_title() -> void:
 	if main != null:
 		main.queue_free()
 		main = null
 	title_screen = TitleScreen.new()
 	title_screen.start_requested.connect(start_game)
+	title_screen.fresh_start_requested.connect(start_fresh_game)
 	add_child(title_screen)
