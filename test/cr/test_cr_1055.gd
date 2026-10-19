@@ -25,7 +25,7 @@ func test_fresh_start_button_ja() -> void:
 	assert_false(t._start_btn_fresh.visible)
 	t.select_language("ja")
 	assert_true(t._start_btn_fresh.visible)
-	assert_eq(t._start_btn_fresh.text, "はじめから")
+	assert_eq(t._start_btn_fresh.text, "1面からやり直す")
 	assert_eq(t._start_btn_fresh.position, Vector2(150, 1600))
 	assert_eq(t._start_btn_fresh.size, Vector2(780, 160))
 

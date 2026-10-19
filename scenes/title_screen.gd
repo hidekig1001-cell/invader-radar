@@ -147,7 +147,7 @@ func select_language(lang: String) -> void:
 	elif lang == "ja":
 		_start_btn_tutorial.text = "チュートリアルから始める"
 		_start_btn_now.text = "すぐに始める"
-		_start_btn_fresh.text = "はじめから"
+		_start_btn_fresh.text = "1面からやり直す"
 	_start_btn_tutorial.visible = true
 	_start_btn_now.visible = true
 	_start_btn_fresh.visible = true
