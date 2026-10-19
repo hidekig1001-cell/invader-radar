@@ -52,11 +52,11 @@ func test_cr_1041_only_ids_6_8_9_have_asteroids() -> void:
 	for d in dicts:
 		if d.has("asteroids"):
 			asteroid_ids.append(d["id"])
-	assert_eq(asteroid_ids, [6, 8, 9, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], "Only ids 6, 8, 9, 16-25 should have asteroids")
+	assert_eq(asteroid_ids, [6, 8, 9, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], "Only ids 6, 8, 9, 16-25 should have asteroids")
 	
 	for d in dicts:
 		var id = d.get("id", -1)
-		if id == 6 or id == 8 or id == 9 or (id >= 16 and id <= 25):
+		if id == 6 or id == 8 or id == 9 or (id >= 16 and id <= 35):
 			assert_true(d.has("asteroids"), "id %d should have asteroids" % id)
 		else:
 			assert_false(d.has("asteroids"), "id %d should NOT have asteroids" % id)

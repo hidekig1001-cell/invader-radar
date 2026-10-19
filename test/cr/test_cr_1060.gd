@@ -11,7 +11,9 @@ func test_generated_specs() -> void:
 	var expected = [
 		[11, 6, 1], [12, 6, 2], [13, 6, 3], [14, 6, 4], [15, 6, 5],
 		[16, 7, 1], [17, 7, 2], [18, 7, 3], [19, 7, 4], [20, 7, 5],
-		[21, 7, 6], [22, 7, 7], [23, 7, 8], [24, 7, 9], [25, 7, 10]
+		[21, 7, 6], [22, 7, 7], [23, 7, 8], [24, 7, 9], [25, 7, 10],
+		[26, 8, 1], [27, 8, 2], [28, 8, 3], [29, 8, 4], [30, 8, 5],
+		[31, 8, 6], [32, 8, 7], [33, 8, 8], [34, 8, 9], [35, 8, 10]
 	]
 	assert_eq(LevelPack.GENERATED_SPECS, expected)
 
@@ -33,7 +35,7 @@ func test_placeholder_regions() -> void:
 ## CHECK: 3
 func test_load_default_levels_placeholder() -> void:
 	var levels = Session.load_default_levels()
-	assert_eq(levels.size(), 25)
+	assert_eq(levels.size(), 35)
 	for i in range(15, 25):
 		var lv = levels[i]
 		assert_eq(lv.id, i + 1)
@@ -44,18 +46,37 @@ func test_load_default_levels_placeholder() -> void:
 			"0000000", "1111111", "2222222", "3333333", "4444444", "5555555", "6666666"
 		]
 		assert_eq(lv.regions.to_rows(), expected_rows)
+	for i in range(25, 35):
+		var lv = levels[i]
+		assert_eq(lv.id, i + 1)
+		assert_eq(lv.width, 8)
+		assert_eq(lv.height, 8)
+		assert_eq(lv.target, 8)
+		var expected_rows = [
+			"00000000", "11111111", "22222222", "33333333", "44444444", "55555555", "66666666", "77777777"
+		]
+		assert_eq(lv.regions.to_rows(), expected_rows)
 
 
 ## CHECK: 4
 func test_level_dicts_placeholder() -> void:
 	var dicts = LevelPack.level_dicts()
-	assert_eq(dicts.size(), 25)
+	assert_eq(dicts.size(), 35)
 	for i in range(15, 25):
 		var d = dicts[i]
 		assert_eq(d["id"], i + 1)
 		assert_eq(d["width"], 7)
 		assert_eq(d["height"], 7)
 		assert_eq(d["target"], 7)
+		var lv = Level.new()
+		assert_true(lv.parse(d))
+		assert_eq(Solver.count_solutions(lv, 2), 1)
+	for i in range(25, 35):
+		var d = dicts[i]
+		assert_eq(d["id"], i + 1)
+		assert_eq(d["width"], 8)
+		assert_eq(d["height"], 8)
+		assert_eq(d["target"], 8)
 		var lv = Level.new()
 		assert_true(lv.parse(d))
 		assert_eq(Solver.count_solutions(lv, 2), 1)
