@@ -9,6 +9,8 @@ const GENERATED_SPECS := [
 	[31, 8, 6], [32, 8, 7], [33, 8, 8], [34, 8, 9], [35, 8, 10]
 ]
 
+static var generated_cache: Array = []
+
 static func with_asteroids(dicts: Array) -> Array:
 	var result: Array = []
 	for d in dicts:
@@ -97,16 +99,16 @@ static func fixed_level_dicts() -> Array:
 	return with_asteroids(base_levels)
 
 static func generated_levels() -> Array:
-	var LevelMaker = preload("res://game/level_maker.gd")
-	var levels: Array = []
-	for spec in GENERATED_SPECS:
-		var id = spec[0]
-		var w = spec[1]
-		var seed = spec[2]
-		var d = LevelMaker.make_level(w, w, seed)
-		d["id"] = id
-		levels.append(d)
-	return levels
+	if generated_cache.is_empty():
+		var LevelMaker = preload("res://game/level_maker.gd")
+		for spec in GENERATED_SPECS:
+			var id = spec[0]
+			var w = spec[1]
+			var seed = spec[2]
+			var d = LevelMaker.make_level(w, w, seed)
+			d["id"] = id
+			generated_cache.append(d)
+	return generated_cache.duplicate(true)
 
 static func level_dicts() -> Array:
 	var fixed = fixed_level_dicts()
