@@ -96,9 +96,14 @@ static func grow_regions(rng: RandomNumberGenerator, size: int, solution: Array)
 					valid_neighbors.append(n)
 					
 		if not valid_neighbors.is_empty():
-			var chosen = valid_neighbors[rng.randi_range(0, valid_neighbors.size() - 1)]
+			var chosen_index = rng.randi_range(0, valid_neighbors.size() - 1)
+			var chosen = valid_neighbors[chosen_index]
 			grid[chosen.y][chosen.x] = grid[cell.y][cell.x]
 			queue.append(chosen)
+			
+			# If there are still unvisited neighbors left for this cell, re-queue it to process them later
+			if valid_neighbors.size() > 1:
+				queue.append(cell)
 			
 	return grid
 
