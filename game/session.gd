@@ -31,6 +31,7 @@ var status: String = "playing"  # "playing" | "cleared"
 var current_hint: Dictionary = {}
 var rng: RandomNumberGenerator
 var uses_default_levels: bool = false
+var given: Vector2i = Vector2i(-1, -1)
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
@@ -83,7 +84,7 @@ static func load_default_levels() -> Array:
 func tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
 		return false
-	if is_asteroid(x, y):
+	if is_asteroid(x, y) or is_given(x, y):
 		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY:
@@ -97,7 +98,7 @@ func tap(x: int, y: int) -> bool:
 func double_tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
 		return false
-	if is_asteroid(x, y):
+	if is_asteroid(x, y) or is_given(x, y):
 		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY, BoardState.MARK:
@@ -113,7 +114,7 @@ func swipe(cells: Array) -> bool:
 		return false
 	var filtered_cells: Array = []
 	for c in cells:
-		if not is_asteroid(c.x, c.y):
+		if not is_asteroid(c.x, c.y) and not is_given(c.x, c.y):
 			filtered_cells.append(c)
 	if filtered_cells.is_empty():
 		return false
@@ -198,6 +199,10 @@ func is_asteroid(x: int, y: int) -> bool:
 	return false
 
 
+func is_given(x: int, y: int) -> bool:
+	return given == Vector2i(x, y)
+
+
 func _start_level(index: int, regenerate: bool = true) -> void:
 	level_index = index
 	if levels.is_empty():
@@ -221,6 +226,18 @@ func _start_level(index: int, regenerate: bool = true) -> void:
 	moves = 0
 	status = "playing"
 	current_hint = {}
+	given = Vector2i(-1, -1)
+	
+	if level != null and level.width >= 6:
+		var solutions = Solver.solutions(level, 1)
+		if not solutions.is_empty():
+			var solution: Array = solutions[0]
+			var mid_y = level.height / 2
+			if mid_y < solution.size():
+				given = solution[mid_y]
+				board.apply("place", given.x, given.y)
+				board.clear_history()
+	
 	changed.emit()
 
 

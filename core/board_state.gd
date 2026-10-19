@@ -52,6 +52,10 @@ func history_size() -> int:
 	return _history.size()
 
 
+func clear_history() -> void:
+	_history.clear()
+
+
 func pieces() -> Array:
 	return _cells_with(PIECE)
 
