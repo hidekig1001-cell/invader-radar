@@ -10,6 +10,7 @@ const Level = preload("res://game/level.gd")
 const LevelPack = preload("res://game/level_pack.gd")
 const Hint = preload("res://core/hint.gd")
 const LevelMaker = preload("res://game/level_maker.gd")
+const Solver = preload("res://core/solver.gd")
 
 const LEVEL_PATHS := [
 	"res://data/levels/level_001.json",
@@ -249,3 +250,19 @@ func restore_dict(data: Dictionary) -> void:
 	score = int(data.get("score", 0))
 	hints = int(data.get("hints", DEFAULT_HINTS))
 	_start_level(li)
+
+
+func solve_now() -> bool:
+	if status != "playing" or board == null or level == null:
+		return false
+	var solutions = Solver.solutions(level, 1)
+	if solutions.is_empty():
+		return false
+	var solution: Array = solutions[0]
+	for y in range(level.height):
+		for x in range(level.width):
+			if board.state_at(x, y) != BoardState.EMPTY:
+				board.apply("clear", x, y)
+	for pos in solution:
+		board.apply("place", pos.x, pos.y)
+	return _commit(true)

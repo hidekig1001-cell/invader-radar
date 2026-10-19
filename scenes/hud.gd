@@ -8,6 +8,7 @@ signal settings_pressed
 signal apply_pressed
 signal restart_pressed
 signal title_requested
+signal solve_pressed
 
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
@@ -26,6 +27,7 @@ var hint_button: Button
 var apply_button: Button
 var restart_button: Button
 var title_button: Button
+var solve_button: Button
 
 var language: String = "en"
 
@@ -47,12 +49,20 @@ func _ready() -> void:
 	apply_button.visible = false
 	title_button = make_title_button()
 
+	if OS.is_debug_build():
+		solve_button = _make_button("ANSWER", Rect2(40, 1560, 200, 150), solve_pressed)
+		solve_button.add_theme_font_size_override("font_size", 36)
+	else:
+		solve_button = null
+
 	ButtonStyle.apply_to(undo_button)
 	ButtonStyle.apply_to(settings_button)
 	ButtonStyle.apply_to(hint_button)
 	ButtonStyle.apply_to(apply_button)
 	ButtonStyle.apply_to(restart_button)
 	ButtonStyle.apply_to(title_button)
+	if solve_button != null:
+		ButtonStyle.apply_to(solve_button)
 
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
 
@@ -63,6 +73,8 @@ func set_language(lang: String) -> void:
 	settings_button.text = localized("HOW TO PLAY", "遊び方")
 	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
+	if solve_button != null:
+		solve_button.text = localized("ANSWER", "答え")
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
 
 

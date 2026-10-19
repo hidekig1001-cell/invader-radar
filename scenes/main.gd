@@ -71,6 +71,10 @@ func _ready() -> void:
 	hud.apply_pressed.connect(on_apply)
 	hud.restart_pressed.connect(func() -> void: session.restart_level())
 	hud.title_requested.connect(on_title_requested)
+	hud.solve_pressed.connect(func() -> void:
+		if not is_tutorial():
+			session.solve_now()
+	)
 	hud.set_language(language)
 	_refresh()
 	bubble.show_text(help_text(), 4.0)
