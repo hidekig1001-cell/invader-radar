@@ -4,4 +4,4 @@
 - 透過: BiRefNet（MIT License）で背景を抜いた。
 - 生成の手順と候補は、作業 PC の D:\AI\imagegen\assets\invader_radar\README.md にある。
 - piece_pink.png は seed 11 の候補（本命の seed 12 は目がつぶれて見えたため）。ほかの駒・×・小惑星は seed 12、bg_1080x1920.png は seed 13、title_bg_1080x1920.png は seed 23。
-- autedev_logo.png（1024×1024、背景は透過）: AuteDev のロゴ。FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成し、背景を抜いた（2026-10-18、画像・音声生成モデルのチャット）。起動時の最初の画面に出す。
+- autedev_logo.png（1024×1024、背景は透過）: AuteDev のロゴ。「AuteDev」の文字は 2026-10-18 に FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成したものの画素のまま。左の絵は 2026-10-19 にユーザーの絵（青い丸に緑の丸 3 つ）をもとに図形として描き直した（画像生成モデル2 のチャット）。起動時の最初の画面に出す。
