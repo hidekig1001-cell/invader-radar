@@ -27,6 +27,9 @@ func _ready() -> void:
 	timer.one_shot = true
 	add_child(timer)
 	timer.timeout.connect(on_timeout)
+	timer.start()
+
+	touch_area.gui_input.connect(on_touch)
 
 	var viewport_size = get_viewport().get_visible_rect().size
 	apply_screen_layout(viewport_size)
@@ -56,6 +59,8 @@ func on_timeout() -> void:
 
 func on_touch(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.pressed:
+		finish()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		finish()
 
 func finish() -> void:
