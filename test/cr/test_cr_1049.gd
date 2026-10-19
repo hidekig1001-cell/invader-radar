@@ -9,12 +9,14 @@ const Solver = preload("res://core/solver.gd")
 ## CHECK: 1
 func test_level_dicts_size_and_generated_levels_match() -> void:
 	var dicts = LevelPack.level_dicts()
-	assert_eq(dicts.size(), 13)
+	assert_eq(dicts.size(), 15)
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 3)
+	assert_eq(gen.size(), 5)
 	assert_eq(dicts[10], gen[0])
 	assert_eq(dicts[11], gen[1])
 	assert_eq(dicts[12], gen[2])
+	assert_eq(dicts[13], gen[3])
+	assert_eq(dicts[14], gen[4])
 
 
 ## CHECK: 2
@@ -46,16 +48,18 @@ func test_level_dicts_dimensions_and_generated_levels_dimensions() -> void:
 ## CHECK: 4
 func test_generated_levels_size_and_ids() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 3)
+	assert_eq(gen.size(), 5)
 	assert_eq(gen[0].get("id"), 11)
 	assert_eq(gen[1].get("id"), 12)
 	assert_eq(gen[2].get("id"), 13)
+	assert_eq(gen[3].get("id"), 14)
+	assert_eq(gen[4].get("id"), 15)
 
 
 ## CHECK: 5
 func test_generated_levels_dimensions() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 3)
+	assert_eq(gen.size(), 5)
 	for d in gen:
 		assert_true(d is Dictionary)
 		assert_eq(d.get("width"), 6)
@@ -106,18 +110,19 @@ func test_attempt_level_different_seed_different_regions() -> void:
 ## CHECK: 9
 func test_generated_levels_regions_are_different() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 3)
+	assert_eq(gen.size(), 5)
 	for d in gen:
 		assert_true(d is Dictionary)
 	assert_ne(gen[0].get("regions"), gen[1].get("regions"))
 	assert_ne(gen[1].get("regions"), gen[2].get("regions"))
 	assert_ne(gen[0].get("regions"), gen[2].get("regions"))
+	assert_ne(gen[3].get("regions"), gen[4].get("regions"))
 
 
 ## CHECK: 10
 func test_generated_levels_have_unique_solutions() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 3)
+	assert_eq(gen.size(), 5)
 	for d in gen:
 		assert_true(d is Dictionary)
 		var level = Level.new()
