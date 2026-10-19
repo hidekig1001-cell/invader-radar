@@ -9,6 +9,7 @@ const Rules = preload("res://core/rules.gd")
 const Level = preload("res://game/level.gd")
 const LevelPack = preload("res://game/level_pack.gd")
 const Hint = preload("res://core/hint.gd")
+const LevelMaker = preload("res://game/level_maker.gd")
 
 const LEVEL_PATHS := [
 	"res://data/levels/level_001.json",
@@ -27,10 +28,13 @@ var score: int = 0
 var hints: int = DEFAULT_HINTS
 var status: String = "playing"  # "playing" | "cleared"
 var current_hint: Dictionary = {}
+var rng: RandomNumberGenerator
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
 func _init(level_list: Array = []) -> void:
+	rng = RandomNumberGenerator.new()
+	rng.randomize()
 	levels = level_list if not level_list.is_empty() else load_default_levels()
 	_start_level(0)
 
@@ -165,7 +169,22 @@ func is_asteroid(x: int, y: int) -> bool:
 
 func _start_level(index: int) -> void:
 	level_index = index
-	level = levels[index] if index < levels.size() else null
+	if levels.is_empty():
+		level = null
+	else:
+		var original_level = levels[index]
+		if index >= 10 and original_level != null:
+			var dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi())
+			dict["id"] = original_level.id
+			var new_level = Level.new()
+			if new_level.parse(dict):
+				level = new_level
+				levels[index] = new_level
+			else:
+				level = original_level
+		else:
+			level = original_level
+	
 	board = BoardState.new(level.width, level.height) if level != null else null
 	moves = 0
 	status = "playing"
