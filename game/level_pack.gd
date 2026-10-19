@@ -1,7 +1,11 @@
 extends RefCounted
 
 const ASTEROID_CELLS := {6: [[2, 2], [4, 0]], 8: [[0, 0], [2, 4]], 9: [[0, 0], [3, 3]]}
-const GENERATED_SPECS := [[11, 6, 1], [12, 6, 2], [13, 6, 3], [14, 6, 4], [15, 6, 5]]
+const GENERATED_SPECS := [
+	[11, 6, 1], [12, 6, 2], [13, 6, 3], [14, 6, 4], [15, 6, 5],
+	[16, 7, 1], [17, 7, 2], [18, 7, 3], [19, 7, 4], [20, 7, 5],
+	[21, 7, 6], [22, 7, 7], [23, 7, 8], [24, 7, 9], [25, 7, 10]
+]
 
 static func with_asteroids(dicts: Array) -> Array:
 	var result: Array = []

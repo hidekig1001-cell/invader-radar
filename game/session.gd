@@ -45,6 +45,16 @@ func _init(level_list: Array = []) -> void:
 	_start_level(0)
 
 
+static func placeholder_regions(w: int) -> Array:
+	var out: Array = []
+	for y in range(w):
+		var row: Array = []
+		for x in range(w):
+			row.append(y)
+		out.append(row)
+	return out
+
+
 static func load_default_levels() -> Array:
 	var out: Array = []
 	for d in LevelPack.fixed_level_dicts():
@@ -54,14 +64,7 @@ static func load_default_levels() -> Array:
 	for spec in LevelPack.GENERATED_SPECS:
 		var id = spec[0]
 		var w = spec[1]
-		var regions = [
-			[0, 0, 0, 0, 0, 0],
-			[1, 1, 1, 1, 1, 1],
-			[2, 2, 2, 2, 2, 2],
-			[3, 3, 3, 3, 3, 3],
-			[4, 4, 4, 4, 4, 4],
-			[5, 5, 5, 5, 5, 5]
-		]
+		var regions = placeholder_regions(w)
 		var d = {
 			"id": id,
 			"width": w,

@@ -9,7 +9,7 @@ const Solver = preload("res://core/solver.gd")
 ## CHECK: 1
 func test_generated_levels_size_is_5() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 5)
+	assert_eq(gen.size(), 15)
 
 
 ## CHECK: 2
@@ -27,7 +27,7 @@ func test_generated_levels_index4_id_is_15() -> void:
 ## CHECK: 4
 func test_level_dicts_size_is_15() -> void:
 	var dicts = LevelPack.level_dicts()
-	assert_eq(dicts.size(), 15)
+	assert_eq(dicts.size(), 25)
 
 
 ## CHECK: 5
