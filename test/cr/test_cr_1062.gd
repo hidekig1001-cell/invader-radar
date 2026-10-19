@@ -8,8 +8,22 @@ const LevelPack = preload("res://game/level_pack.gd")
 func test_session_load_default_levels_placeholder_regions() -> void:
 	var session = Session.new()
 	var levels = session.levels
-	assert_eq(levels.size(), 35)
-	for i in range(10, 15):
+	assert_eq(levels.size(), 100)
+	for i in range(10, 20):
+		var lv = levels[i]
+		assert_not_null(lv)
+		assert_eq(lv.id, i + 1)
+		assert_eq(lv.width, 5)
+		assert_eq(lv.height, 5)
+		assert_eq(lv.target, 5)
+		var rows = lv.regions.to_rows()
+		assert_eq(rows.size(), 5)
+		assert_eq(rows[0], "00000")
+		assert_eq(rows[1], "11111")
+		assert_eq(rows[2], "22222")
+		assert_eq(rows[3], "33333")
+		assert_eq(rows[4], "44444")
+	for i in range(20, 40):
 		var lv = levels[i]
 		assert_not_null(lv)
 		assert_eq(lv.id, i + 1)
@@ -24,7 +38,7 @@ func test_session_load_default_levels_placeholder_regions() -> void:
 		assert_eq(rows[3], "333333")
 		assert_eq(rows[4], "444444")
 		assert_eq(rows[5], "555555")
-	for i in range(15, 25):
+	for i in range(40, 70):
 		var lv = levels[i]
 		assert_not_null(lv)
 		assert_eq(lv.id, i + 1)
@@ -40,7 +54,7 @@ func test_session_load_default_levels_placeholder_regions() -> void:
 		assert_eq(rows[4], "4444444")
 		assert_eq(rows[5], "5555555")
 		assert_eq(rows[6], "6666666")
-	for i in range(25, 35):
+	for i in range(70, 100):
 		var lv = levels[i]
 		assert_not_null(lv)
 		assert_eq(lv.id, i + 1)

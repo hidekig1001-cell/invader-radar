@@ -9,7 +9,7 @@ const Solver = preload("res://core/solver.gd")
 ## CHECK: 1
 func test_generated_levels_size_is_5() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 
 
 ## CHECK: 2
@@ -27,7 +27,7 @@ func test_generated_levels_index4_id_is_15() -> void:
 ## CHECK: 4
 func test_level_dicts_size_is_15() -> void:
 	var dicts = LevelPack.level_dicts()
-	assert_eq(dicts.size(), 35)
+	assert_eq(dicts.size(), 100)
 
 
 ## CHECK: 5
@@ -47,7 +47,7 @@ func test_level_dicts_index13_matches_make_level_6_6_4() -> void:
 	var dicts = LevelPack.level_dicts()
 	var actual = dicts[13].duplicate(true)
 	actual.erase("id")
-	var expected = LevelMaker.make_level(6, 6, 4).duplicate(true)
+	var expected = LevelMaker.make_level(5, 5, 4, 1, 1).duplicate(true)
 	expected.erase("id")
 	assert_eq(actual, expected)
 
@@ -57,7 +57,7 @@ func test_level_dicts_index14_matches_make_level_6_6_5() -> void:
 	var dicts = LevelPack.level_dicts()
 	var actual = dicts[14].duplicate(true)
 	actual.erase("id")
-	var expected = LevelMaker.make_level(6, 6, 5).duplicate(true)
+	var expected = LevelMaker.make_level(5, 5, 5, 1, 1).duplicate(true)
 	expected.erase("id")
 	assert_eq(actual, expected)
 

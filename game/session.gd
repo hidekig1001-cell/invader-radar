@@ -205,7 +205,8 @@ func _start_level(index: int, regenerate: bool = true) -> void:
 	else:
 		var original_level = levels[index]
 		if uses_default_levels and index >= 10 and regenerate and original_level != null:
-			var dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi())
+			var spec = LevelPack.GENERATED_SPECS[index - 10]
+			var dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi(), spec[3], spec[4])
 			dict["id"] = original_level.id
 			var new_level = Level.new()
 			if new_level.parse(dict):

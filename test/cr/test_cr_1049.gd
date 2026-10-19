@@ -9,15 +9,15 @@ const Solver = preload("res://core/solver.gd")
 ## CHECK: 1
 func test_level_dicts_size_and_generated_levels_match() -> void:
 	var dicts = LevelPack.level_dicts()
-	assert_eq(dicts.size(), 35)
+	assert_eq(dicts.size(), 100)
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 	assert_eq(dicts[10], gen[0])
 	assert_eq(dicts[11], gen[1])
 	assert_eq(dicts[12], gen[2])
 	assert_eq(dicts[13], gen[3])
 	assert_eq(dicts[14], gen[4])
-	for k in range(5, 25):
+	for k in range(5, 90):
 		assert_eq(dicts[10 + k], gen[k])
 
 
@@ -36,25 +36,33 @@ func test_level_dicts_ids_and_generated_levels_ids() -> void:
 ## CHECK: 3
 func test_level_dicts_dimensions_and_generated_levels_dimensions() -> void:
 	var dicts = LevelPack.level_dicts()
-	for i in range(10, 15):
+	for i in range(10, 20):
+		assert_eq(dicts[i].get("width"), 5)
+		assert_eq(dicts[i].get("height"), 5)
+		assert_eq(dicts[i].get("target"), 5)
+	for i in range(20, 40):
 		assert_eq(dicts[i].get("width"), 6)
 		assert_eq(dicts[i].get("height"), 6)
 		assert_eq(dicts[i].get("target"), 6)
-	for i in range(15, 25):
+	for i in range(40, 70):
 		assert_eq(dicts[i].get("width"), 7)
 		assert_eq(dicts[i].get("height"), 7)
 		assert_eq(dicts[i].get("target"), 7)
-	for i in range(25, 35):
+	for i in range(70, 100):
 		assert_eq(dicts[i].get("width"), 8)
 		assert_eq(dicts[i].get("height"), 8)
 		assert_eq(dicts[i].get("target"), 8)
 	var gen = LevelPack.generated_levels()
 	for d in gen:
-		if d.get("id") <= 15:
+		if d.get("id") <= 20:
+			assert_eq(d.get("width"), 5)
+			assert_eq(d.get("height"), 5)
+			assert_eq(d.get("target"), 5)
+		elif d.get("id") <= 40:
 			assert_eq(d.get("width"), 6)
 			assert_eq(d.get("height"), 6)
 			assert_eq(d.get("target"), 6)
-		elif d.get("id") <= 25:
+		elif d.get("id") <= 70:
 			assert_eq(d.get("width"), 7)
 			assert_eq(d.get("height"), 7)
 			assert_eq(d.get("target"), 7)
@@ -67,7 +75,7 @@ func test_level_dicts_dimensions_and_generated_levels_dimensions() -> void:
 ## CHECK: 4
 func test_generated_levels_size_and_ids() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 	assert_eq(gen[0].get("id"), 11)
 	assert_eq(gen[1].get("id"), 12)
 	assert_eq(gen[2].get("id"), 13)
@@ -93,20 +101,26 @@ func test_generated_levels_size_and_ids() -> void:
 	assert_eq(gen[22].get("id"), 33)
 	assert_eq(gen[23].get("id"), 34)
 	assert_eq(gen[24].get("id"), 35)
+	for k in range(90):
+		assert_eq(gen[k].get("id"), 11 + k)
 
 
 ## CHECK: 5
 func test_generated_levels_dimensions() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 	for i in range(gen.size()):
 		var d = gen[i]
 		assert_true(d is Dictionary)
-		if i < 5:
+		if i < 10:
+			assert_eq(d.get("width"), 5)
+			assert_eq(d.get("height"), 5)
+			assert_eq(d.get("target"), 5)
+		elif i < 30:
 			assert_eq(d.get("width"), 6)
 			assert_eq(d.get("height"), 6)
 			assert_eq(d.get("target"), 6)
-		elif i < 15:
+		elif i < 60:
 			assert_eq(d.get("width"), 7)
 			assert_eq(d.get("height"), 7)
 			assert_eq(d.get("target"), 7)
@@ -159,7 +173,7 @@ func test_attempt_level_different_seed_different_regions() -> void:
 ## CHECK: 9
 func test_generated_levels_regions_are_different() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 	for d in gen:
 		assert_true(d is Dictionary)
 	assert_ne(gen[0].get("regions"), gen[1].get("regions"))
@@ -171,7 +185,7 @@ func test_generated_levels_regions_are_different() -> void:
 ## CHECK: 10
 func test_generated_levels_have_unique_solutions() -> void:
 	var gen = LevelPack.generated_levels()
-	assert_eq(gen.size(), 25)
+	assert_eq(gen.size(), 90)
 	for d in gen:
 		assert_true(d is Dictionary)
 		var level = Level.new()

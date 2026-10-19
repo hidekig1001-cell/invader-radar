@@ -36,7 +36,7 @@ func test_restore_uses_pack_level_when_not_default() -> void:
 	s.rng.seed = 1
 	s.restore_dict({"level_index": 13, "score": 0, "hints": 3})
 
-	assert_eq(s.level.regions.to_rows(), ["000000", "111111", "222222", "333333", "444444", "555555"])
+	assert_eq(s.level.regions.to_rows(), ["00000", "11111", "22222", "33333", "44444"])
 
 
 func test_restart_keeps_pack_level_when_not_default() -> void:

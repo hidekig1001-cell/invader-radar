@@ -50,5 +50,5 @@ func test_level_dicts_cache_speed_and_size() -> void:
 	assert_true(duration_second < 100, "Second call should be faster than 100ms")
 	# 戻り値が等しい
 	assert_eq(first, second)
-	# 個数が35個
-	assert_eq(second.size(), 35)
+	# 個数が100個
+	assert_eq(second.size(), 100)

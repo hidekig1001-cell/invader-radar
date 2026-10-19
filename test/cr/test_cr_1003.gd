@@ -34,7 +34,7 @@ const EXPECTED_SOLUTIONS := [
 ## CHECK: 1
 func test_level_dicts_size_is_10() -> void:
 	var dicts := LevelPack.level_dicts()
-	assert_eq(dicts.size(), 35)
+	assert_eq(dicts.size(), 100)
 
 ## CHECK: 2
 func test_level_dicts_ids_are_sequential() -> void:
@@ -89,7 +89,7 @@ func test_level_dicts_solutions_match_table() -> void:
 ## CHECK: 8
 func test_session_load_default_levels_size() -> void:
 	var levels := Session.load_default_levels()
-	assert_eq(levels.size(), 35)
+	assert_eq(levels.size(), 100)
 
 ## CHECK: 9
 func test_session_load_default_levels_ids() -> void:

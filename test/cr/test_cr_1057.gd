@@ -20,10 +20,10 @@ func test_random_generation_differs_by_seed() -> void:
 
 	assert_ne(regions1, regions2)
 	assert_eq(s1.level.id, 14)
-	assert_eq(s1.level.width, 6)
+	assert_eq(s1.level.width, 5)
 	assert_eq(Solver.count_solutions(s1.level, 2), 1)
 	assert_eq(s2.level.id, 14)
-	assert_eq(s2.level.width, 6)
+	assert_eq(s2.level.width, 5)
 	assert_eq(Solver.count_solutions(s2.level, 2), 1)
 
 
