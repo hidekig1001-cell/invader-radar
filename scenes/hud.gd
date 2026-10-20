@@ -229,13 +229,20 @@ func set_table_names() -> void:
 	time_name_label.text = localized("TIME", "経過時間")
 
 
+func table_box() -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = TABLE_BG
+	sb.border_color = TABLE_LINE
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(24)
+	sb.anti_aliasing = true
+	return sb
+
+
 func _draw() -> void:
-	draw_rect(TABLE_RECT, TABLE_BG)
+	draw_style_box(table_box(), TABLE_RECT)
 	var cell_w := TABLE_RECT.size.x / 3.0
 	var cell_h := TABLE_RECT.size.y / 2.0
-	
-	# Draw outer border
-	draw_rect(TABLE_RECT, TABLE_LINE, false, 3.0)
 	
 	# Draw inner vertical lines
 	for i in range(1, 3):
