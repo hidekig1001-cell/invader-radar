@@ -75,6 +75,37 @@ func snapshot() -> Dictionary:
 		"marks": marks().size(), "pieces": pieces().size()}
 
 
+func restore_rows(rows: Array) -> int:
+	if rows.size() != height:
+		return ERR_INVALID_PARAMETER
+	
+	var symbol_to_state := {}
+	for state in SYMBOLS.keys():
+		symbol_to_state[SYMBOLS[state]] = state
+
+	for y in range(height):
+		var row = rows[y]
+		if not (row is String):
+			return ERR_INVALID_PARAMETER
+		if row.length() != width:
+			return ERR_INVALID_PARAMETER
+		
+		for x in range(width):
+			var char = row[x]
+			if not symbol_to_state.has(char):
+				return ERR_INVALID_PARAMETER
+	
+	for y in range(height):
+		var row = rows[y]
+		for x in range(width):
+			var char = row[x]
+			var state = symbol_to_state[char]
+			_grid.set_cell(x, y, state)
+	
+	_history.clear()
+	return OK
+
+
 func _cells_with(state: int) -> Array:
 	var out: Array = []
 	for y in range(height):
