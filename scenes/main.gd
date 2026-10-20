@@ -231,6 +231,8 @@ func _on_touch_up(pos: Vector2) -> void:
 
 
 func _on_hint() -> void:
+	if is_tutorial():
+		return
 	if session.request_hint():
 		bubble.show_text(session.current_hint["text"], 0.0)
 		board_view.hint_cell = session.current_hint["cell"]
@@ -299,6 +301,7 @@ func start_tutorial() -> void:
 		board_view.highlight_cells = []
 		bubble.clear_text()
 	board_view.queue_redraw()
+	_refresh()
 
 
 func end_tutorial() -> void:
