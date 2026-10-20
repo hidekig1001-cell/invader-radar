@@ -39,6 +39,7 @@ var last_tutorial_status: String = ""
 @onready var bubble = $Ui/MessageBubble
 
 var base_positions: Dictionary = {}
+var title_logo: TextureRect = null
 
 
 func _ready() -> void:
@@ -97,6 +98,14 @@ func _ready() -> void:
 	rules_label.position = Vector2(54, 1730)
 	rules_label.size = Vector2(972, 140)
 
+	title_logo = TextureRect.new()
+	title_logo.texture = load("res://assets/title_logo/title_logo_1000x200.png")
+	title_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	title_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	title_logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	title_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.get_parent().add_child(title_logo)
+
 	# CR-1039: Record base positions before applying layout offsets
 	base_positions["hud"] = hud.position
 	base_positions["board_view"] = board_view.position
@@ -132,8 +141,23 @@ func apply_screen_layout(size: Vector2) -> void:
 	if base_positions.has("rules_label"):
 		rules_label.position = base_positions["rules_label"] + Vector2(extra_x / 2.0, extra_y / 2.0)
 		
+	place_title_logo()
 	space_bg.sky_size = size
 	space_bg.avoid_rects = part_rects()
+
+
+func place_title_logo() -> void:
+	if title_logo == null:
+		return
+	var top_space: float = hud.position.y + 90.0
+	var h: float = minf(152.0, top_space - 40.0)
+	if h < 100.0:
+		title_logo.visible = false
+		return
+	else:
+		title_logo.visible = true
+		title_logo.size = Vector2(h * 5.0, h)
+		title_logo.position = Vector2(hud.position.x + 1040.0 - h * 5.0, (top_space - h) / 2.0)
 
 
 func part_rects() -> Array:
@@ -148,6 +172,9 @@ func part_rects() -> Array:
 		var b_rect = board_view.board_rect()
 		var global_b_rect = Rect2(board_view.position + b_rect.position, b_rect.size)
 		rects.append(global_b_rect)
+
+	if title_logo != null and title_logo.visible:
+		rects.append(Rect2(title_logo.position, title_logo.size))
 
 	# HUD
 	if hud:
