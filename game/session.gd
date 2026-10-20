@@ -260,13 +260,20 @@ func _commit(did_change: bool) -> bool:
 
 
 func save_dict() -> Dictionary:
-	return {
+	var out := {
 		"level_index": level_index,
 		"score": score,
 		"hints": hints,
 		"max_cleared": max_cleared,
-		"clears": clear_records.duplicate(true)
+		"clears": clear_records.duplicate(true),
+		"moves": moves,
+		"elapsed": elapsed
 	}
+	if level != null:
+		out["level"] = level.to_dict()
+	if board != null:
+		out["rows"] = board.snapshot()["rows"]
+	return out
 
 
 func restore_dict(data: Dictionary) -> void:

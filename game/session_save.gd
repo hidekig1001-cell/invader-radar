@@ -50,4 +50,20 @@ static func read_json(path: String) -> Dictionary:
 				})
 		out["clears"] = clean_clears
 	
+	if data.has("moves"):
+		out["moves"] = int(data["moves"])
+	
+	if data.has("elapsed"):
+		out["elapsed"] = float(data["elapsed"])
+	
+	if data.has("level") and typeof(data["level"]) == TYPE_DICTIONARY:
+		out["level"] = data["level"]
+	
+	if data.has("rows") and typeof(data["rows"]) == TYPE_ARRAY:
+		var clean_rows = []
+		for r in data["rows"]:
+			if typeof(r) == TYPE_STRING:
+				clean_rows.append(r)
+		out["rows"] = clean_rows
+	
 	return out
