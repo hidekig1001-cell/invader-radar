@@ -32,6 +32,7 @@ var current_hint: Dictionary = {}
 var rng: RandomNumberGenerator
 var uses_default_levels: bool = false
 var given: Vector2i = Vector2i(-1, -1)
+var elapsed: float = 0.0
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
@@ -224,6 +225,7 @@ func _start_level(index: int, regenerate: bool = true) -> void:
 	
 	board = BoardState.new(level.width, level.height) if level != null else null
 	moves = 0
+	elapsed = 0.0
 	status = "playing"
 	current_hint = {}
 	given = Vector2i(-1, -1)
@@ -284,3 +286,8 @@ func solve_now() -> bool:
 	for pos in solution:
 		board.apply("place", pos.x, pos.y)
 	return _commit(true)
+
+
+func tick(delta: float) -> void:
+	if status == "playing" and level != null:
+		elapsed += delta

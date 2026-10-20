@@ -21,6 +21,7 @@ var level_label: Label
 var score_label: Label
 var hint_label: Label
 var moves_label: Label
+var time_label: Label
 var undo_button: Button
 var settings_button: Button
 var hint_button: Button
@@ -65,6 +66,8 @@ func _ready() -> void:
 		ButtonStyle.apply_to(solve_button)
 
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
+	time_label = _make_label(Rect2(720, 170, 320, 80), HORIZONTAL_ALIGNMENT_RIGHT)
+	set_time(0.0)
 
 
 func set_language(lang: String) -> void:
@@ -157,3 +160,12 @@ func finish_row_buttons(buttons: Array, max_width: int) -> void:
 	for b in buttons:
 		b.add_theme_font_size_override("font_size", n)
 		b.size = ROW_BUTTON_SIZE
+
+
+func set_time(sec: float) -> void:
+	time_label.text = localized("TIME %s", "時間 %s") % format_time(sec)
+
+
+static func format_time(sec: float) -> String:
+	var s := int(sec)
+	return "%d:%02d" % [floori(sec / 60.0), s % 60]

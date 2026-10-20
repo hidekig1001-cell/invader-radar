@@ -341,3 +341,9 @@ func cleared_text() -> String:
 
 func on_title_requested() -> void:
 	title_requested.emit()
+
+func _process(delta: float) -> void:
+	if session == null or is_tutorial():
+		return
+	session.tick(delta)
+	hud.set_time(session.elapsed)
