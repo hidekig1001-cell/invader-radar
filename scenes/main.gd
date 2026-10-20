@@ -234,7 +234,7 @@ func _on_hint() -> void:
 	if is_tutorial():
 		return
 	if session.request_hint():
-		bubble.show_text(session.current_hint["text"], 0.0)
+		bubble.show_text(hint_text(session.current_hint["text"]), 0.0)
 		board_view.hint_cell = session.current_hint["cell"]
 		hud.set_apply_visible(true)
 
@@ -371,3 +371,15 @@ func tutorial_accepts_cell(cell: Vector2i) -> bool:
 	if highlights.is_empty():
 		return true
 	return cell in highlights
+
+func hint_text(en_text: String) -> String:
+	if language != "ja":
+		return en_text
+	var dict = {
+		"THIS CELL IS MARKED BY MISTAKE. TAP TO REMOVE THE X.": "このマスの × はまちがい。タップで × を消す。",
+		"THIS PIECE IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT.": "この駒の場所はまちがい。ダブルタップで消す。",
+		"A PIECE GOES HERE. DOUBLE TAP TO PLACE IT.": "ここに駒が入る。ダブルタップで置く。"
+	}
+	if dict.has(en_text):
+		return dict[en_text]
+	return en_text
