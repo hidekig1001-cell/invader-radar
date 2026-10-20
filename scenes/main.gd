@@ -14,6 +14,7 @@ const Rules = preload("res://core/rules.gd")
 const Sound = preload("res://scenes/sound.gd")
 const TutorialSteps = preload("res://game/tutorial_steps.gd")
 const SessionSave = preload("res://game/session_save.gd")
+const RulesPanel = preload("res://scenes/rules_panel.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -39,6 +40,7 @@ var last_tutorial_status: String = ""
 @onready var bubble = $Ui/MessageBubble
 
 var base_positions: Dictionary = {}
+var rules_panel = null
 var title_logo: TextureRect = null
 
 
@@ -74,7 +76,7 @@ func _ready() -> void:
 	hud.settings_pressed.connect(func() -> void:
 		sound.play_sfx("button")
 		if not is_tutorial():
-			start_tutorial()
+			open_rules()
 	)
 	hud.apply_pressed.connect(on_apply)
 	hud.restart_pressed.connect(func() -> void: session.restart_level())
@@ -112,6 +114,9 @@ func _ready() -> void:
 	base_positions["bubble"] = bubble.position
 	base_positions["rules_label"] = rules_label.position
 
+	rules_panel = RulesPanel.new()
+	hud.get_parent().add_child(rules_panel)
+
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
 	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
@@ -142,6 +147,8 @@ func apply_screen_layout(size: Vector2) -> void:
 		rules_label.position = base_positions["rules_label"] + Vector2(extra_x / 2.0, extra_y / 2.0)
 		
 	place_title_logo()
+	if rules_panel != null:
+		rules_panel.place(size)
 	space_bg.sky_size = size
 	space_bg.avoid_rects = part_rects()
 
@@ -196,6 +203,8 @@ func is_on_board(pos: Vector2) -> bool:
 
 
 func _input(event: InputEvent) -> void:
+	if rules_is_open():
+		return
 	if event is InputEventScreenTouch and event.index == 0:
 		if event.pressed:
 			_on_touch_down(event.position)
@@ -346,6 +355,15 @@ func end_tutorial() -> void:
 	tutorial_finished.emit()
 
 
+func open_rules() -> void:
+	if rules_panel != null:
+		rules_panel.open(language)
+
+
+func rules_is_open() -> bool:
+	return rules_panel != null and rules_panel.visible
+
+
 func is_tutorial() -> bool:
 	return tutorial != null
 
@@ -383,7 +401,7 @@ func on_title_requested() -> void:
 	title_requested.emit()
 
 func _process(delta: float) -> void:
-	if session == null or is_tutorial():
+	if session == null or is_tutorial() or rules_is_open():
 		return
 	session.tick(delta)
 	hud.set_time(session.elapsed)

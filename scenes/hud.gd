@@ -70,7 +70,7 @@ func _ready() -> void:
 	set_table_names()
 
 	undo_button = _make_button("UNDO", ROW_BUTTON_RECTS[0], undo_pressed)
-	settings_button = _make_button("HOW TO PLAY", ROW_BUTTON_RECTS[2], settings_pressed)
+	settings_button = _make_button("RULES", ROW_BUTTON_RECTS[2], settings_pressed)
 	restart_button = _make_button("RESTART", ROW_BUTTON_RECTS[1], restart_pressed)
 	hint_button = _make_button("HINT", Rect2(250, 1560, 380, 150), hint_pressed)
 	apply_button = _make_button("APPLY", Rect2(640, 1560, 160, 150), apply_pressed)
@@ -100,7 +100,7 @@ func _ready() -> void:
 func set_language(lang: String) -> void:
 	language = lang
 	undo_button.text = localized("UNDO", "戻す")
-	settings_button.text = localized("HOW TO PLAY", "遊び方")
+	settings_button.text = localized("RULES", "説明")
 	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
 	if solve_button != null:

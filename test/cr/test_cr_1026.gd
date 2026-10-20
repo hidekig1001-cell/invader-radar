@@ -56,7 +56,7 @@ func test_hud_set_language_ja_buttons() -> void:
 	await wait_frames(2)
 	hud.set_language("ja")
 	assert_eq(hud.undo_button.text, "戻す")
-	assert_eq(hud.settings_button.text, "遊び方")
+	assert_eq(hud.settings_button.text, "説明")
 	assert_eq(hud.apply_button.text, "決定")
 
 
@@ -69,7 +69,7 @@ func test_hud_set_language_back_to_en() -> void:
 	assert_eq(hud.undo_button.text, "戻す")
 	hud.set_language("en")
 	assert_eq(hud.undo_button.text, "UNDO")
-	assert_eq(hud.settings_button.text, "HOW TO PLAY")
+	assert_eq(hud.settings_button.text, "RULES")
 	assert_eq(hud.apply_button.text, "APPLY")
 
 

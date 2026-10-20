@@ -14,7 +14,7 @@ func _start():
 ## CHECK: 1
 func test_settings_button_text_and_size() -> void:
 	var m = await _start()
-	assert_eq(m.hud.settings_button.text, "HOW TO PLAY")
+	assert_eq(m.hud.settings_button.text, "RULES")
 	assert_eq(m.hud.settings_button.position, Vector2(720, 260))
 	assert_eq(m.hud.settings_button.size, Vector2(320, 100))
 
@@ -23,19 +23,19 @@ func test_settings_button_text_and_size() -> void:
 func test_settings_pressed_starts_tutorial() -> void:
 	var m = await _start()
 	m.hud.settings_pressed.emit()
-	assert_true(m.is_tutorial())
-	assert_eq(m.bubble.text, TutorialSteps.steps()[0]["text"])
-	assert_true(m.hud.hint_button.disabled)
+	assert_false(m.is_tutorial())
+	assert_true(m.rules_panel.visible)
 
 
 ## CHECK: 3
 func test_settings_pressed_does_not_restart_tutorial() -> void:
 	var m = await _start()
-	m.hud.settings_pressed.emit()
+	m.start_tutorial()
 	m.tutorial_input("double_tap", Vector2i(3, 1))
 	assert_eq(m.tutorial.step_index, 1)
 	m.hud.settings_pressed.emit()
 	assert_eq(m.tutorial.step_index, 1)
+	assert_false(m.rules_panel.visible)
 
 
 ## CHECK: 4
