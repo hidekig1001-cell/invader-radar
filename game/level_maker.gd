@@ -1,6 +1,7 @@
 extends RefCounted
 
 const MAX_ATTEMPTS := 2000
+const GREEDY_ATTEMPTS := 200
 
 static func make_level(width: int, height: int, seed: int, radar: int = -1, asteroids: int = -1) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
@@ -218,3 +219,62 @@ static func pick_asteroids(rng: RandomNumberGenerator, solution: Array, radar: A
 		result.append(empty_cells[i])
 		
 	return result
+
+static func make_level_greedy(width: int, seed: int, max_radar: int, asteroids: int = 0) -> Dictionary:
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed
+	var Rules = preload("res://core/rules.gd")
+	
+	for attempt in range(GREEDY_ATTEMPTS):
+		var solution = pick_solution(rng, width)
+		if solution.is_empty():
+			continue
+			
+		var region_rows = grow_regions(rng, width, solution)
+		var level_dict = build_level_dict(width, solution, region_rows)
+		
+		var rocks = []
+		if asteroids >= 1:
+			rocks = pick_asteroids(rng, solution, [], asteroids)
+			level_dict["asteroids"] = rocks
+			
+		var pieces = []
+		for y in range(width):
+			pieces.append(Vector2i(solution[y], y))
+			
+		var cells = []
+		for y in range(width):
+			for x in range(width):
+				if x == solution[y]:
+					continue
+				var is_rock = false
+				for r in rocks:
+					if r[0] == x and r[1] == y:
+						is_rock = true
+						break
+				if not is_rock:
+					cells.append([x, y])
+					
+		# Shuffle cells deterministically using rng (same logic as pick_radar)
+		for i in range(cells.size() - 1, 0, -1):
+			var j = rng.randi_range(0, i)
+			var temp = cells[i]
+			cells[i] = cells[j]
+			cells[j] = temp
+			
+		var radar = []
+		level_dict["radar"] = radar
+		var unique = has_unique_solution(level_dict)
+		var k = 0
+		
+		while not unique and radar.size() < max_radar and k < cells.size():
+			var c = cells[k]
+			k += 1
+			radar.append([c[0], c[1], Rules.radar_count(pieces, c[0], c[1])])
+			level_dict["radar"] = radar
+			unique = has_unique_solution(level_dict)
+			
+		if unique:
+			return level_dict
+			
+	return {}
