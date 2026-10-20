@@ -211,8 +211,8 @@ static func table_cell_rect(col: int, row: int) -> Rect2:
 
 func make_table_label(r: Rect2, align: HorizontalAlignment) -> Label:
 	var l := Label.new()
-	l.position = r.position
-	l.size = r.size
+	l.position = r.position + Vector2(16, 0)
+	l.size = r.size - Vector2(32, 0)
 	l.horizontal_alignment = align
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.add_theme_font_size_override("font_size", TABLE_FONT_SIZE)
@@ -235,13 +235,13 @@ func _draw() -> void:
 	var cell_h := TABLE_RECT.size.y / 2.0
 	
 	# Draw outer border
-	draw_rect(TABLE_RECT, TABLE_LINE, false, 2.0)
+	draw_rect(TABLE_RECT, TABLE_LINE, false, 3.0)
 	
 	# Draw inner vertical lines
 	for i in range(1, 3):
 		var x := TABLE_RECT.position.x + i * cell_w
-		draw_line(Vector2(x, TABLE_RECT.position.y), Vector2(x, TABLE_RECT.position.y + TABLE_RECT.size.y), TABLE_LINE, 2.0)
+		draw_line(Vector2(x, TABLE_RECT.position.y), Vector2(x, TABLE_RECT.position.y + TABLE_RECT.size.y), TABLE_LINE, 3.0)
 		
 	# Draw inner horizontal line
 	var y := TABLE_RECT.position.y + cell_h
-	draw_line(Vector2(TABLE_RECT.position.x, y), Vector2(TABLE_RECT.position.x + TABLE_RECT.size.x, y), TABLE_LINE, 2.0)
+	draw_line(Vector2(TABLE_RECT.position.x, y), Vector2(TABLE_RECT.position.x + TABLE_RECT.size.x, y), TABLE_LINE, 3.0)
