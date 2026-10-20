@@ -126,6 +126,11 @@ func _ready() -> void:
 		start_tutorial()
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_progress()
+
+
 func save_progress() -> void:
 	if save_path != "":
 		SessionSave.write_json(save_path, session.save_dict())
