@@ -285,7 +285,21 @@ func restore_dict(data: Dictionary) -> void:
 	max_cleared = int(data.get("max_cleared", 0))
 	var clears = data.get("clears", [])
 	clear_records = clears.duplicate(true) if typeof(clears) == TYPE_ARRAY else []
-	_start_level(li)
+	
+	var saved_level = Level.new()
+	var use_saved: bool = data.has("level") and typeof(data["level"]) == TYPE_DICTIONARY and levels[li] != null and saved_level.parse(data["level"]) and saved_level.id == levels[li].id
+	
+	if use_saved:
+		levels[li] = saved_level
+		_start_level(li, false)
+	else:
+		_start_level(li)
+		
+	if use_saved and board != null and data.has("rows") and typeof(data["rows"]) == TYPE_ARRAY:
+		if board.restore_rows(data["rows"]) == OK:
+			moves = int(data.get("moves", 0))
+			elapsed = float(data.get("elapsed", 0.0))
+			changed.emit()
 
 
 func solve_now() -> bool:
