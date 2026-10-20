@@ -15,6 +15,7 @@ const Sound = preload("res://scenes/sound.gd")
 const TutorialSteps = preload("res://game/tutorial_steps.gd")
 const SessionSave = preload("res://game/session_save.gd")
 const RulesPanel = preload("res://scenes/rules_panel.gd")
+const ProgressStore = preload("res://game/progress_store.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
@@ -31,6 +32,7 @@ var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
 var save_path := ""
+var progress_store = null
 var clear_effect = null
 var last_status: String = ""
 var last_tutorial_status: String = ""
@@ -58,7 +60,7 @@ func _ready() -> void:
 		session = Session.new()
 	
 	if save_path != "":
-		var data = SessionSave.read_json(save_path)
+		var data = current_store().load_progress()
 		if not data.is_empty():
 			session.restore_dict(data)
 
@@ -131,9 +133,17 @@ func _notification(what: int) -> void:
 		save_progress()
 
 
+func current_store():
+	if progress_store != null:
+		return progress_store
+	var store = ProgressStore.new()
+	store.path = save_path
+	return store
+
+
 func save_progress() -> void:
 	if save_path != "":
-		SessionSave.write_json(save_path, session.save_dict())
+		current_store().save_progress(session.save_dict())
 
 
 func apply_screen_layout(size: Vector2) -> void:

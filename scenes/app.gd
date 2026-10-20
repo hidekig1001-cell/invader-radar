@@ -4,6 +4,7 @@ const MainScene = preload("res://scenes/main.tscn")
 const TitleScreen = preload("res://scenes/title_screen.gd")
 const SplashScreen = preload("res://scenes/splash_screen.gd")
 const SessionSave = preload("res://game/session_save.gd")
+const ProgressStore = preload("res://game/progress_store.gd")
 const SEEN_PATH := "user://tutorial_seen"
 const SAVE_PATH := "user://progress.json"
 
@@ -56,7 +57,9 @@ func start_game(with_tutorial: bool) -> void:
 
 
 func start_fresh_game() -> void:
-	SessionSave.write_text(save_path, "")
+	var store = ProgressStore.new()
+	store.path = save_path
+	store.clear()
 	start_game(false)
 
 
