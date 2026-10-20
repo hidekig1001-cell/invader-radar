@@ -204,6 +204,8 @@ func _on_touch_up(pos: Vector2) -> void:
 	_stroke = []
 	_prev_tap = r["tap_record"]
 	var c: Vector2i = r["cell"]
+	if is_tutorial() and r["kind"] != "swipe" and not tutorial_accepts_cell(c):
+		return
 	match r["kind"]:
 		"tap":
 			if is_tutorial():
@@ -354,3 +356,14 @@ func _process(delta: float) -> void:
 		return
 	session.tick(delta)
 	hud.set_time(session.elapsed)
+
+func tutorial_accepts_cell(cell: Vector2i) -> bool:
+	if tutorial == null:
+		return true
+	var step = tutorial.current_step()
+	if step.is_empty():
+		return true
+	var highlights = step.get("highlight", [])
+	if highlights.is_empty():
+		return true
+	return cell in highlights
