@@ -43,6 +43,7 @@ var moves_name_label: Label
 var time_name_label: Label
 
 var language: String = "en"
+var tutorial_mode: bool = false
 
 
 func _ready() -> void:
@@ -121,8 +122,8 @@ func update_from(snap: Dictionary) -> void:
 	hint_label.text = str(int(snap.get("hints", 0)))
 	moves_label.text = str(int(snap.get("moves", 0)))
 	hint_button.text = localized("HINT (%d)", "ヒント (%d)") % int(snap.get("hints", 0))
-	hint_button.disabled = int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
-	undo_button.disabled = snap.get("status", "") != "playing"
+	hint_button.disabled = tutorial_mode or int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
+	undo_button.disabled = tutorial_mode or snap.get("status", "") != "playing"
 
 
 func set_apply_visible(on: bool) -> void:
@@ -130,8 +131,7 @@ func set_apply_visible(on: bool) -> void:
 
 
 func set_tutorial_mode(on: bool) -> void:
-	hint_button.disabled = on
-	undo_button.disabled = on
+	tutorial_mode = on
 
 
 func _make_label(r: Rect2, align: HorizontalAlignment) -> Label:
