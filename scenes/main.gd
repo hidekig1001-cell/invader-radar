@@ -30,6 +30,8 @@ var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
 var save_path := ""
+var clear_effect = null
+var last_status: String = ""
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -57,6 +59,10 @@ func _ready() -> void:
 			session.restore_dict(data)
 
 	board_view.session = session
+	
+	clear_effect = preload("res://scenes/clear_effect.gd").new()
+	add_child(clear_effect)
+	
 	session.changed.connect(_refresh)
 	hud.undo_pressed.connect(func() -> void:
 		sound.play_sfx("button")
@@ -255,6 +261,11 @@ func _refresh() -> void:
 
 	hud.update_from(curr_snapshot)
 	board_view.queue_redraw()
+	
+	if not is_tutorial() and session.status == "cleared" and last_status != "cleared":
+		clear_effect.play(board_view.position + board_view.board_rect().get_center())
+	last_status = session.status
+	
 	if session.status == "cleared":
 		bubble.show_text(cleared_text(), 0.0)
 	elif bubble.text == cleared_text():
