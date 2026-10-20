@@ -19,10 +19,10 @@ func test_main_has_session() -> void:
 
 func test_hud_follows_session() -> void:
 	var m = await _start()
-	assert_eq(m.hud.level_label.text, "LEVEL 1")
-	assert_eq(m.hud.hint_label.text, "HINT x3")
+	assert_eq(m.hud.level_label.text, "1")
+	assert_eq(m.hud.hint_label.text, "3")
 	m.session.use_hint()
-	assert_eq(m.hud.hint_label.text, "HINT x2")
+	assert_eq(m.hud.hint_label.text, "2")
 
 
 func test_geometry_fits_the_screen() -> void:

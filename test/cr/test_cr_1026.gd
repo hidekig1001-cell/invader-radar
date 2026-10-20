@@ -81,10 +81,14 @@ func test_hud_update_from_ja_labels() -> void:
 	hud.set_language("ja")
 	var snap = {"level": 1, "score": 0, "hints": 3, "moves": 0, "status": "playing"}
 	hud.update_from(snap)
-	assert_eq(hud.level_label.text, "レベル 1")
-	assert_eq(hud.score_label.text, "スコア 0")
-	assert_eq(hud.hint_label.text, "ヒント x3")
-	assert_eq(hud.moves_label.text, "手数 0")
+	assert_eq(hud.level_label.text, "1")
+	assert_eq(hud.score_label.text, "0")
+	assert_eq(hud.hint_label.text, "3")
+	assert_eq(hud.moves_label.text, "0")
+	assert_eq(hud.level_name_label.text, "レベル")
+	assert_eq(hud.score_name_label.text, "スコア")
+	assert_eq(hud.hint_name_label.text, "残りヒント")
+	assert_eq(hud.moves_name_label.text, "手数")
 
 
 func test_hud_update_from_ja_hint_button() -> void:

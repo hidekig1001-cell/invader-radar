@@ -40,8 +40,8 @@ func test_main_process_updates_timer() -> void:
 	m.session.elapsed = 0.0
 	m._process(65.0)
 	assert_eq(m.session.elapsed, 65.0)
-	assert_eq(m.hud.time_label.text, "TIME 1:05")
+	assert_eq(m.hud.time_label.text, "1:05")
 	m.session.solve_now()
 	m._process(10.0)
 	assert_eq(m.session.elapsed, 65.0)
-	assert_eq(m.hud.time_label.text, "TIME 1:05")
+	assert_eq(m.hud.time_label.text, "1:05")
