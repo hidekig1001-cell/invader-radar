@@ -272,7 +272,7 @@ func _refresh() -> void:
 			clear_effect.play(board_view.position + board_view.board_rect().get_center())
 		last_tutorial_status = tutorial.session.status
 	
-	if session.status == "cleared":
+	if not is_tutorial() and session.status == "cleared":
 		bubble.show_tile(cleared_text(), board_view.position + board_view.board_rect().get_center())
 	elif bubble.text == cleared_text():
 		bubble.clear_text()
@@ -282,6 +282,7 @@ func _refresh() -> void:
 
 
 func start_tutorial() -> void:
+	bubble.clear_text()
 	tutorial = Tutorial.new()
 	board_view.session = tutorial.session
 	last_snapshot = tutorial.session.snapshot()
