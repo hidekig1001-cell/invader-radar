@@ -13,6 +13,7 @@ const PANEL_FONT_SIZE := 30
 var _time_left: float = 0.0
 var tile_mode: bool = false
 var panel_mode: bool = false
+var blink_time: float = 0.0
 var normal_position: Vector2 = Vector2.ZERO
 var normal_box: StyleBox = null
 
@@ -46,6 +47,8 @@ func clear_text() -> void:
 	visible = false
 	if panel_mode:
 		panel_mode = false
+		blink_time = 0.0
+		modulate.a = 1.0
 		position = normal_position
 		size = BOX.size
 		add_theme_stylebox_override("normal", normal_box)
@@ -75,6 +78,7 @@ func show_tile(text_to_show: String, center: Vector2) -> void:
 func show_panel(text_to_show: String) -> void:
 	if not panel_mode and not tile_mode:
 		normal_position = position
+		blink_time = 0.0
 	panel_mode = true
 	text = text_to_show
 	_time_left = 0.0
@@ -86,7 +90,20 @@ func show_panel(text_to_show: String) -> void:
 	visible = true
 
 
+static func panel_alpha(t: float) -> float:
+	return 0.55 + 0.45 * (0.5 + 0.5 * cos(TAU * t / 1.6))
+
+
+func step_blink(delta: float) -> void:
+	if panel_mode:
+		blink_time += delta
+		modulate.a = panel_alpha(blink_time)
+	else:
+		modulate.a = 1.0
+
+
 func _process(delta: float) -> void:
+	step_blink(delta)
 	if visible and _time_left > 0.0:
 		_time_left -= delta
 		if _time_left <= 0.0:
