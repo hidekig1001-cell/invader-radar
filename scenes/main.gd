@@ -19,6 +19,7 @@ const ProgressStore = preload("res://game/progress_store.gd")
 
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
+const ALL_CLEARED_TEXT := "ALL LEVELS CLEARED!  TAP FOR TITLE"
 
 var session = null  # add_child の前に置けば、その session を使う（テスト用）
 var _stroke: Array = []  # 今の指のなぞり [{"pos", "t"}]
@@ -235,8 +236,11 @@ func _input(event: InputEvent) -> void:
 func _on_touch_down(pos: Vector2) -> void:
 	_stroke = []
 	if not is_tutorial() and session.status == "cleared":
+		var was_last := is_last_level()
 		session.next_level()
 		save_progress()
+		if was_last:
+			on_title_requested()
 		return
 	
 	var local_pos = to_board_pos(pos)
@@ -408,7 +412,15 @@ func help_text() -> String:
 	return HELP_TEXT
 
 
+func is_last_level() -> bool:
+	return session.level_index == session.levels.size() - 1
+
+
 func cleared_text() -> String:
+	if is_last_level():
+		if language == "ja":
+			return "全部の面をクリア！  タップでタイトルへ"
+		return ALL_CLEARED_TEXT
 	if language == "ja":
 		return "クリア！  タップで次の面"
 	return CLEARED_TEXT
