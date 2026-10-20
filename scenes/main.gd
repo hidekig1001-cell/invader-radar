@@ -32,6 +32,7 @@ var last_conflicts: int = 0
 var save_path := ""
 var clear_effect = null
 var last_status: String = ""
+var last_tutorial_status: String = ""
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -265,6 +266,11 @@ func _refresh() -> void:
 	if not is_tutorial() and session.status == "cleared" and last_status != "cleared":
 		clear_effect.play(board_view.position + board_view.board_rect().get_center())
 	last_status = session.status
+	
+	if is_tutorial():
+		if tutorial.session.status == "cleared" and last_tutorial_status != "cleared":
+			clear_effect.play(board_view.position + board_view.board_rect().get_center())
+		last_tutorial_status = tutorial.session.status
 	
 	if session.status == "cleared":
 		bubble.show_text(cleared_text(), 0.0)
