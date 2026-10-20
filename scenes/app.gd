@@ -37,6 +37,7 @@ func on_splash_finished() -> void:
 	title_screen = TitleScreen.new()
 	title_screen.start_requested.connect(start_game)
 	title_screen.fresh_start_requested.connect(start_fresh_game)
+	title_screen.quit_requested.connect(quit_app)
 	add_child(title_screen)
 
 
@@ -70,4 +71,9 @@ func show_title() -> void:
 	title_screen = TitleScreen.new()
 	title_screen.start_requested.connect(start_game)
 	title_screen.fresh_start_requested.connect(start_fresh_game)
+	title_screen.quit_requested.connect(quit_app)
 	add_child(title_screen)
+
+
+func quit_app() -> void:
+	get_tree().quit()

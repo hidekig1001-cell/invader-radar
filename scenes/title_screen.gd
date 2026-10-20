@@ -2,6 +2,7 @@ extends Control
 
 signal start_requested(with_tutorial: bool)
 signal fresh_start_requested
+signal quit_requested
 
 const Sound = preload("res://scenes/sound.gd")
 const ButtonStyle = preload("res://scenes/button_style.gd")
@@ -113,6 +114,10 @@ func _ready() -> void:
 	var display_name = DisplayServer.get_name()
 	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
 	apply_screen_layout(layout_size)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		quit_requested.emit()
 
 func apply_screen_layout(size: Vector2) -> void:
 	var offset = SpaceBg.layout_offsets(size.x, size.y)
