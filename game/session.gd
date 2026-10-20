@@ -33,6 +33,8 @@ var rng: RandomNumberGenerator
 var uses_default_levels: bool = false
 var given: Vector2i = Vector2i(-1, -1)
 var elapsed: float = 0.0
+var max_cleared: int = 0
+var clear_records: Array = []
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
@@ -249,6 +251,8 @@ func _commit(did_change: bool) -> bool:
 	moves += 1
 	if Rules.is_solved(board, level):
 		status = "cleared"
+		clear_records.append({"level": level.id, "seconds": elapsed, "moves": moves})
+		max_cleared = maxi(max_cleared, level.id)
 		score += CLEAR_SCORE
 		hints = mini(hints + 1, DEFAULT_HINTS)
 	changed.emit()
@@ -259,7 +263,9 @@ func save_dict() -> Dictionary:
 	return {
 		"level_index": level_index,
 		"score": score,
-		"hints": hints
+		"hints": hints,
+		"max_cleared": max_cleared,
+		"clears": clear_records.duplicate(true)
 	}
 
 
@@ -269,6 +275,9 @@ func restore_dict(data: Dictionary) -> void:
 		li = 0
 	score = int(data.get("score", 0))
 	hints = int(data.get("hints", DEFAULT_HINTS))
+	max_cleared = int(data.get("max_cleared", 0))
+	var clears = data.get("clears", [])
+	clear_records = clears.duplicate(true) if typeof(clears) == TYPE_ARRAY else []
 	_start_level(li)
 
 
