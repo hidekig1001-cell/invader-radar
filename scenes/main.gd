@@ -267,7 +267,7 @@ func _refresh() -> void:
 	last_status = session.status
 	
 	if session.status == "cleared":
-		bubble.show_text(cleared_text(), 0.0)
+		bubble.show_tile(cleared_text(), board_view.position + board_view.board_rect().get_center())
 	elif bubble.text == cleared_text():
 		bubble.clear_text()
 	if session.current_hint.is_empty():
