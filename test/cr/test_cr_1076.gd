@@ -18,7 +18,7 @@ func test_show_tile_and_clear_text() -> void:
 	assert_true(b.tile_mode)
 	assert_eq(b.position, Vector2(90, 1020))
 	assert_eq(b.size, Vector2(900, 160))
-	assert_true(b.get_theme_stylebox("normal") is StyleBoxTexture)
+	assert_true(b.get_theme_stylebox("normal") is StyleBoxFlat)
 
 	b.show_tile("CLEAR", Vector2(540, 800))
 	assert_eq(b.position, Vector2(90, 920))

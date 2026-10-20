@@ -67,7 +67,7 @@ func show_tile(text_to_show: String, center: Vector2) -> void:
 	_time_left = 0.0
 	size = TILE_SIZE
 	position = Vector2(center.x - TILE_SIZE.x / 2.0, center.y + TILE_OFFSET_Y - TILE_SIZE.y / 2.0)
-	add_theme_stylebox_override("normal", ButtonStyle.make_box("res://assets/buttons/button_normal.png", 0))
+	add_theme_stylebox_override("normal", clear_tile_box())
 	add_theme_color_override("font_color", TILE_FONT_COLOR)
 	visible = true
 
@@ -91,3 +91,13 @@ func _process(delta: float) -> void:
 		_time_left -= delta
 		if _time_left <= 0.0:
 			clear_text()
+
+
+func clear_tile_box() -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color8(255, 205, 222)
+	box.border_color = Color8(232, 150, 180)
+	box.set_border_width_all(4)
+	box.set_corner_radius_all(24)
+	box.anti_aliasing = true
+	return box
