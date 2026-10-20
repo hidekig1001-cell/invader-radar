@@ -35,9 +35,9 @@ func test_cr_1013_check_1() -> void:
 
 	await wait_frames(30)
 
-	# Tap (0, 0) once. Since step 1 is "next", this should advance to step 2.
+	# Tap (0, 0) once. Step 1 needs X on the 6 row/column cells, so this does not advance.
 	_tap_cell(m, 0, 0)
-	assert_eq(m.tutorial.step_index, 2)
+	assert_eq(m.tutorial.step_index, 1)
 
 
 ## CHECK: 2
@@ -53,15 +53,22 @@ func test_cr_1013_check_2() -> void:
 
 	await wait_frames(30)
 
-	# Tap (0, 0) once to advance to step 2 ("mark")
+	# Tap (0, 0) once. Step 1 needs X on the 6 row/column cells, so this does not advance.
 	_tap_cell(m, 0, 0)
+	assert_eq(m.tutorial.step_index, 1)
+
+	# Tap the 6 row/column cells to advance to step 2 ("mark")
+	for c in [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2)]:
+		_tap_cell(m, c.x, c.y)
+		await wait_frames(30)
+	_tap_cell(m, 3, 3)
 	assert_eq(m.tutorial.step_index, 2)
 
-	# Immediately tap (0, 0) again. This should be read as double_tap.
+	# Immediately tap (3, 3) again. This should be read as double_tap.
 	# In a "mark" step, double_tap should do nothing.
-	_tap_cell(m, 0, 0)
+	_tap_cell(m, 3, 3)
 	assert_eq(m.tutorial.step_index, 2)
-	assert_eq(m.tutorial.session.board.state_at(0, 0), BoardState.EMPTY)
+	assert_eq(m.tutorial.session.board.state_at(3, 3), BoardState.MARK)
 
 	await wait_frames(30)
 

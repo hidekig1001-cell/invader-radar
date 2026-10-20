@@ -55,7 +55,14 @@ func test_step_1_interactions() -> void:
 	assert_false(t.handle("double_tap", Vector2i(1, 0)))
 	assert_eq(t.step_index, 1)
 	
-	assert_true(t.handle("next", Vector2i(-1, -1)))
+	assert_false(t.handle("next", Vector2i(-1, -1)))
+	assert_eq(t.step_index, 1)
+	t.handle("tap", Vector2i(0, 1))
+	t.handle("tap", Vector2i(1, 1))
+	t.handle("tap", Vector2i(2, 1))
+	t.handle("tap", Vector2i(3, 0))
+	t.handle("tap", Vector2i(3, 2))
+	t.handle("tap", Vector2i(3, 3))
 	assert_eq(t.step_index, 2)
 
 
@@ -63,7 +70,12 @@ func test_step_1_interactions() -> void:
 func test_steps_0_to_4_progression() -> void:
 	var t = Tutorial.new()
 	t.handle("double_tap", Vector2i(3, 1))
-	t.handle("next", Vector2i(-1, -1))
+	t.handle("tap", Vector2i(0, 1))
+	t.handle("tap", Vector2i(1, 1))
+	t.handle("tap", Vector2i(2, 1))
+	t.handle("tap", Vector2i(3, 0))
+	t.handle("tap", Vector2i(3, 2))
+	t.handle("tap", Vector2i(3, 3))
 	t.handle("tap", Vector2i(2, 0))
 	t.handle("tap", Vector2i(2, 2))
 	t.handle("double_tap", Vector2i(0, 2))
@@ -80,7 +92,12 @@ func test_steps_0_to_4_progression() -> void:
 func test_finish_tutorial() -> void:
 	var t = Tutorial.new()
 	t.handle("double_tap", Vector2i(3, 1))
-	t.handle("next", Vector2i(-1, -1))
+	t.handle("tap", Vector2i(0, 1))
+	t.handle("tap", Vector2i(1, 1))
+	t.handle("tap", Vector2i(2, 1))
+	t.handle("tap", Vector2i(3, 0))
+	t.handle("tap", Vector2i(3, 2))
+	t.handle("tap", Vector2i(3, 3))
 	t.handle("tap", Vector2i(2, 0))
 	t.handle("tap", Vector2i(2, 2))
 	t.handle("double_tap", Vector2i(0, 2))

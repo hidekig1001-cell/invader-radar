@@ -63,14 +63,19 @@ func test_tutorial_input_next_via_touch_outside_board() -> void:
 	up.position = Vector2(540, 400)
 	m._input(up)
 	
-	assert_eq(m.tutorial.step_index, 2)
+	assert_eq(m.tutorial.step_index, 1)
 
 
 ## CHECK: 5
 func test_tutorial_ends_and_restores_state() -> void:
 	var m = await _start_tutorial()
 	m.tutorial_input("double_tap", Vector2i(3, 1))
-	m.tutorial_input("next", Vector2i(-1, -1))
+	m.tutorial_input("tap", Vector2i(0, 1))
+	m.tutorial_input("tap", Vector2i(1, 1))
+	m.tutorial_input("tap", Vector2i(2, 1))
+	m.tutorial_input("tap", Vector2i(3, 0))
+	m.tutorial_input("tap", Vector2i(3, 2))
+	m.tutorial_input("tap", Vector2i(3, 3))
 	m.tutorial_input("tap", Vector2i(2, 0))
 	m.tutorial_input("tap", Vector2i(2, 2))
 	m.tutorial_input("double_tap", Vector2i(0, 2))

@@ -87,7 +87,7 @@ func handle(kind: String, cell: Vector2i) -> bool:
 		"mark":
 			if kind == "tap":
 				session.tap(cell.x, cell.y)
-				var mark_cells = TutorialSteps.mark_cells()
+				var mark_cells = wait.get("cells", TutorialSteps.mark_cells())
 				if marks_covered(mark_cells):
 					step_index += 1
 				return true

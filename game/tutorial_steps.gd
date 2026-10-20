@@ -24,9 +24,9 @@ static func steps() -> Array:
 			"wait": {"kind": "double_tap", "cell": Vector2i(3, 1)}
 		},
 		{
-			"text": "ONE PIECE PER ROW AND COLUMN, TOO.\nTAP TO CONTINUE.",
+			"text": "ONE PIECE PER ROW AND COLUMN, TOO.\nMARK AN X ON THE 6 CELLS.",
 			"highlight": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2), Vector2i(3, 3)],
-			"wait": {"kind": "next"}
+			"wait": {"kind": "mark", "cells": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2), Vector2i(3, 3)]}
 		},
 		{
 			"text": "PIECES CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.",
@@ -57,7 +57,7 @@ static func apply_language(lang_code: String, step_index: int) -> String:
 			0:
 				return "各色に駒を 1 つ置く。\n緑のマスをダブルタップ"
 			1:
-				return "各行・各列にも 1 つ。\nタップで次へ"
+				return "各行・各列にも 1 つ。\n6 つのマスに × を付ける"
 			2:
 				return "斜めにも隣り合えない。\n斜めのマスに × を付ける"
 			3:

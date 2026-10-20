@@ -43,7 +43,12 @@ func test_cr_1027_check_5() -> void:
 	var t = Tutorial.new()
 	assert_false(t.step_has_mark_cells())
 	t.handle("double_tap", Vector2i(3, 1))
-	t.handle("next", Vector2i(-1, -1))
+	t.handle("tap", Vector2i(0, 1))
+	t.handle("tap", Vector2i(1, 1))
+	t.handle("tap", Vector2i(2, 1))
+	t.handle("tap", Vector2i(3, 0))
+	t.handle("tap", Vector2i(3, 2))
+	t.handle("tap", Vector2i(3, 3))
 	assert_eq(t.step_index, 2)
 	assert_true(t.step_has_mark_cells())
 

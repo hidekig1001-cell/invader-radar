@@ -19,7 +19,7 @@ func test_apply_language_ja_step0() -> void:
 
 ## CHECK: 2
 func test_apply_language_ja_step1() -> void:
-	assert_eq(TutorialSteps.apply_language("ja", 1), "各行・各列にも 1 つ。\nタップで次へ")
+	assert_eq(TutorialSteps.apply_language("ja", 1), "各行・各列にも 1 つ。\n6 つのマスに × を付ける")
 
 
 ## CHECK: 3
@@ -62,5 +62,10 @@ func test_main_tutorial_bubble_ja_step2() -> void:
 	var m = await _start_main("ja")
 	m.start_tutorial()
 	m.tutorial_input("double_tap", Vector2i(3, 1))
-	m.tutorial_input("next", Vector2i(-1, -1))
+	m.tutorial_input("tap", Vector2i(0, 1))
+	m.tutorial_input("tap", Vector2i(1, 1))
+	m.tutorial_input("tap", Vector2i(2, 1))
+	m.tutorial_input("tap", Vector2i(3, 0))
+	m.tutorial_input("tap", Vector2i(3, 2))
+	m.tutorial_input("tap", Vector2i(3, 3))
 	assert_eq(m.bubble.text, TutorialSteps.apply_language("ja", 2))
