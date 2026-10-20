@@ -131,6 +131,8 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_progress()
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		go_back()
 
 
 func current_store():
@@ -412,7 +414,15 @@ func cleared_text() -> String:
 	return CLEARED_TEXT
 
 
+func go_back() -> void:
+	if rules_is_open():
+		rules_panel.close()
+	else:
+		on_title_requested()
+
+
 func on_title_requested() -> void:
+	save_progress()
 	title_requested.emit()
 
 func _process(delta: float) -> void:
