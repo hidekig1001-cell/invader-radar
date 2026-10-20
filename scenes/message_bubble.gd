@@ -7,9 +7,12 @@ const ButtonStyle = preload("res://scenes/button_style.gd")
 const TILE_SIZE := Vector2(900, 160)
 const TILE_OFFSET_Y := 200.0
 const TILE_FONT_COLOR := Color8(74, 50, 10)
+const PANEL_BOX := Rect2(90, 366, 900, 108)
+const PANEL_FONT_SIZE := 30
 
 var _time_left: float = 0.0
 var tile_mode: bool = false
+var panel_mode: bool = false
 var normal_position: Vector2 = Vector2.ZERO
 var normal_box: StyleBox = null
 
@@ -41,6 +44,13 @@ func clear_text() -> void:
 	text = ""
 	_time_left = 0.0
 	visible = false
+	if panel_mode:
+		panel_mode = false
+		position = normal_position
+		size = BOX.size
+		add_theme_stylebox_override("normal", normal_box)
+		remove_theme_color_override("font_color")
+		add_theme_font_size_override("font_size", FONT_SIZE)
 	if tile_mode:
 		tile_mode = false
 		position = normal_position
@@ -59,6 +69,20 @@ func show_tile(text_to_show: String, center: Vector2) -> void:
 	position = Vector2(center.x - TILE_SIZE.x / 2.0, center.y + TILE_OFFSET_Y - TILE_SIZE.y / 2.0)
 	add_theme_stylebox_override("normal", ButtonStyle.make_box("res://assets/buttons/button_normal.png", 0))
 	add_theme_color_override("font_color", TILE_FONT_COLOR)
+	visible = true
+
+
+func show_panel(text_to_show: String) -> void:
+	if not panel_mode and not tile_mode:
+		normal_position = position
+	panel_mode = true
+	text = text_to_show
+	_time_left = 0.0
+	add_theme_stylebox_override("normal", ButtonStyle.make_box("res://assets/buttons/button_normal.png", 0))
+	add_theme_color_override("font_color", TILE_FONT_COLOR)
+	add_theme_font_size_override("font_size", PANEL_FONT_SIZE)
+	size = PANEL_BOX.size
+	position = normal_position + (PANEL_BOX.position - BOX.position)
 	visible = true
 
 

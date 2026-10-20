@@ -294,7 +294,7 @@ func start_tutorial() -> void:
 	var step = tutorial.current_step()
 	if not step.is_empty():
 		board_view.highlight_cells = step["highlight"]
-		bubble.show_text(TutorialSteps.apply_language(language, tutorial.step_index), 0.0)
+		bubble.show_panel(TutorialSteps.apply_language(language, tutorial.step_index))
 	else:
 		board_view.highlight_cells = []
 		bubble.clear_text()
@@ -310,6 +310,7 @@ func end_tutorial() -> void:
 	last_conflicts = Rules.conflicts(session.board, session.level).size()
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
+	bubble.clear_text()
 	bubble.show_text(help_text(), 4.0)
 	_refresh()
 	tutorial_finished.emit()
@@ -329,7 +330,7 @@ func tutorial_input(kind: String, cell: Vector2i) -> void:
 		var step = tutorial.current_step()
 		if not step.is_empty():
 			board_view.highlight_cells = step["highlight"]
-			bubble.show_text(TutorialSteps.apply_language(language, tutorial.step_index), 0.0)
+			bubble.show_panel(TutorialSteps.apply_language(language, tutorial.step_index))
 		else:
 			board_view.highlight_cells = []
 			bubble.clear_text()
