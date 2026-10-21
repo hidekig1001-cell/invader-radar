@@ -3,7 +3,8 @@
   "impl_api": [
     {"file": "game/session_save.gd", "api": "FileAccess", "decision": "D-20261018-0430", "cr": "CR-1050", "why": "進み具合の保存。例外は 1 ファイルだけ"},
     {"file": "scenes/hud.gd", "api": "OS.", "decision": "D-20261019-2248", "cr": "CR-1066", "why": "デバッグ用の一発回答ボタン。OS.is_debug_build() のときだけ"},
-    {"file": "scenes/cloud_store.gd", "api": "HTTPRequest", "decision": "D-20261021-0522", "cr": "改修 157", "why": "Firebase の REST 通信。送る本文は game/cloud_payload.gd に分け、そちらは HTTPRequest を使わない"}
+    {"file": "scenes/cloud_store.gd", "api": "HTTPRequest", "decision": "D-20261021-0522", "cr": "改修 157", "why": "Firebase の REST 通信。送る本文は game/cloud_payload.gd に分け、そちらは HTTPRequest を使わない"},
+    {"file": "game/licenses.gd", "api": "Engine.", "decision": "D-20261022-0722", "cr": "CR-1122", "why": "Godot の著作権表示と部品のライセンスを、動いている Godot の版から Engine.get_license_text・get_license_info で読む"}
   ],
   "settings": [
     {"file": "export_presets.cfg", "section": "preset.0.options", "key": "permissions/internet", "value": "true", "decision": "D-20261021-2022", "cr": "改修 167", "why": "Firebase の通信を実機で動かすための INTERNET の権限"}
