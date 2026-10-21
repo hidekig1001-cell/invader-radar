@@ -56,3 +56,26 @@ static func from_value(f: Dictionary):
 			return {}
 	else:
 		return null
+
+
+static func best_from_clears(clears: Array) -> Dictionary:
+	var out: Dictionary = {}
+	for c in clears:
+		if typeof(c) != TYPE_DICTIONARY:
+			continue
+		var key := str(int(c.get("level", 0)))
+		var sec := float(c.get("seconds", 0.0))
+		var mv := int(c.get("moves", 0))
+		if not out.has(key):
+			out[key] = {"last": sec, "best": sec, "count": 1, "moves": mv}
+		else:
+			var e: Dictionary = out[key]
+			e["last"] = sec
+			e["best"] = minf(float(e["best"]), sec)
+			e["count"] = int(e["count"]) + 1
+			e["moves"] = mv
+	return out
+
+
+static func server_is_newer(local_rev: int, server_rev: int) -> bool:
+	return server_rev > local_rev
