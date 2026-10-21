@@ -8,6 +8,8 @@ const Sound = preload("res://scenes/sound.gd")
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const SpaceBg = preload("res://scenes/space_bg.gd")
 const SoundSettings = preload("res://game/sound_settings.gd")
+const Licenses = preload("res://game/licenses.gd")
+const LicensesPanel = preload("res://scenes/licenses_panel.gd")
 
 var _language: String = ""
 var _title_label: Label
@@ -22,6 +24,8 @@ var base_positions: Dictionary = {}
 var settings_path: String = "user://settings.json"
 var muted: bool = false
 var sound_btn: Button
+var licenses_btn: Button
+var licenses_panel = null
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
@@ -123,6 +127,21 @@ func _ready() -> void:
 	ButtonStyle.apply_to(sound_btn)
 	update_sound_label()
 
+	licenses_btn = Button.new()
+	licenses_btn.text = "LICENSES"
+	licenses_btn.position = Vector2(390, 1790)
+	licenses_btn.size = Vector2(300, 90)
+	licenses_btn.add_theme_font_size_override("font_size", 36)
+	licenses_btn.pressed.connect(func(): 
+		sound.play_sfx("button")
+		open_licenses()
+	)
+	add_child(licenses_btn)
+	ButtonStyle.apply_to(licenses_btn)
+
+	licenses_panel = LicensesPanel.new()
+	add_child(licenses_panel)
+
 	base_positions["title"] = _title_label.position
 	base_positions["lang_en"] = _lang_btn_en.position
 	base_positions["lang_ja"] = _lang_btn_ja.position
@@ -130,6 +149,7 @@ func _ready() -> void:
 	base_positions["start_now"] = _start_btn_now.position
 	base_positions["start_fresh"] = _start_btn_fresh.position
 	base_positions["sound"] = sound_btn.position
+	base_positions["licenses"] = licenses_btn.position
 
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
@@ -159,6 +179,10 @@ func apply_screen_layout(size: Vector2) -> void:
 		_start_btn_fresh.position = base_positions["start_fresh"] + offset
 	if base_positions.has("sound"):
 		sound_btn.position = base_positions["sound"] + offset
+	if base_positions.has("licenses"):
+		licenses_btn.position = base_positions["licenses"] + offset
+		if licenses_panel != null:
+			licenses_panel.place(size)
 
 func title_text() -> String:
 	return _title_label.text
@@ -180,6 +204,10 @@ func select_language(lang: String) -> void:
 	_start_btn_now.visible = true
 	_start_btn_fresh.visible = true
 	update_sound_label()
+	if lang == "ja":
+		licenses_btn.text = "ライセンス"
+	else:
+		licenses_btn.text = "LICENSES"
 
 func language() -> String:
 	return _language
@@ -219,3 +247,6 @@ func sound_label() -> String:
 func update_sound_label() -> void:
 	if sound_btn != null:
 		sound_btn.text = sound_label()
+
+func open_licenses() -> void:
+	licenses_panel.open(Licenses.full_text(), _language)
