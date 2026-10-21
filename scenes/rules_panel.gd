@@ -3,10 +3,14 @@ extends Control
 signal closed
 
 const ButtonStyle = preload("res://scenes/button_style.gd")
+const SoundSettings = preload("res://game/sound_settings.gd")
 
 var dim: ColorRect
 var body_label: Label
 var close_button: Button
+var settings_path: String = "user://settings.json"
+var language: String = "en"
+var sound_button: Button
 
 
 func _ready() -> void:
@@ -47,15 +51,25 @@ func _ready() -> void:
 	close_button.pressed.connect(close)
 	add_child(close_button)
 
+	sound_button = Button.new()
+	sound_button.position = Vector2(340, 1520)
+	sound_button.size = Vector2(400, 120)
+	ButtonStyle.apply_to(sound_button)
+	sound_button.add_theme_font_size_override("font_size", 44)
+	sound_button.pressed.connect(toggle_sound)
+	add_child(sound_button)
+
 	visible = false
 
 
 func open(lang: String) -> void:
+	language = lang
 	body_label.text = rules_text(lang)
 	if lang == "ja":
 		close_button.text = "閉じる"
 	else:
 		close_button.text = "CLOSE"
+	update_sound_label()
 	visible = true
 
 
@@ -70,6 +84,33 @@ func place(screen: Vector2) -> void:
 	dim.size = screen
 	body_label.position = Vector2(90, 420) + offset
 	close_button.position = Vector2(340, 1360) + offset
+	sound_button.position = Vector2(340, 1520) + offset
+
+
+func toggle_sound() -> void:
+	var m = not SoundSettings.load_muted(settings_path)
+	SoundSettings.save_muted(settings_path, m)
+	SoundSettings.apply(m)
+	update_sound_label()
+
+
+func update_sound_label() -> void:
+	if sound_button != null:
+		sound_button.text = sound_label()
+
+
+func sound_label() -> String:
+	var m = SoundSettings.load_muted(settings_path)
+	if language == "ja":
+		if m:
+			return "音 OFF"
+		else:
+			return "音 ON"
+	else:
+		if m:
+			return "SOUND OFF"
+		else:
+			return "SOUND ON"
 
 
 static func rules_text(lang: String) -> String:
