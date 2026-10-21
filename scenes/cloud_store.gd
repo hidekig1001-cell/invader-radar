@@ -78,3 +78,60 @@ func on_get_done(code: int, text: String) -> Dictionary:
 	if not (data.get("fields") is Dictionary):
 		return {}
 	return Payload.read_fields(data["fields"])
+
+
+func signup_request() -> Dictionary:
+	var config = SessionSave.read_dict(config_path)
+	var web_api_key = str(config.get("web_api_key", ""))
+	var url = Payload.signup_url(web_api_key)
+	var headers = ["Content-Type: application/json"]
+	var method = HTTPClient.METHOD_POST
+	var body = JSON.stringify({"returnSecureToken": true})
+	return {
+		"url": url,
+		"headers": headers,
+		"method": method,
+		"body": body
+	}
+
+
+func get_request() -> Dictionary:
+	var config = SessionSave.read_dict(config_path)
+	var project_id = str(config.get("project_id", ""))
+	var state = load_state()
+	var uid = str(state.get("uid", ""))
+	var id_token = str(state.get("id_token", ""))
+	var url = Payload.doc_url(project_id, uid)
+	var headers = ["Authorization: Bearer " + id_token]
+	var method = HTTPClient.METHOD_GET
+	var body = ""
+	return {
+		"url": url,
+		"headers": headers,
+		"method": method,
+		"body": body
+	}
+
+
+func commit_request(fields: Dictionary) -> Dictionary:
+	var config = SessionSave.read_dict(config_path)
+	var project_id = str(config.get("project_id", ""))
+	var state = load_state()
+	var uid = str(state.get("uid", ""))
+	var id_token = str(state.get("id_token", ""))
+	var url = Payload.commit_url(project_id)
+	var headers = ["Content-Type: application/json", "Authorization: Bearer " + id_token]
+	var method = HTTPClient.METHOD_POST
+	var body = JSON.stringify(Payload.commit_body(project_id, uid, fields))
+	return {
+		"url": url,
+		"headers": headers,
+		"method": method,
+		"body": body
+	}
+
+
+func send(req: Dictionary) -> int:
+	if not ensure_http():
+		return ERR_UNCONFIGURED
+	return http.request(req["url"], req["headers"], req["method"], req["body"])
