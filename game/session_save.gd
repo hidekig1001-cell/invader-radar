@@ -67,3 +67,18 @@ static func read_json(path: String) -> Dictionary:
 		out["rows"] = clean_rows
 	
 	return out
+
+
+static func read_dict(path: String) -> Dictionary:
+	var text = FileAccess.get_file_as_string(path)
+	if text == "":
+		return {}
+	
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		return {}
+	
+	if typeof(json.data) != TYPE_DICTIONARY:
+		return {}
+	
+	return json.data
