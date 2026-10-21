@@ -2,6 +2,7 @@
 extends Node
 
 const SessionSave = preload("res://game/session_save.gd")
+const Payload = preload("res://game/cloud_payload.gd")
 
 var config_path: String = ""
 var state_path: String = "user://cloud_state.json"
@@ -44,3 +45,36 @@ func save_progress(data: Dictionary) -> void:
 func clear() -> void:
 	if local_store != null:
 		local_store.clear()
+
+
+func on_signup_done(code: int, text: String) -> bool:
+	if code != 200:
+		return false
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		return false
+	var data = json.data
+	if not (data is Dictionary):
+		return false
+	if not data.has("localId") or not data.has("idToken") or not data.has("refreshToken"):
+		return false
+	var state = load_state()
+	state["uid"] = str(data["localId"])
+	state["id_token"] = str(data["idToken"])
+	state["refresh_token"] = str(data["refreshToken"])
+	SessionSave.write_json(state_path, state)
+	return true
+
+
+func on_get_done(code: int, text: String) -> Dictionary:
+	if code != 200:
+		return {}
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		return {}
+	var data = json.data
+	if not (data is Dictionary):
+		return {}
+	if not (data.get("fields") is Dictionary):
+		return {}
+	return Payload.read_fields(data["fields"])
