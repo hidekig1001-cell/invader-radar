@@ -6,11 +6,21 @@ const SessionSave = preload("res://game/session_save.gd")
 var config_path: String = ""
 var state_path: String = "user://cloud_state.json"
 var local_store = null
+var http = null
 
 
 func is_configured() -> bool:
 	var c = SessionSave.read_dict(config_path)
 	return str(c.get("project_id", "")) != "" and str(c.get("web_api_key", "")) != ""
+
+
+func ensure_http() -> bool:
+	if not is_configured():
+		return false
+	if http == null:
+		http = HTTPRequest.new()
+		add_child(http)
+	return true
 
 
 func load_state() -> Dictionary:
