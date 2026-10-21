@@ -49,6 +49,7 @@ func make_store():
 		cloud_store = CloudStore.new()
 		cloud_store.config_path = cloud_config_path
 		add_child(cloud_store)
+		cloud_store.pulled.connect(on_cloud_pulled)
 	if not cloud_store.is_configured():
 		return null
 	var local = ProgressStore.new()
@@ -72,6 +73,10 @@ func start_game(with_tutorial: bool) -> void:
 	main.progress_store = make_store()
 	main.title_requested.connect(show_title)
 	add_child(main)
+	if main.progress_store != null:
+		var req = cloud_store.begin_pull()
+		if not req.is_empty():
+			cloud_store.send(req)
 
 
 func start_fresh_game() -> void:
@@ -94,3 +99,8 @@ func show_title() -> void:
 
 func quit_app() -> void:
 	get_tree().quit()
+
+
+func on_cloud_pulled(data: Dictionary) -> void:
+	if main != null:
+		main.session.restore_dict(data)
