@@ -13,7 +13,7 @@ var main = null
 var title_screen = null
 var splash = null
 var save_path := SAVE_PATH
-var cloud_config_path: String = ""
+var cloud_config_path: String = "res://data/cloud_config.json"
 var cloud_store = null
 
 
