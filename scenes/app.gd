@@ -5,6 +5,7 @@ const TitleScreen = preload("res://scenes/title_screen.gd")
 const SplashScreen = preload("res://scenes/splash_screen.gd")
 const SessionSave = preload("res://game/session_save.gd")
 const ProgressStore = preload("res://game/progress_store.gd")
+const CloudStore = preload("res://scenes/cloud_store.gd")
 const SEEN_PATH := "user://tutorial_seen"
 const SAVE_PATH := "user://progress.json"
 
@@ -12,6 +13,8 @@ var main = null
 var title_screen = null
 var splash = null
 var save_path := SAVE_PATH
+var cloud_config_path: String = ""
+var cloud_store = null
 
 
 func _ready() -> void:
@@ -41,6 +44,19 @@ func on_splash_finished() -> void:
 	add_child(title_screen)
 
 
+func make_store():
+	if cloud_store == null:
+		cloud_store = CloudStore.new()
+		cloud_store.config_path = cloud_config_path
+		add_child(cloud_store)
+	if not cloud_store.is_configured():
+		return null
+	var local = ProgressStore.new()
+	local.path = save_path
+	cloud_store.local_store = local
+	return cloud_store
+
+
 func start_game(with_tutorial: bool) -> void:
 	if splash != null:
 		splash.queue_free()
@@ -53,6 +69,7 @@ func start_game(with_tutorial: bool) -> void:
 	main.start_with_tutorial = with_tutorial
 	main.language = lang
 	main.save_path = save_path
+	main.progress_store = make_store()
 	main.title_requested.connect(show_title)
 	add_child(main)
 
