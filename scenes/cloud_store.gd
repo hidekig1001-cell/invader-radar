@@ -147,7 +147,16 @@ func send(req: Dictionary) -> int:
 
 
 func push_fields() -> Dictionary:
-	return commit_request(Payload.build_fields(queued, int(load_state().get("rev", 0)), app_version))
+	var state = load_state()
+	var fields = Payload.build_fields(queued, int(state.get("rev", 0)), app_version)
+	var clears = queued.get("clears", [])
+	if typeof(clears) != TYPE_ARRAY:
+		clears = []
+	var cloud_best = state.get("cloud_best", {})
+	if typeof(cloud_best) != TYPE_DICTIONARY:
+		cloud_best = {}
+	fields["best"] = Payload.to_value(Payload.merge_best(cloud_best, Payload.best_from_clears(clears)))
+	return commit_request(fields)
 
 
 func begin_push(data: Dictionary) -> Dictionary:
