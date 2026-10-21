@@ -7,6 +7,7 @@ signal quit_requested
 const Sound = preload("res://scenes/sound.gd")
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const SpaceBg = preload("res://scenes/space_bg.gd")
+const SoundSettings = preload("res://game/sound_settings.gd")
 
 var _language: String = ""
 var _title_label: Label
@@ -18,6 +19,9 @@ var _start_btn_fresh: Button
 var background: TextureRect
 var sound = null
 var base_positions: Dictionary = {}
+var settings_path: String = "user://settings.json"
+var muted: bool = false
+var sound_btn: Button
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
@@ -33,6 +37,10 @@ func _ready() -> void:
 	sound = Sound.new()
 	add_child(sound)
 	sound.setup()
+
+	muted = SoundSettings.load_muted(settings_path)
+	SoundSettings.apply(muted)
+
 	sound.play_music("bgm_title")
 
 	_title_label = Label.new()
@@ -103,12 +111,25 @@ func _ready() -> void:
 	add_child(_start_btn_fresh)
 	ButtonStyle.apply_to(_start_btn_fresh)
 
+	sound_btn = Button.new()
+	sound_btn.position = Vector2(760, 120)
+	sound_btn.size = Vector2(280, 120)
+	sound_btn.add_theme_font_size_override("font_size", 44)
+	sound_btn.pressed.connect(func(): 
+		sound.play_sfx("button")
+		toggle_sound()
+	)
+	add_child(sound_btn)
+	ButtonStyle.apply_to(sound_btn)
+	update_sound_label()
+
 	base_positions["title"] = _title_label.position
 	base_positions["lang_en"] = _lang_btn_en.position
 	base_positions["lang_ja"] = _lang_btn_ja.position
 	base_positions["start_tut"] = _start_btn_tutorial.position
 	base_positions["start_now"] = _start_btn_now.position
 	base_positions["start_fresh"] = _start_btn_fresh.position
+	base_positions["sound"] = sound_btn.position
 
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
@@ -136,6 +157,8 @@ func apply_screen_layout(size: Vector2) -> void:
 		_start_btn_now.position = base_positions["start_now"] + offset
 	if base_positions.has("start_fresh"):
 		_start_btn_fresh.position = base_positions["start_fresh"] + offset
+	if base_positions.has("sound"):
+		sound_btn.position = base_positions["sound"] + offset
 
 func title_text() -> String:
 	return _title_label.text
@@ -156,6 +179,7 @@ func select_language(lang: String) -> void:
 	_start_btn_tutorial.visible = true
 	_start_btn_now.visible = true
 	_start_btn_fresh.visible = true
+	update_sound_label()
 
 func language() -> String:
 	return _language
@@ -173,3 +197,25 @@ func press_start(with_tutorial: bool) -> void:
 func press_fresh_start() -> void:
 	sound.stop_music()
 	fresh_start_requested.emit()
+
+func toggle_sound() -> void:
+	muted = not muted
+	SoundSettings.save_muted(settings_path, muted)
+	SoundSettings.apply(muted)
+	update_sound_label()
+
+func sound_label() -> String:
+	if _language == "ja":
+		if muted:
+			return "音 OFF"
+		else:
+			return "音 ON"
+	else:
+		if muted:
+			return "SOUND OFF"
+		else:
+			return "SOUND ON"
+
+func update_sound_label() -> void:
+	if sound_btn != null:
+		sound_btn.text = sound_label()
