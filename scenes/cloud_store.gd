@@ -11,6 +11,7 @@ var http = null
 var pending: String = ""
 var queued: Dictionary = {}
 var app_version: String = "1.11"
+var refreshed: bool = false
 
 
 func is_configured() -> bool:
@@ -148,6 +149,7 @@ func push_fields() -> Dictionary:
 
 func begin_push(data: Dictionary) -> Dictionary:
 	queued = data.duplicate(true)
+	refreshed = false
 	if str(load_state().get("uid", "")) == "":
 		pending = "signup"
 		return signup_request()
@@ -156,10 +158,46 @@ func begin_push(data: Dictionary) -> Dictionary:
 		return push_fields()
 
 
+func refresh_request() -> Dictionary:
+	var config = SessionSave.read_dict(config_path)
+	var state = load_state()
+	return {
+		"url": "https://securetoken.googleapis.com/v1/token?key=" + str(config.get("web_api_key", "")),
+		"headers": ["Content-Type: application/x-www-form-urlencoded"],
+		"method": HTTPClient.METHOD_POST,
+		"body": "grant_type=refresh_token&refresh_token=" + str(state.get("refresh_token", "")).uri_encode()
+	}
+
+
+func on_refresh_done(code: int, text: String) -> bool:
+	if code != 200:
+		return false
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		return false
+	var data = json.data
+	if not (data is Dictionary):
+		return false
+	if not data.has("id_token") or not data.has("refresh_token"):
+		return false
+	var state = load_state()
+	state["id_token"] = str(data["id_token"])
+	state["refresh_token"] = str(data["refresh_token"])
+	SessionSave.write_json(state_path, state)
+	return true
+
+
 func next_after(code: int, text: String) -> Dictionary:
 	var was = pending
 	pending = ""
 	if was == "signup" and on_signup_done(code, text):
+		pending = "commit"
+		return push_fields()
+	elif was == "commit" and code == 401 and not refreshed:
+		refreshed = true
+		pending = "refresh"
+		return refresh_request()
+	elif was == "refresh" and on_refresh_done(code, text):
 		pending = "commit"
 		return push_fields()
 	else:
