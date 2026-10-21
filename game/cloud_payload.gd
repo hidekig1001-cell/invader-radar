@@ -124,3 +124,39 @@ static func read_fields(fields: Dictionary) -> Dictionary:
 		if typeof(fields[k]) == TYPE_DICTIONARY:
 			out[k] = from_value(fields[k])
 	return out
+
+
+static func signup_url(api_key: String) -> String:
+	return "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + api_key
+
+
+static func refresh_url(api_key: String) -> String:
+	return "https://securetoken.googleapis.com/v1/token?key=" + api_key
+
+
+static func commit_url(project_id: String) -> String:
+	return "https://firestore.googleapis.com/v1/projects/" + project_id + "/databases/(default)/documents:commit"
+
+
+static func doc_name(project_id: String, uid: String) -> String:
+	return "projects/" + project_id + "/databases/(default)/documents/players/" + uid
+
+
+static func doc_url(project_id: String, uid: String) -> String:
+	return "https://firestore.googleapis.com/v1/" + doc_name(project_id, uid)
+
+
+static func commit_body(project_id: String, uid: String, fields: Dictionary) -> Dictionary:
+	var write: Dictionary = {
+		"update": {
+			"name": doc_name(project_id, uid),
+			"fields": fields
+		},
+		"updateTransforms": [
+			{
+				"fieldPath": "updated_at",
+				"setToServerValue": "REQUEST_TIME"
+			}
+		]
+	}
+	return {"writes": [write]}
