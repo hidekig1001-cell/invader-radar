@@ -24,6 +24,7 @@ func ensure_http() -> bool:
 	if http == null:
 		http = HTTPRequest.new()
 		add_child(http)
+		http.request_completed.connect(on_request_completed)
 	return true
 
 
@@ -43,6 +44,7 @@ func save_progress(data: Dictionary) -> void:
 	var state = load_state()
 	state["rev"] = int(state.get("rev", 0)) + 1
 	SessionSave.write_json(state_path, state)
+	push(data)
 
 
 func clear() -> void:
@@ -162,3 +164,22 @@ func next_after(code: int, text: String) -> Dictionary:
 		return push_fields()
 	else:
 		return {}
+
+
+func on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	var req = next_after(code, body.get_string_from_utf8())
+	if not req.is_empty():
+		if send(req) != OK:
+			pending = ""
+
+
+func push(data: Dictionary) -> int:
+	if not is_configured():
+		return ERR_UNCONFIGURED
+	if pending != "":
+		queued = data.duplicate(true)
+		return ERR_BUSY
+	var err = send(begin_push(data))
+	if err != OK:
+		pending = ""
+	return err
