@@ -1,6 +1,8 @@
 # サーバー（Firebase）に進み具合を保存する口。この段では通信しない。
 extends Node
 
+signal pulled(data: Dictionary)
+
 const SessionSave = preload("res://game/session_save.gd")
 const Payload = preload("res://game/cloud_payload.gd")
 
@@ -12,6 +14,7 @@ var pending: String = ""
 var queued: Dictionary = {}
 var app_version: String = "1.11"
 var refreshed: bool = false
+var after_refresh: String = ""
 
 
 func is_configured() -> bool:
@@ -193,13 +196,26 @@ func next_after(code: int, text: String) -> Dictionary:
 	if was == "signup" and on_signup_done(code, text):
 		pending = "commit"
 		return push_fields()
-	elif was == "commit" and code == 401 and not refreshed:
+	elif (was == "commit" or was == "get") and code == 401 and not refreshed:
 		refreshed = true
+		after_refresh = was
 		pending = "refresh"
 		return refresh_request()
 	elif was == "refresh" and on_refresh_done(code, text):
-		pending = "commit"
-		return push_fields()
+		if after_refresh == "get":
+			pending = "get"
+			return get_request()
+		else:
+			pending = "commit"
+			return push_fields()
+	elif was == "get":
+		var server = on_get_done(code, text)
+		if not server.is_empty():
+			var local_rev = int(load_state().get("rev", 0))
+			var server_rev = int(server.get("rev", 0))
+			if Payload.server_is_newer(local_rev, server_rev):
+				apply_server(server)
+		return {}
 	else:
 		return {}
 
@@ -221,3 +237,21 @@ func push(data: Dictionary) -> int:
 	if err != OK:
 		pending = ""
 	return err
+
+
+func begin_pull() -> Dictionary:
+	refreshed = false
+	if str(load_state().get("uid", "")) == "":
+		return {}
+	pending = "get"
+	return get_request()
+
+
+func apply_server(server: Dictionary) -> void:
+	var state = load_state()
+	state["rev"] = int(server.get("rev", 0))
+	state["cloud_best"] = server.get("best", {})
+	SessionSave.write_json(state_path, state)
+	if local_store != null:
+		local_store.save_progress(server)
+	pulled.emit(server)
