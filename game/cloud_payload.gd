@@ -83,6 +83,21 @@ static func server_is_newer(local_rev: int, server_rev: int) -> bool:
 	return server_rev > local_rev
 
 
+static func merge_best(cloud_best: Dictionary, local_best: Dictionary) -> Dictionary:
+	var out: Dictionary = cloud_best.duplicate(true)
+	for k in local_best.keys():
+		var l: Dictionary = local_best[k]
+		if not out.has(k):
+			out[k] = l.duplicate(true)
+		else:
+			var e: Dictionary = out[k]
+			e["best"] = minf(float(e["best"]), float(l["best"]))
+			e["count"] = int(e["count"]) + int(l["count"])
+			e["last"] = float(l["last"])
+			e["moves"] = int(l["moves"])
+	return out
+
+
 static func build_fields(save: Dictionary, rev: int, app_version: String) -> Dictionary:
 	var doc: Dictionary = {"rev": rev}
 	for k in INT_KEYS:
