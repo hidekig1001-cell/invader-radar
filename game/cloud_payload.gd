@@ -1,5 +1,7 @@
 extends RefCounted
 
+const INT_KEYS := ["level_index", "score", "hints", "max_cleared", "moves"]
+
 
 static func to_value(v) -> Dictionary:
 	match typeof(v):
@@ -79,3 +81,31 @@ static func best_from_clears(clears: Array) -> Dictionary:
 
 static func server_is_newer(local_rev: int, server_rev: int) -> bool:
 	return server_rev > local_rev
+
+
+static func build_fields(save: Dictionary, rev: int, app_version: String) -> Dictionary:
+	var doc: Dictionary = {"rev": rev}
+	for k in INT_KEYS:
+		if save.has(k):
+			doc[k] = int(save[k])
+	if save.has("elapsed"):
+		doc["elapsed"] = float(save["elapsed"])
+	if save.has("level"):
+		doc["level"] = save["level"]
+	if save.has("rows"):
+		doc["rows"] = save["rows"]
+	var clears = save.get("clears", [])
+	doc["best"] = best_from_clears(clears if typeof(clears) == TYPE_ARRAY else [])
+	doc["app_version"] = app_version
+	var fields: Dictionary = {}
+	for k in doc.keys():
+		fields[k] = to_value(doc[k])
+	return fields
+
+
+static func read_fields(fields: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in fields.keys():
+		if typeof(fields[k]) == TYPE_DICTIONARY:
+			out[k] = from_value(fields[k])
+	return out
