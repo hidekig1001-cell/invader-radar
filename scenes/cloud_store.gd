@@ -8,6 +8,9 @@ var config_path: String = ""
 var state_path: String = "user://cloud_state.json"
 var local_store = null
 var http = null
+var pending: String = ""
+var queued: Dictionary = {}
+var app_version: String = "1.11"
 
 
 func is_configured() -> bool:
@@ -135,3 +138,27 @@ func send(req: Dictionary) -> int:
 	if not ensure_http():
 		return ERR_UNCONFIGURED
 	return http.request(req["url"], req["headers"], req["method"], req["body"])
+
+
+func push_fields() -> Dictionary:
+	return commit_request(Payload.build_fields(queued, int(load_state().get("rev", 0)), app_version))
+
+
+func begin_push(data: Dictionary) -> Dictionary:
+	queued = data.duplicate(true)
+	if str(load_state().get("uid", "")) == "":
+		pending = "signup"
+		return signup_request()
+	else:
+		pending = "commit"
+		return push_fields()
+
+
+func next_after(code: int, text: String) -> Dictionary:
+	var was = pending
+	pending = ""
+	if was == "signup" and on_signup_done(code, text):
+		pending = "commit"
+		return push_fields()
+	else:
+		return {}
