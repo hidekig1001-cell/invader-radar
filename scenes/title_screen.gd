@@ -26,6 +26,7 @@ var muted: bool = false
 var sound_btn: Button
 var licenses_btn: Button
 var licenses_panel = null
+var safe_top: float = 0.0
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
@@ -154,6 +155,8 @@ func _ready() -> void:
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
 	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
+	if display_name != "headless":
+		safe_top = SpaceBg.safe_top_for_layout(float(DisplayServer.get_display_safe_area().position.y), float(DisplayServer.window_get_size().y), layout_size.y)
 	apply_screen_layout(layout_size)
 
 func _notification(what: int) -> void:
@@ -161,7 +164,7 @@ func _notification(what: int) -> void:
 		quit_requested.emit()
 
 func apply_screen_layout(size: Vector2) -> void:
-	var offset = SpaceBg.layout_offsets(size.x, size.y)
+	var offset = SpaceBg.safe_layout_offsets(size.x, size.y, safe_top)
 	
 	background.size = size
 	

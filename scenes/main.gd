@@ -37,6 +37,7 @@ var progress_store = null
 var clear_effect = null
 var last_status: String = ""
 var last_tutorial_status: String = ""
+var safe_top: float = 0.0
 
 @onready var board_view = $BoardView
 @onready var hud = $Ui/Hud
@@ -123,6 +124,8 @@ func _ready() -> void:
 	var visible_size = get_viewport().get_visible_rect().size
 	var display_name = DisplayServer.get_name()
 	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
+	if display_name != "headless":
+		safe_top = SpaceBg.safe_top_for_layout(float(DisplayServer.get_display_safe_area().position.y), float(DisplayServer.window_get_size().y), layout_size.y)
 	apply_screen_layout(layout_size)
 
 	if start_with_tutorial:
@@ -150,7 +153,7 @@ func save_progress() -> void:
 
 
 func apply_screen_layout(size: Vector2) -> void:
-	var offsets = SpaceBg.layout_offsets(size.x, size.y)
+	var offsets = SpaceBg.safe_layout_offsets(size.x, size.y, safe_top)
 	var extra_x = offsets.x * 2.0
 	var extra_y = offsets.y * 2.0
 	
