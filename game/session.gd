@@ -11,6 +11,7 @@ const LevelPack = preload("res://game/level_pack.gd")
 const Hint = preload("res://core/hint.gd")
 const LevelMaker = preload("res://game/level_maker.gd")
 const Solver = preload("res://core/solver.gd")
+const LevelPrefetch = preload("res://game/level_prefetch.gd")
 
 const LEVEL_PATHS := [
 	"res://data/levels/level_001.json",
@@ -35,6 +36,7 @@ var given: Vector2i = Vector2i(-1, -1)
 var elapsed: float = 0.0
 var max_cleared: int = 0
 var clear_records: Array = []
+var prefetch = LevelPrefetch.new()
 
 
 # level_list（Level の並び）を渡せばそれを使う。空なら data/levels の面を読む。
@@ -208,13 +210,21 @@ func is_given(x: int, y: int) -> bool:
 
 func _start_level(index: int, regenerate: bool = true) -> void:
 	level_index = index
+	var pre_solution: Array = []
 	if levels.is_empty():
 		level = null
 	else:
 		var original_level = levels[index]
 		if uses_default_levels and index >= 10 and regenerate and original_level != null:
 			var spec = LevelPack.GENERATED_SPECS[index - 10]
-			var dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi(), spec[3], spec[4])
+			var pre = prefetch.take(index)
+			var dict: Dictionary
+			if not pre.is_empty():
+				dict = pre["level"]
+				pre_solution = pre["solution"]
+			else:
+				dict = LevelMaker.make_level(original_level.width, original_level.width, rng.randi(), spec[3], spec[4])
+			
 			dict["id"] = original_level.id
 			var new_level = Level.new()
 			if new_level.parse(dict):
@@ -233,7 +243,12 @@ func _start_level(index: int, regenerate: bool = true) -> void:
 	given = Vector2i(-1, -1)
 	
 	if level != null and level.width >= 6:
-		var solutions = Solver.solutions(level, 1)
+		var solutions: Array = []
+		if not pre_solution.is_empty():
+			solutions = [pre_solution]
+		else:
+			solutions = Solver.solutions(level, 1)
+		
 		if not solutions.is_empty():
 			var solution: Array = solutions[0]
 			var mid_y = level.height / 2
@@ -242,6 +257,7 @@ func _start_level(index: int, regenerate: bool = true) -> void:
 				board.apply("place", given.x, given.y)
 				board.clear_history()
 	
+	prefetch_next()
 	changed.emit()
 
 
@@ -321,3 +337,13 @@ func solve_now() -> bool:
 func tick(delta: float) -> void:
 	if status == "playing" and level != null:
 		elapsed += delta
+
+
+func prefetch_next() -> void:
+	if not uses_default_levels or levels.is_empty():
+		return
+	var next = (level_index + 1) % levels.size()
+	if next < 10 or prefetch.pending_index == next:
+		return
+	var spec = LevelPack.GENERATED_SPECS[next - 10]
+	prefetch.start(next, levels[next].width, rng.randi(), spec[3], spec[4])
