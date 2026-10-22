@@ -20,6 +20,7 @@ const ProgressStore = preload("res://game/progress_store.gd")
 const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE   SWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
 const ALL_CLEARED_TEXT := "ALL LEVELS CLEARED!  TAP FOR TITLE"
+const LOGO_GAP := 20.0
 
 var session = null  # add_child の前に置けば、その session を使う（テスト用）
 var _stroke: Array = []  # 今の指のなぞり [{"pos", "t"}]
@@ -181,11 +182,13 @@ func place_title_logo() -> void:
 	var h: float = minf(152.0, top_space - 40.0)
 	if h < 100.0:
 		title_logo.visible = false
+		space_bg.pink_min_y = 0.0
 		return
 	else:
 		title_logo.visible = true
 		title_logo.size = Vector2(h * 5.0, h)
-		title_logo.position = Vector2(hud.position.x + 1040.0 - h * 5.0, (top_space - h) / 2.0)
+		title_logo.position = Vector2(hud.position.x + 1040.0 - h * 5.0, top_space - h - LOGO_GAP)
+		space_bg.pink_min_y = title_logo.position.y
 
 
 func part_rects() -> Array:
@@ -207,7 +210,10 @@ func part_rects() -> Array:
 	# HUD
 	if hud:
 		if hud is Control:
-			rects.append(Rect2(hud.position, hud.size))
+			if title_logo != null and title_logo.visible:
+				rects.append(Rect2(hud.position + Vector2(0, 90), hud.size - Vector2(0, 90)))
+			else:
+				rects.append(Rect2(hud.position, hud.size))
 		else:
 			pass
 

@@ -11,6 +11,7 @@ const SAFE_TOP_MARGIN := 80.0
 
 var sky_size := Vector2(1080, 1920)
 var avoid_rects: Array = []
+var pink_min_y: float = 0.0
 
 static func layout_offsets(w: float, h: float) -> Vector2:
 	var extra = max(h - 1920.0, 0.0)
@@ -111,9 +112,6 @@ func guard_planets() -> Array:
 						radius = available_height / 2.0
 						pos = Vector2(pos.x, band_top + radius)
 					else:
-						continue # Invalid yellow, skip adding to guards? Or add with invalid state? 
-						# CR says "return same values as planet_positions". If planet_positions skips it, guard_planets should too?
-						# But planet_positions logic for yellow is complex. Let's assume valid for now based on tests.
 						continue
 			else:
 				continue
@@ -152,15 +150,11 @@ func pink_placement(rects: Array) -> Dictionary:
 		
 	for radius in radii:
 		var e = pink_draw_extent(radius)
-		# y from 0 to sky_size.y step 5
-		# x from 0 to sky_size.x step 5
-		# We need to find the FIRST one.
-		# The loop order in CR: "radius ... y ... x"
 		
 		var max_y = int(sky_size.y)
 		var max_x = int(sky_size.x)
 		
-		for y in range(0, max_y + 1, 5):
+		for y in range(int(pink_min_y), max_y + 1, 5):
 			for x in range(0, max_x + 1, 5):
 				var pos = Vector2(float(x), float(y))
 				if pink_spot_ok(pos, radius, rects):
@@ -170,18 +164,6 @@ func pink_placement(rects: Array) -> Dictionary:
 
 func planet_positions(rects: Array) -> Array:
 	var result = []
-	
-	# Handle Yellow and Green using guard_planets logic to ensure consistency
-	var guards = guard_planets()
-	for g in guards:
-		# Determine color based on radius/pos from original list? 
-		# guard_planets returns pos/radius. We need to map back to color.
-		# Since guard_planets iterates planet_list, we can just re-iterate planet_list and filter.
-		pass
-		
-	# Re-implement planet_positions to match CR requirements exactly
-	# 1. Yellow/Green: Use logic from guard_planets (which mirrors original planet_positions for Y/G)
-	# 2. Pink: Use pink_placement
 	
 	for p in planet_list():
 		var color = p["color"]
@@ -209,7 +191,7 @@ func planet_positions(rects: Array) -> Array:
 						radius = available_height / 2.0
 						pos = Vector2(pos.x, band_top + radius)
 					else:
-						continue # Skip if invalid
+						continue
 			else:
 				continue
 				

@@ -52,8 +52,8 @@ func test_pink_placement_1080x2424() -> void:
 	assert_false(placement.is_empty())
 	assert_true(placement.has("pos"))
 	assert_true(placement.has("radius"))
-	assert_true(placement["pos"].is_equal_approx(Vector2(140, 125)))
-	assert_almost_eq(placement["radius"], 75.0, 0.001)
+	assert_true(placement["pos"].is_equal_approx(Vector2(130, 170)))
+	assert_almost_eq(placement["radius"], 80.0, 0.001)
 
 ## CHECK: 5
 func test_pink_placement_bounds_and_avoidance() -> void:
@@ -177,8 +177,8 @@ func test_pink_placement_empty_1080x1920_and_present_1080x2424() -> void:
 	var m2 = await _start_main(Vector2(1080, 2424))
 	var placement2 = m2.space_bg.pink_placement(m2.space_bg.avoid_rects)
 	assert_false(placement2.is_empty())
-	assert_true(placement2["pos"].is_equal_approx(Vector2(140, 125)))
-	assert_almost_eq(placement2["radius"], 75.0, 0.001)
+	assert_true(placement2["pos"].is_equal_approx(Vector2(130, 170)))
+	assert_almost_eq(placement2["radius"], 80.0, 0.001)
 	
 	var planets2 = m2.space_bg.planet_positions(m2.space_bg.avoid_rects)
 	var pink_planet2 = null
@@ -194,8 +194,8 @@ func test_pink_placement_empty_1080x1920_and_present_1080x2424() -> void:
 			green_planet2 = p
 			
 	assert_not_null(pink_planet2)
-	assert_true(pink_planet2["pos"].is_equal_approx(Vector2(140, 125)))
-	assert_almost_eq(pink_planet2["radius"], 75.0, 0.001)
+	assert_true(pink_planet2["pos"].is_equal_approx(Vector2(130, 170)))
+	assert_almost_eq(pink_planet2["radius"], 80.0, 0.001)
 	
 	assert_not_null(yellow_planet2)
 	assert_true(yellow_planet2["pos"].is_equal_approx(Vector2(110, 2298)))
