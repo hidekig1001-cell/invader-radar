@@ -7,6 +7,8 @@ const STAR_COLORS = [
 	Color(0.75, 0.95, 1.0)
 ]
 
+const SAFE_TOP_MARGIN := 80.0
+
 var sky_size := Vector2(1080, 1920)
 var avoid_rects: Array = []
 
@@ -14,6 +16,17 @@ static func layout_offsets(w: float, h: float) -> Vector2:
 	var extra = max(h - 1920.0, 0.0)
 	var extra_x = max(w - 1080.0, 0.0)
 	return Vector2(extra_x / 2.0, extra / 2.0)
+
+static func safe_layout_offsets(w: float, h: float, safe_top: float) -> Vector2:
+	var base = layout_offsets(w, h)
+	var extra = max(h - 1920.0, 0.0)
+	var y = max(base.y, safe_top - SAFE_TOP_MARGIN)
+	return Vector2(base.x, min(y, extra))
+
+static func safe_top_for_layout(safe_top_px: float, window_h: float, layout_h: float) -> float:
+	if window_h <= 0:
+		return 0.0
+	return safe_top_px * layout_h / window_h
 
 static func screen_size_for_layout(visible: Vector2, display_name: String) -> Vector2:
 	if display_name == "headless":
