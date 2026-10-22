@@ -13,6 +13,7 @@ signal solve_pressed
 const FONT_SIZE := 52
 const SCREEN := Vector2(1080, 1920)
 const ButtonStyle = preload("res://scenes/button_style.gd")
+const SoundSettings = preload("res://game/sound_settings.gd")
 
 const ROW_BUTTON_RECTS := [Rect2(40, 260, 320, 100), Rect2(380, 260, 320, 100), Rect2(720, 260, 320, 100)]
 const ROW_BUTTON_SIZE := Vector2(320, 100)
@@ -44,6 +45,8 @@ var time_name_label: Label
 
 var language: String = "en"
 var tutorial_mode: bool = false
+var settings_path: String = "user://settings.json"
+var sound_button: Button
 
 
 func _ready() -> void:
@@ -96,6 +99,15 @@ func _ready() -> void:
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
 	set_time(0.0)
 
+	sound_button = Button.new()
+	sound_button.position = Vector2(720, 370)
+	sound_button.size = Vector2(320, 90)
+	ButtonStyle.apply_to(sound_button)
+	sound_button.add_theme_font_size_override("font_size", 40)
+	sound_button.pressed.connect(toggle_sound)
+	add_child(sound_button)
+	update_sound_label()
+
 
 func set_language(lang: String) -> void:
 	language = lang
@@ -107,6 +119,7 @@ func set_language(lang: String) -> void:
 		solve_button.text = localized("ANSWER", "答え")
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
 	set_table_names()
+	update_sound_label()
 
 
 func localized(en_text: String, ja_text: String) -> String:
@@ -124,6 +137,7 @@ func update_from(snap: Dictionary) -> void:
 	hint_button.text = localized("HINT (%d)", "ヒント (%d)") % int(snap.get("hints", 0))
 	hint_button.disabled = tutorial_mode or int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
 	undo_button.disabled = tutorial_mode or snap.get("status", "") != "playing"
+	update_sound_label()
 
 
 func set_apply_visible(on: bool) -> void:
@@ -252,3 +266,29 @@ func _draw() -> void:
 	# Draw inner horizontal line
 	var y := TABLE_RECT.position.y + cell_h
 	draw_line(Vector2(TABLE_RECT.position.x, y), Vector2(TABLE_RECT.position.x + TABLE_RECT.size.x, y), TABLE_LINE, 3.0)
+
+
+func toggle_sound() -> void:
+	var m = not SoundSettings.load_muted(settings_path)
+	SoundSettings.save_muted(settings_path, m)
+	SoundSettings.apply(m)
+	update_sound_label()
+
+
+func update_sound_label() -> void:
+	if sound_button != null:
+		sound_button.text = sound_label()
+
+
+func sound_label() -> String:
+	var muted = SoundSettings.load_muted(settings_path)
+	if muted:
+		if language == "ja":
+			return "音 OFF"
+		else:
+			return "SOUND OFF"
+	else:
+		if language == "ja":
+			return "音 ON"
+		else:
+			return "SOUND ON"
