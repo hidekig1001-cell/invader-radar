@@ -134,6 +134,7 @@ func swipe(cells: Array) -> bool:
 func undo() -> bool:
 	if status != "playing" or board == null or not board.undo():
 		return false
+	current_hint = {}
 	changed.emit()
 	return true
 
@@ -271,6 +272,7 @@ func _commit(did_change: bool) -> bool:
 		max_cleared = maxi(max_cleared, level.id)
 		score += CLEAR_SCORE
 		hints = mini(hints + 1, DEFAULT_HINTS)
+	current_hint = {}
 	changed.emit()
 	return true
 

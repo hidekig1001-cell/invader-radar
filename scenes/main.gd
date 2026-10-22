@@ -302,7 +302,6 @@ func _on_hint() -> void:
 	if session.request_hint():
 		bubble.show_text(hint_text(session.current_hint["text"]), 0.0)
 		board_view.hint_cell = session.current_hint["cell"]
-		hud.set_apply_visible(true)
 
 
 func on_apply() -> void:
@@ -347,6 +346,8 @@ func _refresh() -> void:
 	elif bubble.text == cleared_text():
 		bubble.clear_text()
 	if session.current_hint.is_empty():
+		if board_view.hint_cell.x >= 0 and session.status != "cleared":
+			bubble.clear_text()
 		board_view.hint_cell = Vector2i(-1, -1)
 		hud.set_apply_visible(false)
 

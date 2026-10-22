@@ -26,7 +26,7 @@ func test_hint_button_behavior() -> void:
 	await wait_frames(1)
 	assert_eq(m.session.hints, 2)
 	assert_eq(m.board_view.hint_cell, Vector2i(1, 0))
-	assert_true(m.hud.apply_button.visible)
+	assert_false(m.hud.apply_button.visible)
 	assert_eq(m.bubble.text, "A PIECE GOES HERE. DOUBLE TAP TO PLACE IT.")
 
 
