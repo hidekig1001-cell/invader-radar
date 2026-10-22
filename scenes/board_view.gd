@@ -22,6 +22,9 @@ const PIECE_FILL := Color(0.08, 0.08, 0.12)
 const CONFLICT_FILL := Color(0.90, 0.15, 0.15)
 const GRID_LINE := Color(0, 0, 0, 0.55)
 
+# CR-1130: 数字のあるマスに描く × の色
+const MARK_ON_NUMBER_COLOR := Color(1, 1, 1, 0.6)
+
 # 宇宙人の絵（幅 8・高さ 8）
 const ALIEN_ROWS := [
 	"....1...",
@@ -361,6 +364,27 @@ func radar_text_color(x: int, y: int) -> Color:
 
 # -----------------------------
 
+# CR-1130: 指定したマスに radar の数字があるかどうかを返す。
+func has_radar(x: int, y: int) -> bool:
+	if session == null or session.level == null:
+		return false
+	
+	for r in session.level.radar:
+		if r is Array:
+			if r.size() >= 2 and int(r[0]) == x and int(r[1]) == y:
+				return true
+		elif r is Vector3i:
+			if r.x == x and r.y == y:
+				return true
+				
+	return false
+
+# CR-1130: 指定したマスに描く × の色を返す。
+func mark_color_at(x: int, y: int) -> Color:
+	if has_radar(x, y):
+		return MARK_ON_NUMBER_COLOR
+	return mark_color()
+
 
 func _draw() -> void:
 	var gs := grid_size()
@@ -407,7 +431,7 @@ func _draw() -> void:
 			else:
 				match row[x]:
 					"x":
-						_draw_mark(r)
+						_draw_mark(r, mark_color_at(x, y))
 					"P":
 						_draw_piece(r, piece_fill(x, y))
 
@@ -458,12 +482,11 @@ func _draw() -> void:
 					draw_string(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 
-func _draw_mark(r: Rect2) -> void:
+func _draw_mark(r: Rect2, color: Color) -> void:
 	var m := r.size.x * 0.28
 	var a := r.position + Vector2(m, m)
 	var b := r.end - Vector2(m, m)
 	var thickness := mark_thickness()
-	var color := mark_color()
 	
 	# Draw lines
 	draw_line(a, b, color, thickness)
