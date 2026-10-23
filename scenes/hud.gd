@@ -280,15 +280,16 @@ func update_sound_label() -> void:
 		sound_button.text = sound_label()
 
 
+# 押したときにどうなるかを出す（鳴っているとき OFF、消音のとき ON）。
 func sound_label() -> String:
 	var muted = SoundSettings.load_muted(settings_path)
 	if muted:
 		if language == "ja":
-			return "音 OFF"
-		else:
-			return "SOUND OFF"
-	else:
-		if language == "ja":
 			return "音 ON"
 		else:
 			return "SOUND ON"
+	else:
+		if language == "ja":
+			return "音 OFF"
+		else:
+			return "SOUND OFF"

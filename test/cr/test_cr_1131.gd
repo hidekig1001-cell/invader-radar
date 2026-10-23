@@ -20,15 +20,15 @@ func test_sound_button_toggle() -> void:
 
 	assert_eq(h.sound_button.position, Vector2(720, 370))
 	assert_eq(h.sound_button.size, Vector2(320, 90))
-	assert_eq(h.sound_button.text, "SOUND ON")
+	assert_eq(h.sound_button.text, "SOUND OFF")
 
 	h.toggle_sound()
-	assert_eq(h.sound_button.text, "SOUND OFF")
+	assert_eq(h.sound_button.text, "SOUND ON")
 	assert_true(AudioServer.is_bus_mute(0))
 	assert_eq(Save.read_dict(path)["muted"], true)
 
 	h.toggle_sound()
-	assert_eq(h.sound_button.text, "SOUND ON")
+	assert_eq(h.sound_button.text, "SOUND OFF")
 	assert_false(AudioServer.is_bus_mute(0))
 
 
@@ -38,8 +38,8 @@ func test_sound_label_language_and_update_from() -> void:
 	Save.write_json(path, {"muted": true})
 	var h = _make_hud(path)
 	h.set_language("ja")
-	assert_eq(h.sound_button.text, "音 OFF")
+	assert_eq(h.sound_button.text, "音 ON")
 
 	Save.write_json(path, {"muted": false})
 	h.update_from({"level": 1, "score": 0, "hints": 3, "moves": 0, "status": "playing"})
-	assert_eq(h.sound_button.text, "音 ON")
+	assert_eq(h.sound_button.text, "音 OFF")

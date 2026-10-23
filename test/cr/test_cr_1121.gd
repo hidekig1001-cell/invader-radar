@@ -11,17 +11,17 @@ func test_sound_toggle_and_labels() -> void:
 	rp.settings_path = path
 	add_child_autofree(rp)
 	rp.open("en")
-	assert_eq(rp.sound_button.text, "SOUND ON")
+	assert_eq(rp.sound_button.text, "SOUND OFF")
 	rp.toggle_sound()
 	assert_true(AudioServer.is_bus_mute(0))
 	assert_true(Prefs.load_muted(path))
-	assert_eq(rp.sound_button.text, "SOUND OFF")
+	assert_eq(rp.sound_button.text, "SOUND ON")
 	rp.open("ja")
-	assert_eq(rp.sound_button.text, "音 OFF")
+	assert_eq(rp.sound_button.text, "音 ON")
 	rp.toggle_sound()
 	assert_false(AudioServer.is_bus_mute(0))
 	assert_false(Prefs.load_muted(path))
-	assert_eq(rp.sound_button.text, "音 ON")
+	assert_eq(rp.sound_button.text, "音 OFF")
 
 func test_sound_button_geometry() -> void:
 	## CHECK: 2

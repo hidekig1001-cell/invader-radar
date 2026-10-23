@@ -22,7 +22,7 @@ func test_hint_button_behavior() -> void:
 	
 	assert_true(m.session.current_hint.is_empty())
 	assert_eq(m.board_view.hint_cell, Vector2i(-1, -1))
-	assert_eq(m.bubble.text, "")
+	assert_eq(m.bubble.text, m.help_text())
 
 
 func test_session_hint_clear_on_tap_and_undo() -> void:
@@ -53,7 +53,7 @@ func test_refresh_clears_bubble_on_board_change() -> void:
 	
 	m.session.current_hint = {}
 	m._refresh()
-	assert_eq(m.bubble.text, "")
+	assert_eq(m.bubble.text, m.help_text())
 	
 	m.board_view.hint_cell = Vector2i(1, 0)
 	m.session.status = "cleared"
