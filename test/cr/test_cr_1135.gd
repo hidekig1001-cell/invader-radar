@@ -15,7 +15,7 @@ func test_cr_1135_bubble_geometry_and_font() -> void:
 	b.show_panel("STEP")
 	assert_eq(b.position, Vector2(40, 366))
 	assert_eq(b.size, Vector2(660, 108))
-	assert_eq(b.get_theme_font_size("font_size"), 28)
+	assert_eq(b.get_theme_font_size("font_size"), 48)
 
 	b.clear_text()
 	assert_eq(b.position, Vector2(40, 340))

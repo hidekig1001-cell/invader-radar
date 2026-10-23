@@ -9,6 +9,10 @@ const TILE_OFFSET_Y := 200.0
 const TILE_FONT_COLOR := Color8(74, 50, 10)
 const PANEL_BOX := Rect2(40, 366, 660, 108)
 const PANEL_FONT_SIZE := 28
+const TEXT_MAX_FONT_SIZE := 52
+const TEXT_MIN_FONT_SIZE := 24
+const PANEL_MAX_FONT_SIZE := 48
+const PANEL_MIN_FONT_SIZE := 20
 
 var _time_left: float = 0.0
 var tile_mode: bool = false
@@ -32,6 +36,10 @@ func _ready() -> void:
 	box.set_border_width_all(4)
 	box.set_corner_radius_all(24)
 	box.anti_aliasing = true
+	box.content_margin_left = 20
+	box.content_margin_right = 20
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
 	add_theme_stylebox_override("normal", box)
 	normal_box = box
 	set_normal_font_look()
@@ -42,7 +50,41 @@ func _ready() -> void:
 func show_text(text_to_show: String, seconds: float = 3.0) -> void:
 	text = text_to_show
 	_time_left = seconds
+	add_theme_font_size_override("font_size", fit_font_size(text_to_show, BOX.size, TEXT_MAX_FONT_SIZE, TEXT_MIN_FONT_SIZE))
 	visible = true
+
+
+# 字が box（枠の stylebox の上下左右の content margin を除いた中）に収まる一番大きい字の大きさ。
+# max_size から 2 ずつ下げて探し、収まらなければ min_size。
+func fit_font_size(t: String, box: Vector2, max_size: int, min_size: int) -> int:
+	var sb := get_theme_stylebox("normal")
+	var pad := Vector2.ZERO
+	if sb != null:
+		pad.x = sb.get_content_margin(SIDE_LEFT) + sb.get_content_margin(SIDE_RIGHT)
+		pad.y = sb.get_content_margin(SIDE_TOP) + sb.get_content_margin(SIDE_BOTTOM)
+	var fs := max_size
+	while fs >= min_size:
+		if text_height(t, box.x - pad.x, fs) <= box.y - pad.y:
+			return fs
+		fs -= 2
+	return min_size
+
+
+# Label（AUTOWRAP_WORD_SMART）が描くときの字の高さ。
+# Font.get_multiline_string_size は日本語の行（端末の別のフォントで出る）を Label より低く測るので、
+# Label と同じく行ごとに「字の形の高さ」と「フォントの高さ」の大きい方を取り、行と行の間に line_spacing を足す。
+func text_height(t: String, width: float, fs: int) -> float:
+	var font := get_theme_font("font")
+	var para := TextParagraph.new()
+	para.add_string(t, font, fs)
+	para.width = width
+	para.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+	var n := para.get_line_count()
+	var h := 0.0
+	for li in range(n):
+		h += maxf(para.get_line_size(li).y, font.get_height(fs))
+	h += float(maxi(0, n - 1) * get_theme_constant("line_spacing"))
+	return h
 
 
 func clear_text() -> void:
@@ -90,7 +132,7 @@ func show_panel(text_to_show: String) -> void:
 	add_theme_stylebox_override("normal", ButtonStyle.make_box("res://assets/buttons/button_normal.png", 0))
 	add_theme_color_override("font_color", TILE_FONT_COLOR)
 	add_theme_constant_override("outline_size", 0)
-	add_theme_font_size_override("font_size", PANEL_FONT_SIZE)
+	add_theme_font_size_override("font_size", fit_font_size(text_to_show, PANEL_BOX.size, PANEL_MAX_FONT_SIZE, PANEL_MIN_FONT_SIZE))
 	size = PANEL_BOX.size
 	position = normal_position + (PANEL_BOX.position - BOX.position)
 	visible = true

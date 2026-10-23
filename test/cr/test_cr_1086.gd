@@ -49,7 +49,7 @@ func test_cr_1086_show_panel_and_clear_text_style() -> void:
 	assert_true(b.panel_mode)
 	assert_ne(b.get_theme_stylebox("normal"), b.normal_box)
 	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
-	assert_eq(b.get_theme_font_size("font_size"), 28)
+	assert_eq(b.get_theme_font_size("font_size"), 48)
 	
 	b.clear_text()
 	assert_false(b.panel_mode)
