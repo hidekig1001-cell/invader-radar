@@ -115,6 +115,7 @@ func set_language(lang: String) -> void:
 	settings_button.text = localized("RULES", "説明")
 	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
+	title_button.text = localized("BACK TO\nTITLE", "タイトルに\n戻る")
 	if solve_button != null:
 		solve_button.text = localized("ANSWER", "答え")
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)

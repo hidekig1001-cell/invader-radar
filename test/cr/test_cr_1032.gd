@@ -41,7 +41,7 @@ func test_font_sizes() -> void:
 ## CHECK: 4
 func test_title_button_text_and_rect() -> void:
 	var m = await _start_main()
-	assert_eq(m.hud.title_button.text, "タイトルに\n戻る")
+	assert_eq(m.hud.title_button.text, "BACK TO\nTITLE")
 	assert_eq(m.hud.title_button.position, Vector2(810, 1560))
 	assert_eq(m.hud.title_button.size, Vector2(230, 150))
 
