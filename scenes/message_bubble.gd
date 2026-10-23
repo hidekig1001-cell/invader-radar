@@ -27,10 +27,14 @@ func _ready() -> void:
 	autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_theme_font_size_override("font_size", FONT_SIZE)
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color(1, 1, 1, 0.14)
-	box.set_corner_radius_all(36)
+	box.bg_color = Color8(255, 140, 50)
+	box.border_color = Color8(214, 96, 20)
+	box.set_border_width_all(4)
+	box.set_corner_radius_all(24)
+	box.anti_aliasing = true
 	add_theme_stylebox_override("normal", box)
 	normal_box = box
+	set_normal_font_look()
 	visible = false
 
 
@@ -52,14 +56,14 @@ func clear_text() -> void:
 		position = normal_position
 		size = BOX.size
 		add_theme_stylebox_override("normal", normal_box)
-		remove_theme_color_override("font_color")
+		set_normal_font_look()
 		add_theme_font_size_override("font_size", FONT_SIZE)
 	if tile_mode:
 		tile_mode = false
 		position = normal_position
 		size = BOX.size
 		add_theme_stylebox_override("normal", normal_box)
-		remove_theme_color_override("font_color")
+		set_normal_font_look()
 
 
 func show_tile(text_to_show: String, center: Vector2) -> void:
@@ -72,6 +76,7 @@ func show_tile(text_to_show: String, center: Vector2) -> void:
 	position = Vector2(center.x - TILE_SIZE.x / 2.0, center.y + TILE_OFFSET_Y - TILE_SIZE.y / 2.0)
 	add_theme_stylebox_override("normal", clear_tile_box())
 	add_theme_color_override("font_color", TILE_FONT_COLOR)
+	add_theme_constant_override("outline_size", 0)
 	visible = true
 
 
@@ -84,10 +89,18 @@ func show_panel(text_to_show: String) -> void:
 	_time_left = 0.0
 	add_theme_stylebox_override("normal", ButtonStyle.make_box("res://assets/buttons/button_normal.png", 0))
 	add_theme_color_override("font_color", TILE_FONT_COLOR)
+	add_theme_constant_override("outline_size", 0)
 	add_theme_font_size_override("font_size", PANEL_FONT_SIZE)
 	size = PANEL_BOX.size
 	position = normal_position + (PANEL_BOX.position - BOX.position)
 	visible = true
+
+
+# 吹き出しの字（オレンジの地に白い字、濃いオレンジの縁取り）。
+func set_normal_font_look() -> void:
+	add_theme_color_override("font_color", Color.WHITE)
+	add_theme_color_override("font_outline_color", Color8(150, 60, 0))
+	add_theme_constant_override("outline_size", 6)
 
 
 static func panel_alpha(t: float) -> float:
