@@ -19,8 +19,8 @@ func test_cr_1086_start_tutorial_shows_panel_and_advances() -> void:
 	assert_true(m.bubble.panel_mode)
 	assert_false(m.bubble.tile_mode)
 	assert_eq(m.bubble.text, TutorialSteps.apply_language(m.language, 0))
-	assert_eq(m.bubble.size, Vector2(660, 108))
-	assert_eq(m.bubble.position - m.bubble.normal_position, Vector2(0, 26))
+	assert_eq(m.bubble.size, Vector2(660, 96))
+	assert_eq(m.bubble.position - m.bubble.normal_position, Vector2(0, 0))
 	
 	m.tutorial_input("double_tap", Vector2i(3, 1))
 	assert_true(m.bubble.panel_mode)
@@ -35,7 +35,7 @@ func test_cr_1086_end_tutorial_restores_bubble() -> void:
 	m.end_tutorial()
 	assert_false(m.bubble.panel_mode)
 	assert_eq(m.bubble.text, m.help_text())
-	assert_eq(m.bubble.size, Vector2(660, 120))
+	assert_eq(m.bubble.size, Vector2(660, 96))
 	assert_eq(m.bubble.position, p0)
 
 

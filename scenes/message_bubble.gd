@@ -1,13 +1,15 @@
 # 画面の層（SPEC.md 3 節）: 盤の上に出す吹き出し（短い言葉）。show_text で出し、時間が来たら消える。
 extends Label
 
-const BOX := Rect2(40, 340, 660, 120)
+# 上は hud の UNDO・RESTART のボタンの下の端（y 360）から 8 あけ、下は盤の背景の上の端（y 466）の手前まで。
+# 右の端は音のボタン（x 720 から）にかからない 660 幅（CR-1135）。
+const BOX := Rect2(40, 368, 660, 96)
 const FONT_SIZE := 36
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const TILE_SIZE := Vector2(900, 160)
 const TILE_OFFSET_Y := 200.0
 const TILE_FONT_COLOR := Color8(74, 50, 10)
-const PANEL_BOX := Rect2(40, 366, 660, 108)
+const PANEL_BOX := Rect2(40, 368, 660, 96)
 const PANEL_FONT_SIZE := 28
 const TEXT_MAX_FONT_SIZE := 52
 const TEXT_MIN_FONT_SIZE := 24
@@ -38,8 +40,8 @@ func _ready() -> void:
 	box.anti_aliasing = true
 	box.content_margin_left = 20
 	box.content_margin_right = 20
-	box.content_margin_top = 8
-	box.content_margin_bottom = 8
+	box.content_margin_top = 4
+	box.content_margin_bottom = 4
 	add_theme_stylebox_override("normal", box)
 	normal_box = box
 	set_normal_font_look()
