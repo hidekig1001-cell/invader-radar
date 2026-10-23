@@ -1,14 +1,14 @@
 # 画面の層（SPEC.md 3 節）: 盤の上に出す吹き出し（短い言葉）。show_text で出し、時間が来たら消える。
 extends Label
 
-const BOX := Rect2(90, 340, 900, 120)
-const FONT_SIZE := 44
+const BOX := Rect2(40, 340, 660, 120)
+const FONT_SIZE := 36
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const TILE_SIZE := Vector2(900, 160)
 const TILE_OFFSET_Y := 200.0
 const TILE_FONT_COLOR := Color8(74, 50, 10)
-const PANEL_BOX := Rect2(90, 366, 900, 108)
-const PANEL_FONT_SIZE := 30
+const PANEL_BOX := Rect2(40, 366, 660, 108)
+const PANEL_FONT_SIZE := 28
 
 var _time_left: float = 0.0
 var tile_mode: bool = false
