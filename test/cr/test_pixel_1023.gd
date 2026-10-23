@@ -79,7 +79,7 @@ func test_pixel_1023_fit_font_size() -> void:
 	assert_eq(b.get_theme_font_size("font_size"), 52)
 
 	# 今ある文（操作の説明・チュートリアルの段）で枠の大きさが変わらない
-	for t in ["TAP: X   DOUBLE TAP: PIECE   SWIPE: X", "タップ: ×   ダブルタップ: 駒   スワイプ: ×"]:
+	for t in ["TAP: X   DOUBLE TAP: PIECE\nSWIPE: X", "タップ: ×   ダブルタップ: 駒\nスワイプ: ×"]:
 		b.show_text(t, 0.0)
 		assert_eq(b.size, BubbleScript.BOX.size)
 	for lang in ["en", "ja"]:
@@ -125,7 +125,7 @@ func test_pixel_1023_help_text_after_next_level_and_ja() -> void:
 	n.language = "ja"
 	add_child_autofree(n)
 	await wait_frames(2)
-	assert_eq(n.bubble.text, "タップ: ×   ダブルタップ: 駒   スワイプ: ×")
+	assert_eq(n.bubble.text, "タップ: ×   ダブルタップ: 駒\nスワイプ: ×")
 
 
 ## CHECK: 4

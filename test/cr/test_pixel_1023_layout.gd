@@ -1,5 +1,5 @@
 extends GutTest
-# Pixel 指摘の続き（改修18）: 吹き出しが hud のボタン・盤に重ならないこと。
+# Pixel 指摘の続き（改修18）: 吹き出しが hud のボタン・盤に重ならないこと、操作の説明を項目の途中で折り返さないこと。
 
 const MainScene = preload("res://scenes/main.tscn")
 const BubbleScript = preload("res://scenes/message_bubble.gd")
@@ -73,3 +73,29 @@ func test_bubble_does_not_overlap_buttons_or_board() -> void:
 			m.end_tutorial()
 			await wait_frames(1)
 			_assert_bubble_clear_of_parts(m, tag + " after tutorial")
+
+
+## CHECK: 2
+func test_help_text_breaks_only_between_items() -> void:
+	for lang in ["en", "ja"]:
+		var m = await _start_main(lang)
+		var help: String = m.help_text()
+		var items: Array = help.split("\n")
+		assert_eq(m.bubble.text, help)
+		# Label が実際に描く行の数は、明示した改行の数 + 1（項目の途中で折り返していない）
+		assert_eq(m.bubble.get_line_count(), items.size(), lang)
+		# その字の大きさで、各行が 1 行に収まる
+		var fs: int = m.bubble.get_theme_font_size("font_size")
+		var sb = m.bubble.get_theme_stylebox("normal")
+		var width: float = BubbleScript.BOX.size.x - sb.get_content_margin(SIDE_LEFT) - sb.get_content_margin(SIDE_RIGHT)
+		var font = m.bubble.get_theme_font("font")
+		for line in items:
+			assert_almost_eq(m.bubble.text_height(line, width, fs), font.get_height(fs), 4.0, lang + " " + line)
+			var para := TextParagraph.new()
+			para.add_string(line, font, fs)
+			para.width = width
+			para.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+			assert_eq(para.get_line_count(), 1, lang + " " + line)
+		# 区切りは項目の境目（"×" や "X" だけの行にならない）
+		for line in items:
+			assert_true(line.contains(":"), lang + " " + line)
