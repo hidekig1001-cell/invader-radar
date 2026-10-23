@@ -17,21 +17,21 @@ func test_cr_1120_toggle_sound_and_label() -> void:
 	var ts = _make_title_screen(path)
 	
 	assert_eq(ts.muted, false)
-	assert_eq(ts.sound_label(), "SOUND ON")
+	assert_eq(ts.sound_label(), "SOUND OFF")
 	
 	ts.toggle_sound()
 	assert_eq(ts.muted, true)
 	assert_true(AudioServer.is_bus_mute(0))
 	assert_eq(Prefs.load_muted(path), true)
-	assert_eq(ts.sound_label(), "SOUND OFF")
+	assert_eq(ts.sound_label(), "SOUND ON")
 	
 	ts.select_language("ja")
-	assert_eq(ts.sound_label(), "音 OFF")
+	assert_eq(ts.sound_label(), "音 ON")
 	
 	ts.toggle_sound()
 	assert_eq(ts.muted, false)
 	assert_false(AudioServer.is_bus_mute(0))
-	assert_eq(ts.sound_label(), "音 ON")
+	assert_eq(ts.sound_label(), "音 OFF")
 
 ## CHECK: 2
 func test_cr_1120_load_muted_from_file() -> void:
