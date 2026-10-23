@@ -24,6 +24,8 @@ const GRID_LINE := Color(0, 0, 0, 0.55)
 
 # CR-1130: 数字のあるマスに描く × の色
 const MARK_ON_NUMBER_COLOR := Color(1, 1, 1, 0.6)
+# 駒（黒）を置いた数字のマスの数字の色（紺だと駒に埋もれて読めない）
+const PIECE_NUMBER_COLOR := Color(1, 1, 1)
 
 # 宇宙人の絵（幅 8・高さ 8）
 const ALIEN_ROWS := [
@@ -360,7 +362,24 @@ func radar_text_color(x: int, y: int) -> Color:
 	var count := Rules.radar_count(session.board.pieces(), x, y)
 	if count > limit:
 		return Color.RED
+	if has_piece_at(x, y):
+		return PIECE_NUMBER_COLOR
 	return MARK_COLOR
+
+
+# 駒を描くマスかどうか（_draw で駒を描く所と同じ判定: 岩ではなく、snapshot の行の文字が "P"）。
+func has_piece_at(x: int, y: int) -> bool:
+	if session == null or session.board == null or session.level == null:
+		return false
+	if is_rock(x, y):
+		return false
+	var rows: Array = session.board.snapshot()["rows"]
+	if y < 0 or y >= rows.size():
+		return false
+	var row: String = rows[y]
+	if x < 0 or x >= row.length():
+		return false
+	return row[x] == "P"
 
 # -----------------------------
 
