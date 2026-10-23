@@ -47,5 +47,5 @@ func test_main_integration_tile() -> void:
 
 	m.session.next_level()
 	assert_false(m.bubble.tile_mode)
-	assert_false(m.bubble.visible)
+	assert_true(m.bubble.visible)
 	assert_eq(m.bubble.position, p0)

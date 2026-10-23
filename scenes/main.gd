@@ -92,7 +92,7 @@ func _ready() -> void:
 	)
 	hud.set_language(language)
 	_refresh()
-	bubble.show_text(help_text(), 4.0)
+	show_help()
 
 	rules_label = RulesLabelScript.new()
 	add_child(rules_label)
@@ -306,7 +306,7 @@ func _on_hint() -> void:
 
 func on_apply() -> void:
 	sound.play_sfx("button")
-	bubble.clear_text()
+	show_help()
 	board_view.hint_cell = Vector2i(-1, -1)
 	hud.set_apply_visible(false)
 	session.apply_hint()
@@ -345,9 +345,10 @@ func _refresh() -> void:
 		bubble.show_tile(cleared_text(), board_view.position + board_view.board_rect().get_center())
 	elif bubble.text == cleared_text():
 		bubble.clear_text()
+		show_help()
 	if session.current_hint.is_empty():
 		if board_view.hint_cell.x >= 0 and session.status != "cleared":
-			bubble.clear_text()
+			show_help()
 		board_view.hint_cell = Vector2i(-1, -1)
 		hud.set_apply_visible(false)
 
@@ -381,7 +382,7 @@ func end_tutorial() -> void:
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
 	bubble.clear_text()
-	bubble.show_text(help_text(), 4.0)
+	show_help()
 	_refresh()
 	tutorial_finished.emit()
 
@@ -414,6 +415,14 @@ func tutorial_input(kind: String, cell: Vector2i) -> void:
 			board_view.highlight_cells = []
 			bubble.clear_text()
 		board_view.queue_redraw()
+
+
+# 操作の説明を消さずに出しておく（ヒント・クリアの表示・チュートリアルの間はそちらを出す）。
+# 文は今の language から作るので、言語を切り替えたあとはその言語の説明になる。
+func show_help() -> void:
+	if is_tutorial():
+		return
+	bubble.show_text(help_text(), 0.0)
 
 
 func help_text() -> String:
