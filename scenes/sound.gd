@@ -9,6 +9,10 @@ const SFX_LEVEL_CLEAR := preload("res://assets/audio/level_clear.wav")
 const SFX_BUTTON := preload("res://assets/audio/button.wav")
 const BGM_MAIN := preload("res://assets/audio/bgm_main.wav")
 const BGM_TITLE := preload("res://assets/audio/bgm_title.wav")
+const BGM_STAGE1 := preload("res://assets/audio/bgm_stage1.wav")
+const BGM_STAGE2 := preload("res://assets/audio/bgm_stage2.wav")
+const BGM_STAGE3 := preload("res://assets/audio/bgm_stage3.wav")
+const BGM_STAGE4 := preload("res://assets/audio/bgm_stage4.wav")
 
 var played: Array = []
 var music_name: String = ""
@@ -46,12 +50,22 @@ func play_sfx(sfx_name: String) -> void:
 		played.append(sfx_name)
 
 func play_music(music: String) -> void:
+	if music == music_name and music_player.playing:
+		return
 	var stream: AudioStream = null
 	match music:
 		"bgm_main":
 			stream = BGM_MAIN
 		"bgm_title":
 			stream = BGM_TITLE
+		"bgm_stage1":
+			stream = BGM_STAGE1
+		"bgm_stage2":
+			stream = BGM_STAGE2
+		"bgm_stage3":
+			stream = BGM_STAGE3
+		"bgm_stage4":
+			stream = BGM_STAGE4
 	if stream != null:
 		music_player.stream = stream
 		music_player.play()
@@ -86,3 +100,13 @@ static func sfx_for(prev: Dictionary, curr: Dictionary, prev_conflicts: int, con
 	if curr_marks > prev_marks:
 		return "mark"
 	return ""
+
+static func bgm_for_size(size: int) -> String:
+	if size <= 5:
+		return "bgm_stage1"
+	elif size <= 7:
+		return "bgm_stage2"
+	elif size <= 9:
+		return "bgm_stage3"
+	else:
+		return "bgm_stage4"
