@@ -10,7 +10,7 @@ func test_show_tile_and_clear_text() -> void:
 	add_child_autofree(b)
 	await wait_frames(1)
 
-	assert_eq(b.position, Vector2(40, 368))
+	assert_eq(b.position, Vector2(40, 262))
 
 	b.show_tile("CLEAR", Vector2(540, 900))
 	assert_true(b.visible)
@@ -26,8 +26,8 @@ func test_show_tile_and_clear_text() -> void:
 	b.clear_text()
 	assert_false(b.visible)
 	assert_false(b.tile_mode)
-	assert_eq(b.position, Vector2(40, 368))
-	assert_eq(b.size, Vector2(660, 96))
+	assert_eq(b.position, Vector2(40, 262))
+	assert_eq(b.size, Vector2(1000, 192))
 	assert_true(b.get_theme_stylebox("normal") is StyleBoxFlat)
 
 
