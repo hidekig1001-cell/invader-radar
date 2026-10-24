@@ -64,7 +64,7 @@ func test_sfx_for_level_clear() -> void:
 ## CHECK: 7
 func test_main_music_setup() -> void:
 	var m = await _start_main()
-	assert_eq(m.sound.music_name, "bgm_main")
+	assert_eq(m.sound.music_name, "bgm_stage1")
 	assert_eq(m.sound.music_player.volume_db, -8.0)
 
 

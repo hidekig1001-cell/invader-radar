@@ -54,7 +54,6 @@ func _ready() -> void:
 	sound = Sound.new()
 	add_child(sound)
 	sound.setup()
-	sound.play_music("bgm_main")
 
 	space_bg = SpaceBg.new()
 	add_child(space_bg)
@@ -94,6 +93,7 @@ func _ready() -> void:
 	hud.set_language(language)
 	_refresh()
 	show_help()
+	update_music()
 
 	rules_label = RulesLabelScript.new()
 	add_child(rules_label)
@@ -352,6 +352,7 @@ func _refresh() -> void:
 			show_help()
 		board_view.hint_cell = Vector2i(-1, -1)
 		hud.set_apply_visible(false)
+	update_music()
 
 
 func start_tutorial() -> void:
@@ -485,3 +486,8 @@ func hint_text(en_text: String) -> String:
 	if dict.has(en_text):
 		return dict[en_text]
 	return en_text
+
+func update_music() -> void:
+	if session != null and session.level != null:
+		var size = max(session.level.width, session.level.height)
+		sound.play_music(Sound.bgm_for_size(size))
