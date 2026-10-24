@@ -38,7 +38,8 @@ func _ready() -> void:
 	if tex != null:
 		background.texture = tex
 	background.position = Vector2(0, 120)
-	background.size = Vector2(1080, 1920)
+	background.size = Vector2(1080, 1800)
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	add_child(background)
 
 	top_fill = ColorRect.new()
@@ -135,8 +136,8 @@ func _ready() -> void:
 	ButtonStyle.apply_to(_start_btn_fresh)
 
 	sound_btn = Button.new()
-	sound_btn.position = Vector2(760, 240)
-	sound_btn.size = Vector2(280, 120)
+	sound_btn.position = Vector2(570, 1080)
+	sound_btn.size = Vector2(360, 90)
 	sound_btn.add_theme_font_size_override("font_size", 44)
 	sound_btn.pressed.connect(func(): 
 		sound.play_sfx("button")
@@ -148,8 +149,8 @@ func _ready() -> void:
 
 	licenses_btn = Button.new()
 	licenses_btn.text = "LICENSES"
-	licenses_btn.position = Vector2(390, 1080)
-	licenses_btn.size = Vector2(300, 90)
+	licenses_btn.position = Vector2(150, 1080)
+	licenses_btn.size = Vector2(360, 90)
 	licenses_btn.add_theme_font_size_override("font_size", 36)
 	licenses_btn.pressed.connect(func(): 
 		sound.play_sfx("button")
@@ -185,7 +186,7 @@ func _notification(what: int) -> void:
 func apply_screen_layout(size: Vector2) -> void:
 	var offset = SpaceBg.safe_layout_offsets(size.x, size.y, safe_top)
 	
-	background.size = size
+	background.size = Vector2(size.x, size.y - 120 - offset.y)
 	background.position = Vector2(0, 120 + offset.y)
 	top_fill.size = Vector2(size.x, 120 + offset.y)
 	

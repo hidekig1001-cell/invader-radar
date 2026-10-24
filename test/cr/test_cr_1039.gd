@@ -96,7 +96,7 @@ func test_main_planet_positions_yellow() -> void:
 func test_title_apply_screen_layout_vertical() -> void:
 	var t = await _start_title()
 	t.apply_screen_layout(Vector2(1080, 2424))
-	assert_eq(t.background.size, Vector2(1080, 2424))
+	assert_eq(t.background.size, Vector2(1080, 2052))
 	assert_eq(t._title_label.position, Vector2(0, 732))
 	assert_eq(t._lang_btn_en.position, Vector2(150, 1132))
 
