@@ -6,3 +6,4 @@
 - piece_pink.png は seed 11 の候補（本命の seed 12 は目がつぶれて見えたため）。ほかの駒・×・小惑星は seed 12、bg_1080x1920.png は seed 13、title_bg_1080x1920.png は seed 23。
 - autedev_logo.png（1024×1024、背景は透過）: AuteDev のロゴ。「AuteDev」の文字は 2026-10-18 に FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成したものの画素のまま。左の絵は 2026-10-19 にユーザーの絵（青い丸に緑の丸 3 つ）をもとに図形として描き直した（画像生成モデル2 のチャット）。起動時の最初の画面に出す。
 - piece_*.png（駒 6 色と置きすぎ用の赤い困った顔、a 豆の形）と rock.png（岩、a 顔なし）: 512×512、背景は透過。2026-10-24 に FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成し、6 色はピンクの駒の体の色だけ色相を回して作った（画像生成モデル3 のチャット）。ユーザーが選んだ（D-20261024-1347＝A・1347-2＝A）。作り方は作業 PC の F:\AI\imagegen\assets\invader_radar\pieces_kawaii\README.md にある。前の piece_*.png（10/16 の版）は置き換えた。
+- title_logo.png（800×359、背景は透過）: タイトル画面の「INVADER RADAR」のロゴ（2 行、INVADER がミント・RADAR がピンク、宇宙人のアンテナ）。2026-10-24 に FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成し、綴りを目で確かめて選んだ（画像生成モデル3 のチャット）。ユーザーが選んだ（D-20261024-1317＝A）。作り方は作業 PC の F:\AI\imagegen\assets\invader_radar\title_logo_kawaii\README.md にある。
