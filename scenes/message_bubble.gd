@@ -33,8 +33,8 @@ func _ready() -> void:
 	autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_theme_font_size_override("font_size", FONT_SIZE)
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color8(255, 140, 50)
-	box.border_color = Color8(214, 96, 20)
+	box.bg_color = Color8(255, 200, 150)
+	box.border_color = Color8(235, 150, 80)
 	box.set_border_width_all(4)
 	box.set_corner_radius_all(24)
 	box.anti_aliasing = true
@@ -140,11 +140,11 @@ func show_panel(text_to_show: String) -> void:
 	visible = true
 
 
-# 吹き出しの字（オレンジの地に白い字、濃いオレンジの縁取り）。
+# 吹き出しの字（淡いオレンジの地に濃い茶色の字、縁取りなし）。
 func set_normal_font_look() -> void:
-	add_theme_color_override("font_color", Color.WHITE)
+	add_theme_color_override("font_color", TILE_FONT_COLOR)
 	add_theme_color_override("font_outline_color", Color8(150, 60, 0))
-	add_theme_constant_override("outline_size", 6)
+	add_theme_constant_override("outline_size", 0)
 
 
 static func panel_alpha(t: float) -> float:

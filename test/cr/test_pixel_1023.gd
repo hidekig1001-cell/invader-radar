@@ -31,27 +31,27 @@ func test_pixel_1023_bubble_is_orange_with_white_text() -> void:
 	var b = await _make_bubble()
 	var box = b.normal_box
 	assert_true(box is StyleBoxFlat)
-	assert_eq(box.bg_color, Color8(255, 140, 50))
+	assert_eq(box.bg_color, Color8(255, 200, 150))
 	assert_eq(box.bg_color.a, 1.0)
-	assert_eq(box.border_color, Color8(214, 96, 20))
+	assert_eq(box.border_color, Color8(235, 150, 80))
 	assert_eq(box.border_width_left, 4)
 	assert_eq(box.corner_radius_top_left, 24)
-	assert_eq(b.get_theme_color("font_color"), Color.WHITE)
+	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
 	assert_eq(b.get_theme_color("font_outline_color"), Color8(150, 60, 0))
-	assert_eq(b.get_theme_constant("outline_size"), 6)
+	assert_eq(b.get_theme_constant("outline_size"), 0)
 
 	b.show_panel("STEP")
 	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
 	b.clear_text()
 	assert_eq(b.get_theme_stylebox("normal"), b.normal_box)
-	assert_eq(b.get_theme_color("font_color"), Color.WHITE)
-	assert_eq(b.get_theme_constant("outline_size"), 6)
+	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
+	assert_eq(b.get_theme_constant("outline_size"), 0)
 
 	b.show_tile("CLEAR", Vector2(540, 900))
 	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
 	b.clear_text()
 	assert_eq(b.get_theme_stylebox("normal"), b.normal_box)
-	assert_eq(b.get_theme_color("font_color"), Color.WHITE)
+	assert_eq(b.get_theme_color("font_color"), BubbleScript.TILE_FONT_COLOR)
 
 
 ## CHECK: 2
