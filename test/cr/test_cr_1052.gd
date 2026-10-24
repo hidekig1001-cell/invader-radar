@@ -128,4 +128,4 @@ func test_level_pack_11_13_have_radar() -> void:
 		
 		assert_true(dict.has("radar"))
 		var radar = dict["radar"]
-		assert_true(radar.size() == 1 or radar.size() == 2)
+		assert_true(radar.size() == 4)
