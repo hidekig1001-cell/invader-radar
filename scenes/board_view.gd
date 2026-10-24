@@ -82,6 +82,16 @@ var highlight_cells: Array = []:
 	set(value):
 		highlight_cells = value
 		queue_redraw()
+const PIECE_POSE_TEXTURES := {
+	"cyan": [preload("res://assets/piece_cyan.png"), preload("res://assets/piece_cyan_2.png"), preload("res://assets/piece_cyan_3.png"), preload("res://assets/piece_cyan_4.png")],
+	"green": [preload("res://assets/piece_green.png"), preload("res://assets/piece_green_2.png"), preload("res://assets/piece_green_3.png"), preload("res://assets/piece_green_4.png")],
+	"navy": [preload("res://assets/piece_navy.png"), preload("res://assets/piece_navy_2.png"), preload("res://assets/piece_navy_3.png"), preload("res://assets/piece_navy_4.png")],
+	"orange": [preload("res://assets/piece_orange.png"), preload("res://assets/piece_orange_2.png"), preload("res://assets/piece_orange_3.png"), preload("res://assets/piece_orange_4.png")],
+	"pink": [preload("res://assets/piece_pink.png"), preload("res://assets/piece_pink_2.png"), preload("res://assets/piece_pink_3.png"), preload("res://assets/piece_pink_4.png")],
+	"purple": [preload("res://assets/piece_purple.png"), preload("res://assets/piece_purple_2.png"), preload("res://assets/piece_purple_3.png"), preload("res://assets/piece_purple_4.png")]
+}
+var piece_poses: Dictionary = {}
+var pose_rng := RandomNumberGenerator.new()
 
 
 # 盤の大きさ（マス）。session がなければ 0。
@@ -439,7 +449,10 @@ func piece_color_name(x: int, y: int) -> String:
 	return REGION_PIECE_COLORS[idx]
 
 func piece_texture(x: int, y: int) -> Texture2D:
-	return PIECE_TEXTURES[piece_color_name(x, y)]
+	var color_name := piece_color_name(x, y)
+	if color_name == "conflict":
+		return PIECE_TEXTURES["conflict"]
+	return PIECE_POSE_TEXTURES[color_name][piece_pose(x, y)]
 
 func rock_texture() -> Texture2D:
 	return ROCK_TEXTURE
@@ -455,6 +468,8 @@ func _draw() -> void:
 	if gs == Vector2i.ZERO:
 		return
 	
+	forget_empty_poses()
+
 	# 1. Draw Board Background (CR-1022)
 	var bg_rect := board_bg_rect()
 	_draw_round_rect(bg_rect, 36.0, Color(0.20, 0.18, 0.32), true)
@@ -595,3 +610,21 @@ func _draw_rock(r: Rect2) -> void:
 			elif char == "2":
 				var rect := alien_pixel_rect(r, col_idx, row_idx)
 				draw_rect(rect, ROCK_SHADOW_COLOR, true)
+
+
+func piece_pose(x: int, y: int) -> int:
+	if not has_piece_at(x, y):
+		return 0
+	var key := Vector2i(x, y)
+	if not piece_poses.has(key):
+		piece_poses[key] = pose_rng.randi_range(0, 3)
+	return piece_poses[key]
+
+
+func forget_empty_poses() -> void:
+	var keys_to_remove: Array = []
+	for key in piece_poses.keys():
+		if not has_piece_at(key.x, key.y):
+			keys_to_remove.append(key)
+	for key in keys_to_remove:
+		piece_poses.erase(key)
