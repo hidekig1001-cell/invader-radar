@@ -13,6 +13,7 @@ const LicensesPanel = preload("res://scenes/licenses_panel.gd")
 
 var _language: String = ""
 var _title_label: Label
+var title_logo: TextureRect
 var _lang_btn_en: Button
 var _lang_btn_ja: Button
 var _start_btn_tutorial: Button
@@ -62,6 +63,16 @@ func _ready() -> void:
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.add_theme_font_size_override("font_size", 96)
 	add_child(_title_label)
+
+	title_logo = TextureRect.new()
+	title_logo.texture = load("res://assets/title_logo.png")
+	title_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	title_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	title_logo.position = Vector2(180, 520)
+	title_logo.size = Vector2(720, 323)
+	add_child(title_logo)
+
+	_title_label.visible = false
 
 	_lang_btn_en = Button.new()
 	_lang_btn_en.text = "English"
@@ -151,6 +162,7 @@ func _ready() -> void:
 	add_child(licenses_panel)
 
 	base_positions["title"] = _title_label.position
+	base_positions["title_logo"] = title_logo.position
 	base_positions["lang_en"] = _lang_btn_en.position
 	base_positions["lang_ja"] = _lang_btn_ja.position
 	base_positions["start_tut"] = _start_btn_tutorial.position
@@ -179,6 +191,8 @@ func apply_screen_layout(size: Vector2) -> void:
 	
 	if base_positions.has("title"):
 		_title_label.position = base_positions["title"] + offset
+	if base_positions.has("title_logo"):
+		title_logo.position = base_positions["title_logo"] + offset
 	if base_positions.has("lang_en"):
 		_lang_btn_en.position = base_positions["lang_en"] + offset
 	if base_positions.has("lang_ja"):
