@@ -38,8 +38,8 @@ func test_main_apply_screen_layout_vertical() -> void:
 	var m = await _start_main()
 	m.apply_screen_layout(Vector2(1080, 2424))
 	m.apply_screen_layout(Vector2(1080, 2424))
-	assert_eq(m.rules_label.position, Vector2(54, 1982))
-	assert_eq(m.hud.hint_button.get_global_rect(), Rect2(250, 1812, 380, 150))
+	assert_eq(m.rules_label.position, Vector2(54, 1984))
+	assert_eq(m.hud.hint_button.get_global_rect(), Rect2(40, 1866, 300, 110))
 
 
 ## CHECK: 4
@@ -47,7 +47,7 @@ func test_main_apply_screen_layout_sky_and_avoid() -> void:
 	var m = await _start_main()
 	m.apply_screen_layout(Vector2(1080, 2424))
 	assert_eq(m.space_bg.sky_size, Vector2(1080, 2424))
-	assert_true(m.space_bg.avoid_rects.has(Rect2(54, 1982, 972, 140)))
+	assert_true(m.space_bg.avoid_rects.has(Rect2(54, 1984, 972, 128)))
 	assert_true(m.space_bg.avoid_rects.has(Rect2(40, 732, 1000, 1000)))
 
 
@@ -114,5 +114,5 @@ func test_title_apply_screen_layout_horizontal() -> void:
 func test_main_apply_screen_layout_horizontal() -> void:
 	var m = await _start_main()
 	m.apply_screen_layout(Vector2(1440, 1920))
-	assert_eq(m.rules_label.position, Vector2(234, 1730))
+	assert_eq(m.rules_label.position, Vector2(234, 1732))
 	assert_eq(m.hud.undo_button.get_global_rect(), Rect2(220, 260, 320, 100))

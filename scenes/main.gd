@@ -102,9 +102,9 @@ func _ready() -> void:
 	rules_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	rules_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rules_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	rules_label.add_theme_font_size_override("font_size", 36)
-	rules_label.position = Vector2(54, 1730)
-	rules_label.size = Vector2(972, 140)
+	rules_label.add_theme_font_size_override("font_size", 32)
+	rules_label.position = Vector2(54, 1732)
+	rules_label.size = Vector2(972, 128)
 
 	title_logo = TextureRect.new()
 	title_logo.texture = load("res://assets/title_logo/title_logo_1000x200.png")

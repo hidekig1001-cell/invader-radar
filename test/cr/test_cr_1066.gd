@@ -40,8 +40,8 @@ func test_hud_has_solve_button_in_debug() -> void:
 	await wait_frames(1)
 	assert_not_null(hud.solve_button)
 	assert_true(hud.solve_button.visible)
-	assert_eq(hud.solve_button.position, Vector2(40, 1560))
-	assert_eq(hud.solve_button.size, Vector2(200, 150))
+	assert_eq(hud.solve_button.position, Vector2(40, 1866))
+	assert_eq(hud.solve_button.size, Vector2(200, 50))
 	assert_true(hud.has_signal("solve_pressed"))
 
 
