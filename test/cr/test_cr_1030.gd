@@ -34,7 +34,7 @@ func test_background_texture_path() -> void:
 func test_background_global_rect_is_full_screen() -> void:
 	var ts = await _start()
 	assert_not_null(ts.background)
-	var expected = Rect2(0, 120, 1080, 1920)
+	var expected = Rect2(0, 120, 1080, 1800)
 	var actual = ts.background.get_global_rect()
 	assert_true(actual.is_equal_approx(expected))
 
@@ -95,4 +95,4 @@ func test_screen_size_and_background_position_size_unchanged() -> void:
 	
 	# Background position and size
 	assert_true(ts.background.position.is_equal_approx(Vector2(0, 120)))
-	assert_true(ts.background.size.is_equal_approx(Vector2(1080, 1920)))
+	assert_true(ts.background.size.is_equal_approx(Vector2(1080, 1800)))

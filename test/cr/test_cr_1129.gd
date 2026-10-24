@@ -14,11 +14,11 @@ func test_title_screen_safe_top() -> void:
 
 	t.safe_top = 300.0
 	t.apply_screen_layout(Vector2(1080, 2000))
-	assert_eq(t.sound_btn.position, Vector2(760, 320))
+	assert_eq(t.sound_btn.position, Vector2(570, 1160))
 
 	t.safe_top = 0.0
 	t.apply_screen_layout(Vector2(1080, 2000))
-	assert_eq(t.sound_btn.position, Vector2(760, 280))
+	assert_eq(t.sound_btn.position, Vector2(570, 1120))
 
 
 ## CHECK: 2

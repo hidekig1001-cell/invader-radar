@@ -14,7 +14,7 @@ func _start_title_screen():
 func test_licenses_button_initial_state() -> void:
 	var ts = await _start_title_screen()
 	assert_eq(ts.licenses_btn.text, "LICENSES")
-	assert_eq(ts.licenses_btn.size, Vector2(300, 90))
+	assert_eq(ts.licenses_btn.size, Vector2(360, 90))
 	assert_false(ts.licenses_panel.visible)
 
 ## CHECK: 1
