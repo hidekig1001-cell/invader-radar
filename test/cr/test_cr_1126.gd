@@ -18,7 +18,7 @@ func test_prefetch_next_level() -> void:
 	s.next_level()
 	assert_eq(s.level_index, 21)
 
-	var expected_build = LevelPrefetch.build(6, seed21, 4, 2)
+	var expected_build = LevelPrefetch.build(6, seed21, 5, 3)
 	assert_eq(s.level.to_dict()["regions"], expected_build["level"]["regions"])
 	assert_eq(s.given, expected_build["solution"][3])
 	assert_eq(s.prefetch.pending_index, 22)
