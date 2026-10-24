@@ -216,7 +216,7 @@ func test_radar_text_color_not_exceeded() -> void:
 	add_child_autofree(bv)
 	bv.session = session
 	
-	assert_eq(bv.radar_text_color(0, 0), BoardView.MARK_COLOR)
+	assert_eq(bv.radar_text_color(0, 0), Color(1, 1, 1))
 
 ## CHECK: 5
 func test_radar_text_color_below_limit() -> void:
@@ -252,7 +252,7 @@ func test_radar_text_color_below_limit() -> void:
 	add_child_autofree(bv)
 	bv.session = session
 	
-	assert_eq(bv.radar_text_color(0, 0), BoardView.MARK_COLOR)
+	assert_eq(bv.radar_text_color(0, 0), Color(1, 1, 1))
 
 ## CHECK: 6
 func test_radar_text_color_exceeded() -> void:

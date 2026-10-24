@@ -198,7 +198,7 @@ func test_pixel_1023_radar_text_white_on_piece() -> void:
 	assert_eq(bv.radar_text_color(0, 0), Color(1, 1, 1))
 
 	bv.session = _radar_session([Vector2i(1, 0)])
-	assert_eq(bv.radar_text_color(0, 0), BoardView.MARK_COLOR)
+	assert_eq(bv.radar_text_color(0, 0), Color(1, 1, 1))
 
 	bv.session = _radar_session([Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)])
 	assert_eq(bv.radar_text_color(0, 0), Color.RED)
@@ -206,5 +206,5 @@ func test_pixel_1023_radar_text_white_on_piece() -> void:
 	var s = _radar_session([])
 	s.board.apply("mark", 0, 0)
 	bv.session = s
-	assert_true(bv.mark_color_at(0, 0).is_equal_approx(Color(1, 1, 1, 0.6)))
-	assert_eq(bv.radar_text_color(0, 0), BoardView.MARK_COLOR)
+	assert_true(bv.mark_color_at(0, 0).is_equal_approx(Color(0.25, 0.22, 0.40)))
+	assert_eq(bv.radar_text_color(0, 0), Color(1, 1, 1))

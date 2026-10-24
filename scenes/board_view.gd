@@ -362,9 +362,9 @@ func radar_text_color(x: int, y: int) -> Color:
 	var count := Rules.radar_count(session.board.pieces(), x, y)
 	if count > limit:
 		return Color.RED
-	if has_piece_at(x, y):
-		return PIECE_NUMBER_COLOR
-	return MARK_COLOR
+	
+	# CR-1137: Radar text is always white unless exceeded (red).
+	return Color(1, 1, 1)
 
 
 # 駒を描くマスかどうか（_draw で駒を描く所と同じ判定: 岩ではなく、snapshot の行の文字が "P"）。
@@ -399,10 +399,18 @@ func has_radar(x: int, y: int) -> bool:
 	return false
 
 # CR-1130: 指定したマスに描く × の色を返す。
+# CR-1137: Always return mark_color() to unify X color.
 func mark_color_at(x: int, y: int) -> Color:
-	if has_radar(x, y):
-		return MARK_ON_NUMBER_COLOR
 	return mark_color()
+
+
+# CR-1137: 数字の縁取りの色を返す。
+func radar_outline_color() -> Color:
+	return Color(0.12, 0.10, 0.22)
+
+# CR-1137: 数字の縁取りの太さを返す。
+func radar_outline_size() -> int:
+	return 8
 
 
 func _draw() -> void:
@@ -498,6 +506,9 @@ func _draw() -> void:
 					var font := ThemeDB.fallback_font
 					var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 					var draw_pos := Vector2(center.x - text_width * 0.5, center.y + font_size * 0.35)
+					
+					# CR-1137: Draw outline before text
+					draw_string_outline(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, radar_outline_size(), radar_outline_color())
 					draw_string(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 
