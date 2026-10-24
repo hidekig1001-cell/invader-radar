@@ -27,6 +27,20 @@ const MARK_ON_NUMBER_COLOR := Color(1, 1, 1, 0.6)
 # 駒（黒）を置いた数字のマスの数字の色（紺だと駒に埋もれて読めない）
 const PIECE_NUMBER_COLOR := Color(1, 1, 1)
 
+# CR-1142: 駒の画像
+const PIECE_TEXTURES := {
+	"cyan": preload("res://assets/piece_cyan.png"),
+	"green": preload("res://assets/piece_green.png"),
+	"navy": preload("res://assets/piece_navy.png"),
+	"orange": preload("res://assets/piece_orange.png"),
+	"pink": preload("res://assets/piece_pink.png"),
+	"purple": preload("res://assets/piece_purple.png"),
+	"conflict": preload("res://assets/piece_conflict.png")
+}
+const ROCK_TEXTURE := preload("res://assets/rock.png")
+# REGION_COLORS と同じ順で、区域番号に対応する駒の色の名前
+const REGION_PIECE_COLORS := ["navy", "orange", "pink", "green", "cyan", "purple", "pink", "navy"]
+
 # 宇宙人の絵（幅 8・高さ 8）
 const ALIEN_ROWS := [
 	"....1...",
@@ -412,6 +426,29 @@ func radar_outline_color() -> Color:
 func radar_outline_size() -> int:
 	return 8
 
+# --- CR-1142 New Functions ---
+
+func piece_color_name(x: int, y: int) -> String:
+	if session == null or session.board == null or session.level == null:
+		return "navy"
+	var conflicts = Rules.conflicts(session.board, session.level)
+	if Vector2i(x, y) in conflicts:
+		return "conflict"
+	var region = session.level.region_at(x, y)
+	var idx = posmod(region, REGION_PIECE_COLORS.size())
+	return REGION_PIECE_COLORS[idx]
+
+func piece_texture(x: int, y: int) -> Texture2D:
+	return PIECE_TEXTURES[piece_color_name(x, y)]
+
+func rock_texture() -> Texture2D:
+	return ROCK_TEXTURE
+
+func piece_image_rect(r: Rect2) -> Rect2:
+	return r.grow(-r.size.x * 0.06)
+
+# -----------------------------
+
 
 func _draw() -> void:
 	var gs := grid_size()
@@ -454,13 +491,13 @@ func _draw() -> void:
 
 			# Draw Content (Rock or Piece/Mark)
 			if is_rock(x, y):
-				_draw_rock(r)
+				draw_texture_rect(rock_texture(), piece_image_rect(r), false)
 			else:
 				match row[x]:
 					"x":
 						_draw_mark(r, mark_color_at(x, y))
 					"P":
-						_draw_piece(r, piece_fill(x, y))
+						draw_texture_rect(piece_texture(x, y), piece_image_rect(r), false)
 
 	# 5. Draw Highlight/Darkening (CR-1022)
 	if highlight_cells.size() > 0:
