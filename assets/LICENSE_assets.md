@@ -9,3 +9,4 @@
 - title_logo.png（800×359、背景は透過）: タイトル画面の「INVADER RADAR」のロゴ（2 行、INVADER がミント・RADAR がピンク、宇宙人のアンテナ）。2026-10-24 に FLUX.2 [klein] 4B（Apache 2.0）で Mac mini で生成し、綴りを目で確かめて選んだ（画像生成モデル3 のチャット）。ユーザーが選んだ（D-20261024-1317＝A）。作り方は作業 PC の F:\AI\imagegen\assets\invader_radar\title_logo_kawaii\README.md にある。
 - piece_<色>_2.png・piece_<色>_3.png・piece_<色>_4.png（6 色×3、256×256、背景は透過）: 駒の宇宙人のポーズ違い（2＝手を振る、3＝跳ねる、4＝ウインク）。2026-10-24 に、元の piece_<色>.png を土台に手・閉じた目・影を図形で足して作った（モデルは使わない。画像生成モデル3 のチャット）。ユーザーの判断 D-20261024-2059＝A（1 色 4 ポーズ）。
 - piece_pink.png・piece_orange.png を、白目の透けを直した版に置き換えた（2026-10-24、同じチャット）。作り方は作業 PC の F:\AI\imagegen\assets\invader_radar\poses\README.md にある。
+- rules/rules_1.png〜rules_7.png（960×720）: チュートリアルの前の説明のページの図（目的・色・行と列・となり・数字のマス・岩・操作）。2026-10-24 に、ゲームの素材（駒・岩）を組み合わせて作り、指と星は FLUX.2 [klein] 4B（Apache 2.0）で作った（画像生成モデル3 のチャット）。ユーザーの判断 D-20261024-2114＝B。作り方は作業 PC の F:\AI\imagegen\assets\invader_radar\rules\README.md にある。
