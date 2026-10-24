@@ -15,7 +15,7 @@ func _start():
 func test_settings_button_text_and_size() -> void:
 	var m = await _start()
 	assert_eq(m.hud.settings_button.text, "RULES")
-	assert_eq(m.hud.settings_button.position, Vector2(720, 260))
+	assert_eq(m.hud.settings_button.position, Vector2(720, 1506))
 	assert_eq(m.hud.settings_button.size, Vector2(320, 100))
 
 

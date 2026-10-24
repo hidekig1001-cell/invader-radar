@@ -38,8 +38,8 @@ func _assert_bubble_clear_of_parts(m, label: String) -> void:
 	assert_false(b.intersects(restart_r), label + " restart")
 	assert_false(b.intersects(sound_r), label + " sound")
 	assert_false(b.intersects(board_r), label + " board")
-	assert_true(b.position.y >= undo_r.end.y + BUTTON_GAP, label + " gap below undo")
-	assert_true(b.position.y >= restart_r.end.y + BUTTON_GAP, label + " gap below restart")
+	assert_true(b.end.y + BUTTON_GAP <= undo_r.position.y, label + " gap below undo")
+	assert_true(b.end.y + BUTTON_GAP <= restart_r.position.y, label + " gap below restart")
 	assert_true(b.end.y <= board_r.position.y, label + " above board")
 
 

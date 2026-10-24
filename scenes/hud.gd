@@ -15,7 +15,7 @@ const SCREEN := Vector2(1080, 1920)
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const SoundSettings = preload("res://game/sound_settings.gd")
 
-const ROW_BUTTON_RECTS := [Rect2(40, 260, 320, 100), Rect2(380, 260, 320, 100), Rect2(720, 260, 320, 100)]
+const ROW_BUTTON_RECTS := [Rect2(40, 1506, 320, 100), Rect2(380, 1506, 320, 100), Rect2(720, 1506, 320, 100)]
 const ROW_BUTTON_SIZE := Vector2(320, 100)
 
 const TABLE_RECT := Rect2(40, 90, 1000, 160)

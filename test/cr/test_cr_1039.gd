@@ -115,4 +115,4 @@ func test_main_apply_screen_layout_horizontal() -> void:
 	var m = await _start_main()
 	m.apply_screen_layout(Vector2(1440, 1920))
 	assert_eq(m.rules_label.position, Vector2(234, 1732))
-	assert_eq(m.hud.undo_button.get_global_rect(), Rect2(220, 260, 320, 100))
+	assert_eq(m.hud.undo_button.get_global_rect(), Rect2(220, 1506, 320, 100))
