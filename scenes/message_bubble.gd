@@ -3,13 +3,13 @@ extends Label
 
 # 上は hud の UNDO・RESTART のボタンの下の端（y 360）から 8 あけ、下は盤の背景の上の端（y 466）の手前まで。
 # 右の端は音のボタン（x 720 から）にかからない 660 幅（CR-1135）。
-const BOX := Rect2(40, 368, 660, 96)
+const BOX := Rect2(40, 262, 1000, 192)
 const FONT_SIZE := 36
 const ButtonStyle = preload("res://scenes/button_style.gd")
 const TILE_SIZE := Vector2(900, 160)
 const TILE_OFFSET_Y := 200.0
 const TILE_FONT_COLOR := Color8(74, 50, 10)
-const PANEL_BOX := Rect2(40, 368, 660, 96)
+const PANEL_BOX := Rect2(40, 262, 1000, 192)
 const PANEL_FONT_SIZE := 28
 const TEXT_MAX_FONT_SIZE := 52
 const TEXT_MIN_FONT_SIZE := 24
