@@ -10,6 +10,7 @@ const SpaceBg = preload("res://scenes/space_bg.gd")
 const SoundSettings = preload("res://game/sound_settings.gd")
 const Licenses = preload("res://game/licenses.gd")
 const LicensesPanel = preload("res://scenes/licenses_panel.gd")
+const RulesPages = preload("res://scenes/rules_pages.gd")
 
 var _language: String = ""
 var _title_label: Label
@@ -29,6 +30,7 @@ var sound_btn: Button
 var licenses_btn: Button
 var licenses_panel = null
 var safe_top: float = 0.0
+var rules_pages = null
 
 func _ready() -> void:
 	size = Vector2(1080, 1920)
@@ -106,7 +108,7 @@ func _ready() -> void:
 	_start_btn_tutorial.visible = false
 	_start_btn_tutorial.pressed.connect(func(): 
 		sound.play_sfx("button")
-		press_start(true)
+		open_rules_pages()
 	)
 	add_child(_start_btn_tutorial)
 	ButtonStyle.apply_to(_start_btn_tutorial)
@@ -278,3 +280,19 @@ func update_sound_label() -> void:
 
 func open_licenses() -> void:
 	licenses_panel.open(Licenses.full_text(), _language)
+
+func open_rules_pages() -> void:
+	rules_pages = RulesPages.new()
+	rules_pages.language = _language
+	rules_pages.finished.connect(on_rules_pages_finished)
+	add_child(rules_pages)
+	var visible_size = get_viewport().get_visible_rect().size
+	var display_name = DisplayServer.get_name()
+	var layout_size = SpaceBg.screen_size_for_layout(visible_size, display_name)
+	rules_pages.place(layout_size)
+
+func on_rules_pages_finished() -> void:
+	if rules_pages != null:
+		rules_pages.queue_free()
+		rules_pages = null
+	press_start(true)
