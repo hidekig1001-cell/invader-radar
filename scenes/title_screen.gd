@@ -19,6 +19,7 @@ var _start_btn_tutorial: Button
 var _start_btn_now: Button
 var _start_btn_fresh: Button
 var background: TextureRect
+var top_fill: ColorRect
 var sound = null
 var base_positions: Dictionary = {}
 var settings_path: String = "user://settings.json"
@@ -35,9 +36,15 @@ func _ready() -> void:
 	var tex = load("res://assets/title_bg_1080x1920.png")
 	if tex != null:
 		background.texture = tex
-	background.position = Vector2(0, 0)
+	background.position = Vector2(0, 120)
 	background.size = Vector2(1080, 1920)
 	add_child(background)
+
+	top_fill = ColorRect.new()
+	top_fill.color = Color(0.03, 0.02, 0.12)
+	top_fill.position = Vector2(0, 0)
+	top_fill.size = Vector2(1080, 120)
+	add_child(top_fill)
 
 	sound = Sound.new()
 	add_child(sound)
@@ -117,7 +124,7 @@ func _ready() -> void:
 	ButtonStyle.apply_to(_start_btn_fresh)
 
 	sound_btn = Button.new()
-	sound_btn.position = Vector2(760, 120)
+	sound_btn.position = Vector2(760, 240)
 	sound_btn.size = Vector2(280, 120)
 	sound_btn.add_theme_font_size_override("font_size", 44)
 	sound_btn.pressed.connect(func(): 
@@ -130,7 +137,7 @@ func _ready() -> void:
 
 	licenses_btn = Button.new()
 	licenses_btn.text = "LICENSES"
-	licenses_btn.position = Vector2(390, 1790)
+	licenses_btn.position = Vector2(390, 1080)
 	licenses_btn.size = Vector2(300, 90)
 	licenses_btn.add_theme_font_size_override("font_size", 36)
 	licenses_btn.pressed.connect(func(): 
@@ -167,6 +174,8 @@ func apply_screen_layout(size: Vector2) -> void:
 	var offset = SpaceBg.safe_layout_offsets(size.x, size.y, safe_top)
 	
 	background.size = size
+	background.position = Vector2(0, 120 + offset.y)
+	top_fill.size = Vector2(size.x, 120 + offset.y)
 	
 	if base_positions.has("title"):
 		_title_label.position = base_positions["title"] + offset
