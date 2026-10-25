@@ -19,9 +19,9 @@ const ROW_BUTTON_RECTS := [Rect2(40, 1506, 320, 100), Rect2(380, 1506, 320, 100)
 const ROW_BUTTON_SIZE := Vector2(320, 100)
 
 const TABLE_RECT := Rect2(40, 90, 1000, 160)
-const TABLE_BG := Color8(190, 228, 245)
-const TABLE_LINE := Color(1, 1, 1)
-const TABLE_TEXT := Color8(30, 30, 40)
+const TABLE_BG := Color8(60, 45, 120)
+const TABLE_LINE := Color8(140, 120, 210)
+const TABLE_TEXT := Color8(245, 240, 255)
 const TABLE_FONT_SIZE := 40
 
 var level_label: Label
