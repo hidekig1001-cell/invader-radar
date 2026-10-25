@@ -15,8 +15,8 @@ func test_hint_text_ja_translation() -> void:
 	var m = await _start()
 	m.language = "ja"
 	assert_eq(m.hint_text("THIS CELL IS MARKED BY MISTAKE. TAP TO REMOVE THE X."), "このマスの × はまちがい。タップで × を消す。")
-	assert_eq(m.hint_text("THIS PIECE IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT."), "この駒の場所はまちがい。ダブルタップで消す。")
-	assert_eq(m.hint_text("A PIECE GOES HERE. DOUBLE TAP TO PLACE IT."), "ここに駒が入る。ダブルタップで置く。")
+	assert_eq(m.hint_text("THIS ALIEN IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT."), "この宇宙人の場所はまちがい。ダブルタップで消す。")
+	assert_eq(m.hint_text("AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT."), "ここに宇宙人が入る。ダブルタップで置く。")
 	assert_eq(m.hint_text("ABC"), "ABC")
 
 

@@ -480,8 +480,8 @@ func hint_text(en_text: String) -> String:
 		return en_text
 	var dict = {
 		"THIS CELL IS MARKED BY MISTAKE. TAP TO REMOVE THE X.": "このマスの × はまちがい。タップで × を消す。",
-		"THIS PIECE IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT.": "この駒の場所はまちがい。ダブルタップで消す。",
-		"A PIECE GOES HERE. DOUBLE TAP TO PLACE IT.": "ここに駒が入る。ダブルタップで置く。"
+		"THIS ALIEN IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT.": "この宇宙人の場所はまちがい。ダブルタップで消す。",
+		"AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT.": "ここに宇宙人が入る。ダブルタップで置く。"
 	}
 	if dict.has(en_text):
 		return dict[en_text]

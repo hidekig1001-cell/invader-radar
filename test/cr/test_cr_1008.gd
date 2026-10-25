@@ -10,7 +10,7 @@ func test_request_hint_initial() -> void:
 	var ok = s.request_hint()
 	assert_true(ok)
 	assert_eq(s.hints, 2)
-	assert_eq(s.current_hint, {"cell": Vector2i(1, 0), "kind": "next_piece", "text": "A PIECE GOES HERE. DOUBLE TAP TO PLACE IT."})
+	assert_eq(s.current_hint, {"cell": Vector2i(1, 0), "kind": "next_piece", "text": "AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT."})
 
 
 func test_apply_hint_initial() -> void:

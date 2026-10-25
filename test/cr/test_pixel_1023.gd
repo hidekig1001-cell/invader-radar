@@ -102,7 +102,7 @@ func test_pixel_1023_help_text_stays_and_returns_after_hint() -> void:
 
 	m.hud.hint_button.pressed.emit()
 	await wait_frames(1)
-	assert_eq(m.bubble.text, "A PIECE GOES HERE. DOUBLE TAP TO PLACE IT.")
+	assert_eq(m.bubble.text, "AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT.")
 
 	m.session.tap(3, 3)
 	await wait_frames(1)
