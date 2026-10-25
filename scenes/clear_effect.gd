@@ -1,6 +1,6 @@
 extends Node2D
 
-const DURATION := 1.6
+const DURATION := 2.4
 const PARTICLE_COUNT := 40
 const GRAVITY := 900.0
 const COLORS := [Color(1.0, 0.85, 0.3), Color(1.0, 0.6, 0.75), Color(0.6, 0.85, 1.0), Color(0.7, 1.0, 0.7)]
