@@ -20,7 +20,7 @@ const PAGE_TEXT_EN := [
 	"ONE ALIEN IN EACH COLOR AREA.",
 	"ONE ALIEN IN EACH ROW\nAND IN EACH COLUMN.",
 	"ALIENS MUST NOT TOUCH,\nNOT EVEN DIAGONALLY.",
-	"A NUMBER TELLS HOW MANY ALIENS\nARE IN THE 8 CELLS AROUND IT.",
+	"A NUMBER TELLS HOW MANY ALIENS\nARE IN THE 8 CELLS AROUND IT.\nNO ALIEN IS ON A NUMBER CELL.",
 	"YOU CANNOT PLACE AN ALIEN\nON A ROCK.",
 	"TAP ONCE TO MARK X.\nDOUBLE TAP TO PLACE AN ALIEN.",
 	"TAP AN X AGAIN TO ERASE IT.\nDOUBLE TAP AN ALIEN TO REMOVE IT."
@@ -31,7 +31,7 @@ const PAGE_TEXT_JA := [
 	"同じ色のマスの集まりに、\n宇宙人は 1 人ずつ。",
 	"横の 1 行・縦の 1 列にも、\n宇宙人は 1 人ずつ。",
 	"宇宙人どうしは、縦・横・斜めに\n隣り合えない。",
-	"数字は、まわりの 8 マスにいる\n宇宙人の数。",
+	"数字は、まわりの 8 マスにいる\n宇宙人の数。\n数字のマスに宇宙人はいない。",
 	"岩のマスには、\n宇宙人を置けない。",
 	"1 回タップで × を付ける。\n2 回タップで宇宙人を置く。",
 	"× のマスを 1 回タップで × を消す。\n宇宙人のマスを 2 回タップで取り除く。"
