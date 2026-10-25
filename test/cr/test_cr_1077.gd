@@ -30,7 +30,7 @@ func test_cr_1077_check_1() -> void:
 ## CHECK: 2
 func test_cr_1077_check_2() -> void:
 	var steps = TutorialSteps.steps()
-	assert_eq(steps[1]["text"], "ONE PIECE PER ROW AND COLUMN, TOO.\nMARK AN X ON THE 6 CELLS.")
+	assert_eq(steps[1]["text"], "ONE ALIEN PER ROW AND COLUMN, TOO.\nMARK AN X ON THE 6 CELLS.")
 	assert_eq(TutorialSteps.apply_language("ja", 1), "各行・各列にも 1 つ。\n6 つのマスに × を付ける")
 
 

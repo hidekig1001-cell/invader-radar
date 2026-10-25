@@ -13,7 +13,7 @@ func _make_tutorial_at_step(step_index: int) -> Tutorial:
 ## CHECK: 1
 func test_cr_1027_check_1() -> void:
 	var steps = TutorialSteps.steps()
-	assert_eq(steps[2]["text"], "PIECES CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.")
+	assert_eq(steps[2]["text"], "ALIENS CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.")
 	assert_eq(steps[2]["highlight"], TutorialSteps.mark_cells())
 
 

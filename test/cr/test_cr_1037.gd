@@ -14,7 +14,7 @@ func _start_main(language: String):
 
 ## CHECK: 1
 func test_apply_language_ja_step0() -> void:
-	assert_eq(TutorialSteps.apply_language("ja", 0), "各色に駒を 1 つ置く。\n緑のマスをダブルタップ")
+	assert_eq(TutorialSteps.apply_language("ja", 0), "各色に宇宙人を 1 人置く。\n緑のマスをダブルタップ")
 
 
 ## CHECK: 2
@@ -34,7 +34,7 @@ func test_apply_language_ja_step3() -> void:
 
 ## CHECK: 5
 func test_apply_language_ja_step4() -> void:
-	assert_eq(TutorialSteps.apply_language("ja", 4), "残りの 2 つの駒を置く。")
+	assert_eq(TutorialSteps.apply_language("ja", 4), "残りの 2 人の宇宙人を置く。")
 
 
 ## CHECK: 6

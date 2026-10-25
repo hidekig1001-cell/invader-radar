@@ -29,7 +29,7 @@ func test_initial_state() -> void:
 	var t = Tutorial.new()
 	assert_eq(t.step_index, 0)
 	assert_false(t.is_finished())
-	assert_eq(t.current_step()["text"], "EACH COLOR NEEDS ONE PIECE.\nDOUBLE TAP THE GREEN CELL.")
+	assert_eq(t.current_step()["text"], "EACH COLOR NEEDS ONE ALIEN.\nDOUBLE TAP THE GREEN CELL.")
 	assert_eq(t.session.board.state_at(3, 1), BoardState.EMPTY)
 
 
