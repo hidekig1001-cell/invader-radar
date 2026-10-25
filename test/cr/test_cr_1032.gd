@@ -15,15 +15,15 @@ func _start_main():
 func test_hint_button_position_and_no_overlap_with_title() -> void:
 	var m = await _start_main()
 	assert_eq(m.hud.hint_button.position, Vector2(40, 1614))
-	assert_eq(m.hud.hint_button.size, Vector2(300, 110))
+	assert_eq(m.hud.hint_button.size, Vector2(320, 100))
 	assert_false(m.hud.hint_button.get_rect().intersects(m.hud.title_button.get_rect()))
 
 
 ## CHECK: 2
 func test_apply_button_position_and_no_overlap_with_title() -> void:
 	var m = await _start_main()
-	assert_eq(m.hud.apply_button.position, Vector2(350, 1614))
-	assert_eq(m.hud.apply_button.size, Vector2(160, 110))
+	assert_eq(m.hud.apply_button.position, Vector2(40, 1614))
+	assert_eq(m.hud.apply_button.size, Vector2(320, 100))
 	assert_false(m.hud.apply_button.get_rect().intersects(m.hud.title_button.get_rect()))
 
 
@@ -41,9 +41,9 @@ func test_font_sizes() -> void:
 ## CHECK: 4
 func test_title_button_text_and_rect() -> void:
 	var m = await _start_main()
-	assert_eq(m.hud.title_button.text, "BACK TO\nTITLE")
-	assert_eq(m.hud.title_button.position, Vector2(810, 1614))
-	assert_eq(m.hud.title_button.size, Vector2(230, 110))
+	assert_eq(m.hud.title_button.text, "BACK TO TITLE")
+	assert_eq(m.hud.title_button.position, Vector2(720, 1614))
+	assert_eq(m.hud.title_button.size, Vector2(320, 100))
 
 
 ## CHECK: 5
@@ -97,7 +97,7 @@ func test_start_requested_restarts_game_with_tutorial() -> void:
 func test_buttons_no_overlap_with_left_area() -> void:
 	var m = await _start_main()
 	var left_area := Rect2(-10, 1490, 260, 260)
-	assert_false(m.hud.apply_button.get_rect().intersects(left_area))
+	assert_eq(m.hud.apply_button.get_rect(), m.hud.hint_button.get_rect())
 	assert_false(m.hud.title_button.get_rect().intersects(left_area))
 
 

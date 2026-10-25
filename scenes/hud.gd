@@ -75,8 +75,8 @@ func _ready() -> void:
 	undo_button = _make_button("UNDO", ROW_BUTTON_RECTS[0], undo_pressed)
 	settings_button = _make_button("RULES", ROW_BUTTON_RECTS[2], settings_pressed)
 	restart_button = _make_button("RESTART", ROW_BUTTON_RECTS[1], restart_pressed)
-	hint_button = _make_button("HINT", Rect2(40, 1614, 300, 110), hint_pressed)
-	apply_button = _make_button("APPLY", Rect2(350, 1614, 160, 110), apply_pressed)
+	hint_button = _make_button("HINT", Rect2(40, 1614, 320, 100), hint_pressed)
+	apply_button = _make_button("APPLY", Rect2(40, 1614, 320, 100), apply_pressed)
 	apply_button.add_theme_font_size_override("font_size", 40)
 	apply_button.visible = false
 	title_button = make_title_button()
@@ -100,8 +100,8 @@ func _ready() -> void:
 	set_time(0.0)
 
 	sound_button = Button.new()
-	sound_button.position = Vector2(520, 1614)
-	sound_button.size = Vector2(280, 110)
+	sound_button.position = Vector2(380, 1614)
+	sound_button.size = Vector2(320, 100)
 	ButtonStyle.apply_to(sound_button)
 	sound_button.add_theme_font_size_override("font_size", 40)
 	sound_button.pressed.connect(toggle_sound)
@@ -115,7 +115,7 @@ func set_language(lang: String) -> void:
 	settings_button.text = localized("RULES", "説明")
 	restart_button.text = localized("RESTART", "やり直す")
 	apply_button.text = localized("APPLY", "決定")
-	title_button.text = localized("BACK TO\nTITLE", "タイトルに\n戻る")
+	title_button.text = localized("BACK TO TITLE", "タイトルに戻る")
 	if solve_button != null:
 		solve_button.text = localized("ANSWER", "答え")
 	finish_row_buttons([undo_button, restart_button, settings_button], 320)
@@ -173,9 +173,9 @@ func _make_button(text: String, r: Rect2, sig: Signal) -> Button:
 
 func make_title_button() -> Button:
 	var b := Button.new()
-	b.text = "タイトルに\n戻る"
-	b.position = Vector2(810, 1614)
-	b.size = Vector2(230, 110)
+	b.text = "タイトルに戻る"
+	b.position = Vector2(720, 1614)
+	b.size = Vector2(320, 100)
 	b.add_theme_font_size_override("font_size", 36)
 	b.pressed.connect(func() -> void: title_requested.emit())
 	add_child(b)

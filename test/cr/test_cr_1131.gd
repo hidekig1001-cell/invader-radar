@@ -18,8 +18,8 @@ func test_sound_button_toggle() -> void:
 	var h = _make_hud(path)
 	h.update_sound_label()
 
-	assert_eq(h.sound_button.position, Vector2(520, 1614))
-	assert_eq(h.sound_button.size, Vector2(280, 110))
+	assert_eq(h.sound_button.position, Vector2(380, 1614))
+	assert_eq(h.sound_button.size, Vector2(320, 100))
 	assert_eq(h.sound_button.text, "SOUND OFF")
 
 	h.toggle_sound()
