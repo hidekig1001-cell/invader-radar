@@ -11,7 +11,8 @@ const PAGE_IMAGES := [
 	preload("res://assets/rules/rules_4.png"),
 	preload("res://assets/rules/rules_5.png"),
 	preload("res://assets/rules/rules_6.png"),
-	preload("res://assets/rules/rules_7.png")
+	preload("res://assets/rules/rules_7.png"),
+	preload("res://assets/rules/rules_8.png")
 ]
 
 const PAGE_TEXT_EN := [
@@ -21,7 +22,8 @@ const PAGE_TEXT_EN := [
 	"ALIENS MUST NOT TOUCH,\nNOT EVEN DIAGONALLY.",
 	"A NUMBER TELLS HOW MANY ALIENS\nARE IN THE 8 CELLS AROUND IT.",
 	"YOU CANNOT PLACE AN ALIEN\nON A ROCK.",
-	"TAP ONCE TO MARK X.\nDOUBLE TAP TO PLACE AN ALIEN."
+	"TAP ONCE TO MARK X.\nDOUBLE TAP TO PLACE AN ALIEN.",
+	"TAP AN X AGAIN TO ERASE IT.\nDOUBLE TAP AN ALIEN TO REMOVE IT."
 ]
 
 const PAGE_TEXT_JA := [
@@ -31,7 +33,8 @@ const PAGE_TEXT_JA := [
 	"宇宙人どうしは、縦・横・斜めに\n隣り合えない。",
 	"数字は、まわりの 8 マスにいる\n宇宙人の数。",
 	"岩のマスには、\n宇宙人を置けない。",
-	"1 回タップで × を付ける。\n2 回タップで宇宙人を置く。"
+	"1 回タップで × を付ける。\n2 回タップで宇宙人を置く。",
+	"× のマスを 1 回タップで × を消す。\n宇宙人のマスを 2 回タップで取り除く。"
 ]
 
 var language: String = "en"
