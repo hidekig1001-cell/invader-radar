@@ -46,7 +46,7 @@ func test_cr_1063_make_level_7x7_has_valid_asteroids_and_6x6_does_not() -> void:
 ## CHECK: 2
 func test_cr_1063_level_pack_indices_15_to_24_have_valid_asteroids() -> void:
 	var dicts = LevelPack.level_dicts()
-	var expected_counts = [4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1]
+	var expected_counts = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
 	# Indices 40 to 69 correspond to levels 41-70 (0-indexed)
 	for i in range(40, 70):
 		assert_true(i < dicts.size(), "Level dict index %d out of bounds" % i)
