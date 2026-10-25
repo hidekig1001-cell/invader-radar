@@ -21,7 +21,7 @@ func test_rules_label_exists_and_is_label() -> void:
 func test_rules_label_text_matches_spec() -> void:
 	var m = await _start()
 	m.rules_label.apply_language("ja")
-	var expected_text := "各行・各列・各色に駒を 1 つ置く。\n駒どうしは縦・横・斜めにも隣り合ってはいけない。"
+	var expected_text := "各行・各列・各色に宇宙人を 1 人置く。\n宇宙人どうしは縦・横・斜めにも隣り合ってはいけない。"
 	assert_eq(m.rules_label.text, expected_text)
 
 

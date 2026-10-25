@@ -1,7 +1,7 @@
 extends Label
 
-const RULES_TEXT := "ONE PIECE PER ROW, COLUMN AND COLOR.\nPIECES MUST NOT TOUCH, EVEN DIAGONALLY."
-const RULES_TEXT_JA := "各行・各列・各色に駒を 1 つ置く。\n駒どうしは縦・横・斜めにも隣り合ってはいけない。"
+const RULES_TEXT := "ONE ALIEN PER ROW, COLUMN AND COLOR.\nALIENS MUST NOT TOUCH, EVEN DIAGONALLY."
+const RULES_TEXT_JA := "各行・各列・各色に宇宙人を 1 人置く。\n宇宙人どうしは縦・横・斜めにも隣り合ってはいけない。"
 
 func _ready() -> void:
 	text = RULES_TEXT
