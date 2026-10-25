@@ -16,7 +16,7 @@ func test_1_empty_board_next_piece() -> void:
 	var lv = _make_level()
 	var b = BoardState.new(4, 4)
 	var result = Hint.next_hint(b, lv)
-	assert_eq(result, {"cell": Vector2i(2, 0), "kind": "next_piece", "text": "A PIECE GOES HERE. DOUBLE TAP TO PLACE IT."})
+	assert_eq(result, {"cell": Vector2i(2, 0), "kind": "next_piece", "text": "AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT."})
 
 
 func test_2_wrong_mark_priority() -> void:
@@ -51,7 +51,7 @@ func test_4_wrong_piece() -> void:
 	var result = Hint.next_hint(b, lv)
 	assert_eq(result["cell"], Vector2i(0, 0))
 	assert_eq(result["kind"], "wrong_piece")
-	assert_eq(result["text"], "THIS PIECE IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT.")
+	assert_eq(result["text"], "THIS ALIEN IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT.")
 
 
 func test_5_next_piece_after_some_placed() -> void:

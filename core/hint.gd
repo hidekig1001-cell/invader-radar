@@ -48,7 +48,7 @@ static func next_hint(board_state, level) -> Dictionary:
 		return {
 			"cell": cell,
 			"kind": "wrong_piece",
-			"text": "THIS PIECE IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT."
+			"text": "THIS ALIEN IS IN THE WRONG PLACE. DOUBLE TAP TO REMOVE IT."
 		}
 	
 	# 3. Check for next piece (solution cells without pieces)
@@ -66,7 +66,7 @@ static func next_hint(board_state, level) -> Dictionary:
 		return {
 			"cell": cell,
 			"kind": "next_piece",
-			"text": "A PIECE GOES HERE. DOUBLE TAP TO PLACE IT."
+			"text": "AN ALIEN GOES HERE. DOUBLE TAP TO PLACE IT."
 		}
 	
 	return {}
