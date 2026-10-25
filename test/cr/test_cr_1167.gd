@@ -25,9 +25,9 @@ func test_cr_1167_size_up_text_ja() -> void:
 	m.show_help()
 	await wait_frames(1)
 
-	assert_eq(m.help_text(), "この面からはマスが 5×5 になるよ。がんばって！\nタップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
-	assert_eq(m.bubble.text, "この面からはマスが 5×5 になるよ。がんばって！\nタップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
-	assert_eq(m.bubble.get_line_count(), 3)
+	assert_eq(m.help_text(), "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
+	assert_eq(m.bubble.text, "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
+	assert_eq(m.bubble.get_line_count(), 2)
 
 	s.next_level()
 	assert_eq(m.help_text(), "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
@@ -52,5 +52,5 @@ func test_cr_1167_size_up_text_en() -> void:
 	await wait_frames(1)
 
 	assert_eq(m.size_up_text(), "THE BOARD IS 5x5 FROM HERE. GOOD LUCK!")
-	assert_eq(m.bubble.text, "THE BOARD IS 5x5 FROM HERE. GOOD LUCK!\nTAP: X   DOUBLE TAP: ALIEN\nSWIPE: X")
-	assert_eq(m.bubble.get_line_count(), 3)
+	assert_eq(m.bubble.text, "TAP: X   DOUBLE TAP: ALIEN\nSWIPE: X")
+	assert_eq(m.bubble.get_line_count(), 2)

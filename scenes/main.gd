@@ -245,6 +245,11 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_down(pos: Vector2) -> void:
 	_stroke = []
+	if not is_tutorial() and bubble.tile_mode and size_up_tile_text() != "" and bubble.text == size_up_tile_text():
+		bubble.clear_text()
+		show_help()
+		return
+
 	if not is_tutorial() and session.status == "cleared":
 		var was_last := is_last_level()
 		session.next_level()
@@ -346,7 +351,11 @@ func _refresh() -> void:
 		bubble.show_tile(cleared_text(), board_view.position + board_view.board_rect().get_center())
 	elif bubble.text == cleared_text():
 		bubble.clear_text()
-		show_help()
+		var tile_text = size_up_tile_text()
+		if tile_text != "":
+			bubble.show_tile(tile_text, board_view.position + board_view.board_rect().get_center())
+		else:
+			show_help()
 	if session.current_hint.is_empty():
 		if board_view.hint_cell.x >= 0 and session.status != "cleared":
 			show_help()
@@ -428,16 +437,10 @@ func show_help() -> void:
 
 
 func help_text() -> String:
-	var base_text = ""
 	if language == "ja":
-		base_text = "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
+		return "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
 	else:
-		base_text = HELP_TEXT
-	
-	var size_hint = size_up_text()
-	if size_hint != "":
-		return size_hint + "\n" + base_text
-	return base_text
+		return HELP_TEXT
 
 
 func size_up_text() -> String:
@@ -451,6 +454,16 @@ func size_up_text() -> String:
 		else:
 			return "THE BOARD IS %dx%d FROM HERE. GOOD LUCK!" % [session.level.width, session.level.width]
 	return ""
+
+
+func size_up_tile_text() -> String:
+	if size_up_text() == "":
+		return ""
+	var w = session.level.width
+	if language == "ja":
+		return "この面からはマスが %d×%d になるよ。\nがんばって！  タップではじめる" % [w, w]
+	else:
+		return "THE BOARD IS %dx%d FROM HERE.\nGOOD LUCK!  TAP TO START" % [w, w]
 
 
 func is_last_level() -> bool:
