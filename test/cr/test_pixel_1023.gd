@@ -125,7 +125,7 @@ func test_pixel_1023_help_text_after_next_level_and_ja() -> void:
 	n.language = "ja"
 	add_child_autofree(n)
 	await wait_frames(2)
-	assert_eq(n.bubble.text, "タップ: ×   ダブルタップ: 駒\nスワイプ: ×")
+	assert_eq(n.bubble.text, "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
 
 
 ## CHECK: 4
