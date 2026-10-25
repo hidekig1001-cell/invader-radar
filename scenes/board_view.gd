@@ -428,6 +428,10 @@ func has_radar(x: int, y: int) -> bool:
 # CR-1130: 指定したマスに描く × の色を返す。
 # CR-1137: Always return mark_color() to unify X color.
 func mark_color_at(x: int, y: int) -> Color:
+	if session != null and session.level != null:
+		var dead := Rules.dead_marks(session.board, session.level)
+		if Vector2i(x, y) in dead:
+			return Color.RED
 	return mark_color()
 
 
