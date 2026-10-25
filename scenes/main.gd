@@ -361,6 +361,15 @@ func _refresh() -> void:
 			show_help()
 		board_view.hint_cell = Vector2i(-1, -1)
 		hud.set_apply_visible(false)
+
+	if not is_tutorial() and session.status != "cleared" and session.current_hint.is_empty():
+		var current_text = bubble.text
+		var target_text = help_text()
+		if current_text != target_text:
+			var ja_help = "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
+			if current_text == HELP_TEXT or current_text == ja_help or current_text == dead_marks_text():
+				show_help()
+
 	update_music()
 
 
@@ -437,10 +446,22 @@ func show_help() -> void:
 
 
 func help_text() -> String:
+	if not is_tutorial() and session != null and session.board != null and session.level != null:
+		var dead = Rules.dead_marks(session.board, session.level)
+		if not dead.is_empty():
+			return dead_marks_text()
+	
 	if language == "ja":
 		return "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
 	else:
 		return HELP_TEXT
+
+
+func dead_marks_text() -> String:
+	if language == "ja":
+		return "× だけの色・行・列があるよ\n× をタップして消してね"
+	else:
+		return "A LINE OR COLOR HAS ONLY X\nTAP AN X TO REMOVE IT"
 
 
 func size_up_text() -> String:
