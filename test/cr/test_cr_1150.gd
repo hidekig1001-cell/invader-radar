@@ -11,7 +11,7 @@ func test_cr_1150_rules_pages_basic() -> void:
 	assert_eq(rp.page_count(), 7)
 	assert_eq(rp.page_index, 0)
 	assert_eq(rp.image.texture.resource_path, "res://assets/rules/rules_1.png")
-	assert_eq(rp.text_label.text, "盤のマスに宇宙人の駒を置こう。\nルールを全部守るとクリア！")
+	assert_eq(rp.text_label.text, "盤のマスに宇宙人を置こう。\n宇宙人をすべて見つけるとクリア！")
 	assert_eq(rp.page_label.text, "1 / 7")
 	assert_true(rp.back_btn.disabled)
 	assert_eq(rp.next_btn.text, "つぎへ")
@@ -29,15 +29,23 @@ func test_cr_1150_rules_pages_basic() -> void:
 	rp.prev_page()
 	assert_eq(rp.page_index, 0)
 
+	rp.show_page(3)
+	assert_eq(rp.text_label.text, "宇宙人どうしは、縦・横・斜めに\n隣り合えない。")
+
 	rp.show_page(6)
 	assert_eq(rp.image.texture.resource_path, "res://assets/rules/rules_7.png")
-	assert_eq(rp.text_label.text, "1 回タップで × を付ける。\n2 回タップで駒を置く。")
+	assert_eq(rp.text_label.text, "1 回タップで × を付ける。\n2 回タップで宇宙人を置く。")
 	assert_eq(rp.page_label.text, "7 / 7")
 	assert_eq(rp.next_btn.text, "はじめる")
 
 	watch_signals(rp)
 	rp.next_page()
 	assert_signal_emitted(rp, "finished")
+
+	assert_null(rp.sound)
+	rp.show_page(0)
+	rp.next_page()
+	assert_eq(rp.page_index, 1)
 
 
 ## CHECK: 2
@@ -54,7 +62,7 @@ func test_cr_1150_title_screen_integration() -> void:
 	await wait_frames(1)
 
 	assert_not_null(ts.rules_pages)
-	assert_eq(ts.rules_pages.text_label.text, "PLACE THE ALIEN PIECES ON THE BOARD.\nKEEP ALL THE RULES TO CLEAR IT!")
+	assert_eq(ts.rules_pages.text_label.text, "PLACE THE ALIENS ON THE BOARD.\nFIND ALL THE ALIENS TO CLEAR IT!")
 	assert_signal_not_emitted(ts, "start_requested")
 
 	ts.rules_pages.finished.emit()
