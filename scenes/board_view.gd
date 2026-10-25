@@ -511,6 +511,10 @@ func _draw() -> void:
 			if is_rock(x, y):
 				draw_texture_rect(rock_texture(), piece_image_rect(r), false)
 			else:
+				# CR-1171: Draw rock image under numbers if radar exists
+				if rock_image_at(x, y):
+					draw_texture_rect(rock_texture(), piece_image_rect(r), false)
+				
 				match row[x]:
 					"x":
 						_draw_mark(r, mark_color_at(x, y))
@@ -663,3 +667,7 @@ func _process(delta: float) -> void:
 			break
 	if needs_redraw:
 		queue_redraw()
+
+
+func rock_image_at(x: int, y: int) -> bool:
+	return is_rock(x, y) or has_radar(x, y)
