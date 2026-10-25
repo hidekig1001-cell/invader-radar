@@ -20,6 +20,15 @@ static func conflicts(board_state, level) -> Array:
 				conflict_set[piece] = true
 				break
 	
+	# レーダー（数字）のマスにある駒を conflict_set に追加
+	for piece in pieces:
+		for r in level.radar:
+			var rx = r[0]
+			var ry = r[1]
+			if piece.x == rx and piece.y == ry:
+				conflict_set[piece] = true
+				break
+	
 	for i in range(n):
 		for j in range(i + 1, n):
 			var a = pieces[i]
