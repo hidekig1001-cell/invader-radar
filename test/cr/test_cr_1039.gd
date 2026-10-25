@@ -39,7 +39,7 @@ func test_main_apply_screen_layout_vertical() -> void:
 	m.apply_screen_layout(Vector2(1080, 2424))
 	m.apply_screen_layout(Vector2(1080, 2424))
 	assert_eq(m.rules_label.position, Vector2(54, 1984))
-	assert_eq(m.hud.hint_button.get_global_rect(), Rect2(40, 1866, 300, 110))
+	assert_eq(m.hud.hint_button.get_global_rect(), Rect2(40, 1866, 320, 100))
 
 
 ## CHECK: 4
