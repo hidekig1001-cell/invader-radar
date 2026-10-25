@@ -108,7 +108,7 @@ func test_main_help_text_ja() -> void:
 	m.language = "ja"
 	add_child_autofree(m)
 	await wait_frames(2)
-	assert_eq(m.bubble.text, "タップ: ×   ダブルタップ: 駒\nスワイプ: ×")
+	assert_eq(m.bubble.text, "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×")
 
 
 func test_main_cleared_text_ja() -> void:

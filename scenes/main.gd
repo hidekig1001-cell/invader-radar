@@ -18,7 +18,7 @@ const RulesPanel = preload("res://scenes/rules_panel.gd")
 const ProgressStore = preload("res://game/progress_store.gd")
 
 # 操作の説明は項目の途中で折り返さないよう、項目の区切りで改行しておく。
-const HELP_TEXT := "TAP: X   DOUBLE TAP: PIECE\nSWIPE: X"
+const HELP_TEXT := "TAP: X   DOUBLE TAP: ALIEN\nSWIPE: X"
 const CLEARED_TEXT := "LEVEL CLEARED!  TAP FOR NEXT"
 const ALL_CLEARED_TEXT := "ALL LEVELS CLEARED!  TAP FOR TITLE"
 const LOGO_GAP := 20.0
@@ -429,7 +429,7 @@ func show_help() -> void:
 
 func help_text() -> String:
 	if language == "ja":
-		return "タップ: ×   ダブルタップ: 駒\nスワイプ: ×"
+		return "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
 	return HELP_TEXT
 
 
