@@ -39,7 +39,7 @@ func _ready() -> void:
 	body_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_label.add_theme_stylebox_override("normal", box)
-	body_label.add_theme_font_size_override("font_size", 38)
+	body_label.add_theme_font_size_override("font_size", 34)
 	body_label.add_theme_color_override("font_color", Color8(30, 30, 40))
 	add_child(body_label)
 
