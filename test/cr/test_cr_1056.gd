@@ -47,7 +47,7 @@ func test_level_dicts_index13_matches_make_level_6_6_4() -> void:
 	var dicts = LevelPack.level_dicts()
 	var actual = dicts[13].duplicate(true)
 	actual.erase("id")
-	var expected = LevelMaker.make_level(5, 5, 4, 3, 2).duplicate(true)
+	var expected = LevelMaker.make_level(5, 5, 4, 5, 3).duplicate(true)
 	expected.erase("id")
 	assert_eq(actual, expected)
 
@@ -57,7 +57,7 @@ func test_level_dicts_index14_matches_make_level_6_6_5() -> void:
 	var dicts = LevelPack.level_dicts()
 	var actual = dicts[14].duplicate(true)
 	actual.erase("id")
-	var expected = LevelMaker.make_level(5, 5, 5, 3, 2).duplicate(true)
+	var expected = LevelMaker.make_level(5, 5, 5, 4, 3).duplicate(true)
 	expected.erase("id")
 	assert_eq(actual, expected)
 
