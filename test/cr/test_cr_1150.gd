@@ -8,11 +8,11 @@ func test_cr_1150_rules_pages_basic() -> void:
 	add_child_autofree(rp)
 	await wait_frames(1)
 
-	assert_eq(rp.page_count(), 7)
+	assert_eq(rp.page_count(), 8)
 	assert_eq(rp.page_index, 0)
 	assert_eq(rp.image.texture.resource_path, "res://assets/rules/rules_1.png")
 	assert_eq(rp.text_label.text, "盤のマスに宇宙人を置こう。\n宇宙人をすべて見つけるとクリア！")
-	assert_eq(rp.page_label.text, "1 / 7")
+	assert_eq(rp.page_label.text, "1 / 8")
 	assert_true(rp.back_btn.disabled)
 	assert_eq(rp.next_btn.text, "つぎへ")
 
@@ -35,12 +35,12 @@ func test_cr_1150_rules_pages_basic() -> void:
 	rp.show_page(6)
 	assert_eq(rp.image.texture.resource_path, "res://assets/rules/rules_7.png")
 	assert_eq(rp.text_label.text, "1 回タップで × を付ける。\n2 回タップで宇宙人を置く。")
-	assert_eq(rp.page_label.text, "7 / 7")
-	assert_eq(rp.next_btn.text, "はじめる")
+	assert_eq(rp.page_label.text, "7 / 8")
+	assert_eq(rp.next_btn.text, "つぎへ")
 
 	watch_signals(rp)
 	rp.next_page()
-	assert_signal_emitted(rp, "finished")
+	assert_signal_not_emitted(rp, "finished")
 
 	assert_null(rp.sound)
 	rp.show_page(0)
