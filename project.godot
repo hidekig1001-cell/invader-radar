@@ -8,6 +8,8 @@ config/icon="res://assets/title_logo/icon_play_512.png"
 run/main_scene="res://scenes/app.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/quit_on_go_back=false
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.05, 0.1, 0.2, 1)
 
 [debug]
 
