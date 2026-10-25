@@ -33,13 +33,13 @@ func _ready() -> void:
 	box.content_margin_right = 40
 
 	body_label = Label.new()
-	body_label.position = Vector2(90, 420)
-	body_label.size = Vector2(900, 900)
+	body_label.position = Vector2(90, 240)
+	body_label.size = Vector2(900, 1100)
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	body_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_label.add_theme_stylebox_override("normal", box)
-	body_label.add_theme_font_size_override("font_size", 40)
+	body_label.add_theme_font_size_override("font_size", 38)
 	body_label.add_theme_color_override("font_color", Color8(30, 30, 40))
 	add_child(body_label)
 
@@ -82,7 +82,7 @@ func place(screen: Vector2) -> void:
 	var offset := (screen - Vector2(1080, 1920)) / 2.0
 	size = screen
 	dim.size = screen
-	body_label.position = Vector2(90, 420) + offset
+	body_label.position = Vector2(90, 240) + offset
 	close_button.position = Vector2(340, 1360) + offset
 	sound_button.position = Vector2(340, 1520) + offset
 
@@ -116,6 +116,6 @@ func sound_label() -> String:
 
 static func rules_text(lang: String) -> String:
 	if lang == "ja":
-		return "ルール\n・各行・各列・各色に、宇宙人を 1 人ずつ置く。\n・宇宙人どうしは、縦・横・斜めにも隣り合ってはいけない。\n\n操作\n・タップ: ×\n・ダブルタップ: 宇宙人\n・スワイプ: なぞったマスに ×\n\nボタン\n・ヒント: 次の 1 手を教える\n・戻す: 1 手戻す\n・やり直す: この面を最初から"
+		return "ルール\n・各行・各列・各色に、\n　宇宙人を 1 人ずつ置く。\n・宇宙人どうしは、縦・横・斜めにも\n　隣り合ってはいけない。\n・数字は、まわりの 8 マスにいる\n　宇宙人の数。\n　数字のマスに宇宙人はいない。\n・岩のマスには、宇宙人を置けない。\n\n操作\n・タップ: ×\n・ダブルタップ: 宇宙人\n・スワイプ: なぞったマスに ×\n\nボタン\n・ヒント: 次の 1 手を教える\n・戻す: 1 手戻す\n・やり直す: この面を最初から"
 	else:
-		return "RULES\n- One alien in each row, column and color.\n- Aliens must not touch, even diagonally.\n\nCONTROLS\n- Tap: X\n- Double tap: alien\n- Swipe: X on the cells you swipe\n\nBUTTONS\n- Hint: shows the next move\n- Undo: takes back one move\n- Restart: starts this level over"
+		return "RULES\n- One alien in each row, column and color.\n- Aliens must not touch, even diagonally.\n- A number tells how many aliens\n  are in the 8 cells around it.\n  No alien is on a number cell.\n- You cannot place an alien on a rock.\n\nCONTROLS\n- Tap: X\n- Double tap: alien\n- Swipe: X on the cells you swipe\n\nBUTTONS\n- Hint: shows the next move\n- Undo: takes back one move\n- Restart: starts this level over"

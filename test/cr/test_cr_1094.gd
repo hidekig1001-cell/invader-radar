@@ -50,5 +50,5 @@ func test_cr_1094_main_ja_rules_and_layout() -> void:
 	assert_eq(m.rules_panel.close_button.text, "閉じる")
 	m.apply_screen_layout(Vector2(1080, 2424))
 	assert_eq(m.rules_panel.size, Vector2(1080, 2424))
-	assert_eq(m.rules_panel.body_label.position, Vector2(90, 420) + m.hud.position)
+	assert_eq(m.rules_panel.body_label.position, Vector2(90, 240) + m.hud.position)
 	assert_eq(m.rules_panel.close_button.position, Vector2(340, 1360) + m.hud.position)
