@@ -19,17 +19,17 @@ static func practice_level() -> Dictionary:
 static func steps() -> Array:
 	return [
 		{
-			"text": "EACH COLOR NEEDS ONE PIECE.\nDOUBLE TAP THE GREEN CELL.",
+			"text": "EACH COLOR NEEDS ONE ALIEN.\nDOUBLE TAP THE GREEN CELL.",
 			"highlight": [Vector2i(3, 1)],
 			"wait": {"kind": "double_tap", "cell": Vector2i(3, 1)}
 		},
 		{
-			"text": "ONE PIECE PER ROW AND COLUMN, TOO.\nMARK AN X ON THE 6 CELLS.",
+			"text": "ONE ALIEN PER ROW AND COLUMN, TOO.\nMARK AN X ON THE 6 CELLS.",
 			"highlight": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2), Vector2i(3, 3)],
 			"wait": {"kind": "mark", "cells": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 2), Vector2i(3, 3)]}
 		},
 		{
-			"text": "PIECES CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.",
+			"text": "ALIENS CANNOT TOUCH DIAGONALLY EITHER.\nMARK AN X ON EACH DIAGONAL CELL.",
 			"highlight": mark_cells(),
 			"wait": {"kind": "mark"}
 		},
@@ -39,7 +39,7 @@ static func steps() -> Array:
 			"wait": {"kind": "double_tap", "cell": Vector2i(0, 2)}
 		},
 		{
-			"text": "NOW PLACE THE LAST TWO PIECES.",
+			"text": "NOW PLACE THE LAST TWO ALIENS.",
 			"highlight": [],
 			"wait": {"kind": "solved"}
 		},
@@ -55,7 +55,7 @@ static func apply_language(lang_code: String, step_index: int) -> String:
 	if lang_code == "ja":
 		match step_index:
 			0:
-				return "各色に駒を 1 つ置く。\n緑のマスをダブルタップ"
+				return "各色に宇宙人を 1 人置く。\n緑のマスをダブルタップ"
 			1:
 				return "各行・各列にも 1 つ。\n6 つのマスに × を付ける"
 			2:
@@ -63,7 +63,7 @@ static func apply_language(lang_code: String, step_index: int) -> String:
 			3:
 				return "紫は 1 マスだけ。\nそこをダブルタップ"
 			4:
-				return "残りの 2 つの駒を置く。"
+				return "残りの 2 人の宇宙人を置く。"
 			5:
 				return "よくできました！\nタップで開始"
 			_:
