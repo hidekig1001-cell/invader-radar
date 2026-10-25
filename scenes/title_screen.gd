@@ -284,6 +284,7 @@ func open_licenses() -> void:
 func open_rules_pages() -> void:
 	rules_pages = RulesPages.new()
 	rules_pages.language = _language
+	rules_pages.sound = sound
 	rules_pages.finished.connect(on_rules_pages_finished)
 	add_child(rules_pages)
 	var visible_size = get_viewport().get_visible_rect().size

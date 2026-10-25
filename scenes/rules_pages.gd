@@ -15,27 +15,28 @@ const PAGE_IMAGES := [
 ]
 
 const PAGE_TEXT_EN := [
-	"PLACE THE ALIEN PIECES ON THE BOARD.\nKEEP ALL THE RULES TO CLEAR IT!",
-	"ONE PIECE IN EACH COLOR AREA.",
-	"ONE PIECE IN EACH ROW\nAND IN EACH COLUMN.",
-	"PIECES MUST NOT TOUCH,\nNOT EVEN DIAGONALLY.",
-	"A NUMBER TELLS HOW MANY PIECES\nARE IN THE 8 CELLS AROUND IT.",
-	"YOU CANNOT PLACE A PIECE\nON A ROCK.",
-	"TAP ONCE TO MARK X.\nDOUBLE TAP TO PLACE A PIECE."
+	"PLACE THE ALIENS ON THE BOARD.\nFIND ALL THE ALIENS TO CLEAR IT!",
+	"ONE ALIEN IN EACH COLOR AREA.",
+	"ONE ALIEN IN EACH ROW\nAND IN EACH COLUMN.",
+	"ALIENS MUST NOT TOUCH,\nNOT EVEN DIAGONALLY.",
+	"A NUMBER TELLS HOW MANY ALIENS\nARE IN THE 8 CELLS AROUND IT.",
+	"YOU CANNOT PLACE AN ALIEN\nON A ROCK.",
+	"TAP ONCE TO MARK X.\nDOUBLE TAP TO PLACE AN ALIEN."
 ]
 
 const PAGE_TEXT_JA := [
-	"盤のマスに宇宙人の駒を置こう。\nルールを全部守るとクリア！",
-	"同じ色のマスの集まりに、\n駒は 1 つずつ。",
-	"横の 1 行・縦の 1 列にも、\n駒は 1 つずつ。",
-	"駒どうしは、縦・横・斜めに\n隣り合えない。",
-	"数字は、まわりの 8 マスにある\n駒の数。",
-	"岩のマスには、\n駒を置けない。",
-	"1 回タップで × を付ける。\n2 回タップで駒を置く。"
+	"盤のマスに宇宙人を置こう。\n宇宙人をすべて見つけるとクリア！",
+	"同じ色のマスの集まりに、\n宇宙人は 1 人ずつ。",
+	"横の 1 行・縦の 1 列にも、\n宇宙人は 1 人ずつ。",
+	"宇宙人どうしは、縦・横・斜めに\n隣り合えない。",
+	"数字は、まわりの 8 マスにいる\n宇宙人の数。",
+	"岩のマスには、\n宇宙人を置けない。",
+	"1 回タップで × を付ける。\n2 回タップで宇宙人を置く。"
 ]
 
 var language: String = "en"
 var page_index: int = 0
+var sound = null
 
 var bg: ColorRect
 var image: TextureRect
@@ -130,6 +131,8 @@ func show_page(i: int) -> void:
 			next_btn.text = "NEXT"
 
 func next_page() -> void:
+	if sound != null:
+		sound.play_sfx("button")
 	if page_index == page_count() - 1:
 		finished.emit()
 	else:
@@ -137,6 +140,8 @@ func next_page() -> void:
 
 func prev_page() -> void:
 	if page_index > 0:
+		if sound != null:
+			sound.play_sfx("button")
 		show_page(page_index - 1)
 
 func place(screen: Vector2) -> void:
