@@ -428,9 +428,29 @@ func show_help() -> void:
 
 
 func help_text() -> String:
+	var base_text = ""
 	if language == "ja":
-		return "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
-	return HELP_TEXT
+		base_text = "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
+	else:
+		base_text = HELP_TEXT
+	
+	var size_hint = size_up_text()
+	if size_hint != "":
+		return size_hint + "\n" + base_text
+	return base_text
+
+
+func size_up_text() -> String:
+	if session == null or session.level == null or session.level_index == 0:
+		return ""
+	
+	var prev_level = session.levels[session.level_index - 1]
+	if prev_level.width < session.level.width:
+		if language == "ja":
+			return "この面からはマスが %d×%d になるよ。がんばって！" % [session.level.width, session.level.width]
+		else:
+			return "THE BOARD IS %dx%d FROM HERE. GOOD LUCK!" % [session.level.width, session.level.width]
+	return ""
 
 
 func is_last_level() -> bool:
