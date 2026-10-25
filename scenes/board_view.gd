@@ -92,6 +92,9 @@ const PIECE_POSE_TEXTURES := {
 }
 var piece_poses: Dictionary = {}
 var pose_rng := RandomNumberGenerator.new()
+const PIECE_POP_TIME := 0.15
+var piece_pop_start: Dictionary = {}
+var pop_clock: float = 0.0
 
 
 # 盤の大きさ（マス）。session がなければ 0。
@@ -512,7 +515,9 @@ func _draw() -> void:
 					"x":
 						_draw_mark(r, mark_color_at(x, y))
 					"P":
-						draw_texture_rect(piece_texture(x, y), piece_image_rect(r), false)
+						var pop_scale := piece_pop_scale(x, y, pop_clock)
+						var target_rect := scaled_rect(piece_image_rect(r), pop_scale)
+						draw_texture_rect(piece_texture(x, y), target_rect, false)
 
 	# 5. Draw Highlight/Darkening (CR-1022)
 	if highlight_cells.size() > 0:
@@ -618,6 +623,7 @@ func piece_pose(x: int, y: int) -> int:
 	var key := Vector2i(x, y)
 	if not piece_poses.has(key):
 		piece_poses[key] = pose_rng.randi_range(0, 3)
+		piece_pop_start[key] = pop_clock
 	return piece_poses[key]
 
 
@@ -628,3 +634,32 @@ func forget_empty_poses() -> void:
 			keys_to_remove.append(key)
 	for key in keys_to_remove:
 		piece_poses.erase(key)
+		piece_pop_start.erase(key)
+
+
+func piece_pop_scale(x: int, y: int, now: float) -> float:
+	var key := Vector2i(x, y)
+	if not piece_pop_start.has(key):
+		return 1.0
+	var start_time: float = piece_pop_start[key]
+	var t := (now - start_time) / PIECE_POP_TIME
+	if t <= 0.0 or t >= 1.0:
+		return 1.0
+	return 1.0 + 0.2 * sin(PI * t)
+
+
+func scaled_rect(rect: Rect2, s: float) -> Rect2:
+	var center := rect.get_center()
+	var new_size := rect.size * s
+	return Rect2(center - new_size * 0.5, new_size)
+
+
+func _process(delta: float) -> void:
+	pop_clock += delta
+	var needs_redraw := false
+	for key in piece_pop_start.keys():
+		if pop_clock - piece_pop_start[key] < PIECE_POP_TIME + delta:
+			needs_redraw = true
+			break
+	if needs_redraw:
+		queue_redraw()
