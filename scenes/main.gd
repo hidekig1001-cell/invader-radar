@@ -354,6 +354,8 @@ func _refresh() -> void:
 			sound.vibrate(15, 0.4)
 		elif sfx_name == "dead":
 			sound.vibrate(120)
+		elif sfx_name == "wrong":
+			sound.vibrate(250, 0.3)
 			
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
