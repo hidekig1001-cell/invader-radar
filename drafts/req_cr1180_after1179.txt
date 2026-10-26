@@ -16,12 +16,12 @@ CR-1179 の dead の手（× を付けて × だけの組が空から空でな�
 
 変わる既存のテスト:
 - test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — m.session.tap(3, 3) のあとの assert_eq(m.sound.vibrations, [30]) は assert_eq(m.sound.vibrations, [30, 15]) に変わる（× を付けた手でも 15 ミリ秒振動する。関数の名前と「× では振動しない」のコメントは古くなるが、名前は変えない）
-- test/cr/test_cr_1179.gd::test_dead_on_region_filled — m.session.tap(0, 1) のあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15, 15, 15]) に、m.session.tap(1, 1) のあとの assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120]) に変わる
-- test/cr/test_cr_1179.gd::test_no_dead_on_row_with_alien — m.session.tap(3, 0) のあとの assert_eq(m.sound.vibrations, [30]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15]) に、m.session.tap(3, 1) のあとの assert_eq(m.sound.vibrations, [30, 120]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120]) に変わる
-- test/cr/test_cr_1179.gd::test_dead_again_after_back_to_empty — 1 つ目（m.session.tap(2, 0)・m.session.tap(3, 0) のあと）と 2 つ目（m.session.tap(1, 1)・m.session.tap(3, 0) で × を消したあと）の assert_eq(m.sound.vibrations, [120]) は、どちらも assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15]) に、最後の assert_eq(m.sound.vibrations, [120, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120]) に変わる
-- test/cr/test_cr_1179.gd::test_dead_again_on_next_level — 1 つ目（区域 0 を埋めたあと）と 2 つ目（m.session.next_level() のあと）の assert_eq(m.sound.vibrations, [120]) は、どちらも assert_eq(m.sound.vibrations, [15, 15, 15, 120]) に、最後の assert_eq(m.sound.vibrations, [120, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) に変わる
-- test/cr/test_cr_1179.gd::test_no_dead_on_first_refresh — 立ち上げたあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15]) に（× のある盤から立ち上げると最初の _refresh は mark を鳴らすので 15 が出る）、最後の assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 120]) に変わる
-- test/cr/test_cr_1179.gd::test_no_dead_in_tutorial — m.tutorial.session.tap(0, 2) のあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15]) に（チュートリアルの × の手も 15 で振動する）、最後の assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — m.session.tap(0, 1) のあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15, 15, 15]) に、m.session.tap(1, 1) のあとの assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — m.session.tap(3, 0) のあとの assert_eq(m.sound.vibrations, [30]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15]) に、m.session.tap(3, 1) のあとの assert_eq(m.sound.vibrations, [30, 120]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — m.session.tap(1, 1) のあと（区域 0 を埋めた）の assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120]) に、m.session.tap(2, 0)・m.session.tap(3, 0) のあとの assert_eq(m.sound.vibrations, [120]) と、m.session.tap(1, 1)・m.session.tap(3, 0) で × を消したあとの assert_eq(m.sound.vibrations, [120]) は、どちらも assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15]) に、最後の assert_eq(m.sound.vibrations, [120, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — 1 つ目（区域 0 を埋めたあと）と 2 つ目（m.session.next_level() のあと）の assert_eq(m.sound.vibrations, [120]) は、どちらも assert_eq(m.sound.vibrations, [15, 15, 15, 120]) に、最後の assert_eq(m.sound.vibrations, [120, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — 立ち上げたあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15]) に（× のある盤から立ち上げると最初の _refresh は mark を鳴らすので 15 が出る）、最後の assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 120]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — m.tutorial.session.tap(0, 2) のあとの assert_eq(m.sound.vibrations, []) は assert_eq(m.sound.vibrations, [15]) に（チュートリアルの × の手も 15 で振動する）、最後の assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) に変わる
 
 変わらない既存のテスト:
 - test/cr/test_cr_1177.gd::test_sound_vibrate_records_ms — s.vibrate(30) は amplitude を省いても呼べ、vibrations は [30]
@@ -30,8 +30,8 @@ CR-1179 の dead の手（× を付けて × だけの組が空から空でな�
 - test/cr/test_cr_1033.gd::test_main_played_mark_on_tap — 効果音は "mark" が鳴る。振動は見ていない
 - test/cr/test_cr_1038.gd::test_tutorial_mark_sound — チュートリアルの × の手も振動するが、見ているのは効果音だけ
 - test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — × を付ける手と dead の手が振動するが、見ているのは吹き出しの文だけ
-- test/cr/test_cr_1179.gd::test_play_sfx_dead — 振動は見ていない
-- test/cr/test_cr_1179.gd::test_dead_on_swipe — スワイプで × だけの組ができる手は dead なので、15 は足さず [120]
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 振動は見ていない
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — スワイプで × だけの組ができる手は dead なので、15 は足さず [120]
 - test/cr/test_cr_1038.gd::test_tutorial_place_sound — 効果音だけを見ている
 
 ## 依頼の欄（YAML）
@@ -102,12 +102,12 @@ keep:
   - 'scenes/main.gd の宇宙人を置いたときの sound.vibrate(30)、dead を鳴らす決まり（last_dead・curr_dead）と dead の手の sound.vibrate(120) は変えない'
 changing_tests:
   - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
-  - 'test/cr/test_cr_1179.gd::test_dead_on_region_filled'
-  - 'test/cr/test_cr_1179.gd::test_no_dead_on_row_with_alien'
-  - 'test/cr/test_cr_1179.gd::test_dead_again_after_back_to_empty'
-  - 'test/cr/test_cr_1179.gd::test_dead_again_on_next_level'
-  - 'test/cr/test_cr_1179.gd::test_no_dead_on_first_refresh'
-  - 'test/cr/test_cr_1179.gd::test_no_dead_in_tutorial'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
 unchanged_tests:
   - 'test/cr/test_cr_1177.gd::test_sound_vibrate_records_ms'
   - 'test/cr/test_cr_1176.gd::test_vibrate_permission_is_true'
@@ -115,7 +115,7 @@ unchanged_tests:
   - 'test/cr/test_cr_1033.gd::test_main_played_mark_on_tap'
   - 'test/cr/test_cr_1038.gd::test_tutorial_mark_sound'
   - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
-  - 'test/cr/test_cr_1179.gd::test_play_sfx_dead'
-  - 'test/cr/test_cr_1179.gd::test_dead_on_swipe'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe'
   - 'test/cr/test_cr_1038.gd::test_tutorial_place_sound'
 ```

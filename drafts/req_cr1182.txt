@@ -9,12 +9,21 @@ dead を鳴らす決まり（Rules.dead_marks が空から空でなくなった�
 3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が × だけで埋まった）の m.sound.vibrations は [15, 15, 15, 250]。続けて m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 も × だけになったが、× だけの組はその前からあったので dead ではなく mark の手）の m.sound.vibrations は [15, 15, 15, 250, 15, 15]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3, 0.4, 0.4]。
 
 変わる既存のテスト:
-- test/cr/test_cr_1179.gd（CR-1179 の run で入るテスト） — dead の手のあとの m.sound.vibrations の期待値の 120 は 250 に変わる（例: [120] は [250] に、[30, 120] は [30, 250] に、[120, 120] は [250, 250] に変わる）。CR-1180 が先に入っていれば、× を付けた手の 15 もその前に入った形になっている。CR を作る前に test/cr/test_cr_1179.gd の表明を 1 つずつ書き写す
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — assert_eq(m.sound.vibrations, [15, 120]) は assert_eq(m.sound.vibrations, [15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1180.gd::test_dead_hand_vibrates_only_dead（CR-1180 の run が作るテストの、dead の手を見る関数。名前は CR-1180 の probe のもの） — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0]) は assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3]) に変わる
 
 変わらない既存のテスト:
 - test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — dead の手が無い
 - test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — dead の手が振動するが、見ているのは吹き出しの文だけ
 - test/cr/test_cr_1173.gd::test_dead_marks_basic — Rules.dead_marks は読むだけで変えない
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 振動は見ていない
+- test/cr/test_cr_1180.gd::test_mark_vibrates_small — dead の手が無い（名前は CR-1180 の probe のもの）
 
 ## 依頼の欄（YAML）
 ```yaml
@@ -57,9 +66,18 @@ keep:
   other:
   - 'scenes/main.gd の dead を鳴らす決まり（last_dead と curr_dead）は変えない'
 changing_tests:
-  - 'test/cr/test_cr_1179.gd'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_dead_hand_vibrates_only_dead'
 unchanged_tests:
   - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
   - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
   - 'test/cr/test_cr_1173.gd::test_dead_marks_basic'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx'
+  - 'test/cr/test_cr_1180.gd::test_mark_vibrates_small'
 ```
