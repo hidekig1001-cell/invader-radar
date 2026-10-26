@@ -16,14 +16,18 @@ dead を鳴らす決まり（Rules.dead_marks が空から空でなくなった�
 - test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 15, 250]) に変わる
 - test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — assert_eq(m.sound.vibrations, [15, 120]) は assert_eq(m.sound.vibrations, [15, 250]) に変わる
 - test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 250]) に変わる
-- test/cr/test_cr_1180.gd::test_dead_hand_vibrates_only_dead（CR-1180 の run が作るテストの、dead の手を見る関数。名前は CR-1180 の probe のもの） — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0]) は assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3]) に変わる
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0]) は assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3]) に変わる
 
 変わらない既存のテスト:
 - test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — dead の手が無い
 - test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — dead の手が振動するが、見ているのは吹き出しの文だけ
 - test/cr/test_cr_1173.gd::test_dead_marks_basic — Rules.dead_marks は読むだけで変えない
 - test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 振動は見ていない
-- test/cr/test_cr_1180.gd::test_mark_vibrates_small — dead の手が無い（名前は CR-1180 の probe のもの）
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — dead の手が無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — スワイプは × 3 つで dead の手ではない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — チュートリアルでは dead を鳴らさない
+- test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude — vibrate の記録だけを見ている
 
 ## 依頼の欄（YAML）
 ```yaml
@@ -73,11 +77,15 @@ changing_tests:
   - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
   - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
   - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
-  - 'test/cr/test_cr_1180.gd::test_dead_hand_vibrates_only_dead'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition'
 unchanged_tests:
   - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
   - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
   - 'test/cr/test_cr_1173.gd::test_dead_marks_basic'
   - 'test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx'
-  - 'test/cr/test_cr_1180.gd::test_mark_vibrates_small'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude'
 ```
