@@ -1,0 +1,73 @@
+手触りの 2 本目「行・列・色（区域）がそろったら line の音と光」の 1 本目として、そろった組を返す規則の関数を足して（Invader Radar29 の依頼 10/27 03:1x。10/26 の解釈「宇宙人 1 つと × だけで埋まりきった瞬間」。音と光は、この関数を使う次の 2 本の CR で足す）。
+「そろった組」は、行・列・区域のうち、小惑星とレーダー（数字）のマスを除いたマスが全部「宇宙人」か「×」で、宇宙人がちょうど 1 つあり、その宇宙人が赤くない（Rules.conflicts(board_state, level) の中に無い）組。空のマスが 1 つでも残る組、宇宙人が 0 個（× だけ）か 2 つ以上の組、宇宙人が赤い組は入れない。答え（正しい置き場所）と比べることはしない（くわしくは notes）。
+返す値は組ごとの辞書の並び。辞書は {"kind": 種類, "index": 番号, "cells": マスの並び}。種類は "row"（行。番号は y）・"column"（列。番号は x）・"region"（区域。番号は区域の番号）。マスの並びは、小惑星とレーダーのマスを除き、y の小さい順、y が同じなら x の小さい順。組の並びは、行（y の小さい順）→ 列（x の小さい順）→ 区域（番号の小さい順）。例: 区域 0 と行 0 と列 0 が同時にそろっていれば [行 0, 列 0, 区域 0] の順。
+- core/rules.gd に static func filled_lines(board_state, level) -> Array を足す。上の「そろった組」を、上の並びの辞書の並びで返す。board_state か level が null なら [] を返す。
+- Rules.conflicts、Rules.dead_marks、ほかの規則の関数、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("mark", 1, 0)、b.apply("mark", 2, 0) を順にしたあと（行 0 の (3, 0) が空）の Rules.filled_lines(b, level) は []。続けて b.apply("mark", 3, 0) をしたあと（行 0 が宇宙人 1 つと × 3 つで埋まった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("place", 2, 0)、b.apply("mark", 1, 0)、b.apply("mark", 3, 0) と、b.apply("mark", 0, 3)、b.apply("mark", 1, 3)、b.apply("mark", 2, 3)、b.apply("mark", 3, 3) を順にしたあと（行 0 は宇宙人 2 つと × 2 つ、行 3 は × だけ。どちらもそろった組ではない）の Rules.filled_lines(b, level) は []。続けて b.apply("mark", 2, 0) をしたあと（(2, 0) の宇宙人を × に替え、行 0 は宇宙人 1 つと × 3 つ）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("place", 0, 2)、b.apply("mark", 1, 0)、b.apply("mark", 2, 0)、b.apply("mark", 3, 0) を順にしたあと（(0, 0) と (0, 2) は同じ列なので 2 つとも赤い。行 0 は赤い宇宙人 1 つと × 3 つ）の Rules.filled_lines(b, level) は []。続けて b.apply("clear", 0, 2) をしたあと（(0, 0) が赤くなくなった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。
+4. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("mark", 1, 0)、b.apply("mark", 0, 1)、b.apply("mark", 1, 1) を順にしたあと（区域 0 がそろった）の Rules.filled_lines(b, level) は [{"kind": "region", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]}]。続けて b.apply("mark", 2, 0)、b.apply("mark", 3, 0)、b.apply("mark", 0, 2)、b.apply("mark", 0, 3) を順にしたあと（行 0 と列 0 もそろった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}, {"kind": "column", "index": 0, "cells": [Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]}, {"kind": "region", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]}]（行 → 列 → 区域の順）。
+5. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "asteroids": [[3, 0]], "radar": [[2, 0, 1]]}) をする（(3, 0) は小惑星、(2, 0) は数字 1 のレーダー。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("mark", 0, 0)、b.apply("place", 1, 0) を順にしたあと（行 0 は小惑星とレーダーを除くと (0, 0) の × と (1, 0) の宇宙人だけ）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0)]}]。
+
+変わる既存のテスト: なし。
+
+変わらない既存のテスト:
+- test/cr/test_cr_1173.gd::test_dead_marks_basic — Rules.dead_marks は変えない
+- test/cr/test_cr_1173.gd::test_mark_color_at_dead_marks — 同じ
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "手触りの 2 本目: 行・列・色がそろったら line の音と光"
+  said_at: "2026-10-27 03:1x"
+  decision: "D-20261026-0622"
+  plan: "手触り（音・光・振動）"
+  step: "そろった組を返す Rules.filled_lines を足す（手触り 2 本目の 1 つ目）"
+title: "そろった行・列・区域を返す規則の関数"
+probe: req_line_rules_probe.gd
+decls:
+  core/rules.gd:
+  - "static func filled_lines(board_state, level) -> Array"
+files:
+  edit: [core/rules.gd]
+  new: []
+human:
+  - "自動の項目だけ（画面は変わらない）。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("mark", 1, 0)、b.apply("mark", 2, 0) を順にしたあと（行 0 の (3, 0) が空）の Rules.filled_lines(b, level) は []。続けて b.apply("mark", 3, 0) をしたあと（行 0 が宇宙人 1 つと × 3 つで埋まった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。'
+  target: Rules.filled_lines(b, level)
+  expect:
+  - 'Rules.filled_lines(b, level)'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("place", 2, 0)、b.apply("mark", 1, 0)、b.apply("mark", 3, 0) と、b.apply("mark", 0, 3)、b.apply("mark", 1, 3)、b.apply("mark", 2, 3)、b.apply("mark", 3, 3) を順にしたあと（行 0 は宇宙人 2 つと × 2 つ、行 3 は × だけ。どちらもそろった組ではない）の Rules.filled_lines(b, level) は []。続けて b.apply("mark", 2, 0) をしたあと（(2, 0) の宇宙人を × に替え、行 0 は宇宙人 1 つと × 3 つ）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。'
+  target: Rules.filled_lines(b, level)
+  expect:
+  - 'Rules.filled_lines(b, level)'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("place", 0, 2)、b.apply("mark", 1, 0)、b.apply("mark", 2, 0)、b.apply("mark", 3, 0) を順にしたあと（(0, 0) と (0, 2) は同じ列なので 2 つとも赤い。行 0 は赤い宇宙人 1 つと × 3 つ）の Rules.filled_lines(b, level) は []。続けて b.apply("clear", 0, 2) をしたあと（(0, 0) が赤くなくなった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}]。'
+  target: Rules.filled_lines(b, level)
+  expect:
+  - 'Rules.filled_lines(b, level)'
+- id: R4
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("place", 0, 0)、b.apply("mark", 1, 0)、b.apply("mark", 0, 1)、b.apply("mark", 1, 1) を順にしたあと（区域 0 がそろった）の Rules.filled_lines(b, level) は [{"kind": "region", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]}]。続けて b.apply("mark", 2, 0)、b.apply("mark", 3, 0)、b.apply("mark", 0, 2)、b.apply("mark", 0, 3) を順にしたあと（行 0 と列 0 もそろった）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]}, {"kind": "column", "index": 0, "cells": [Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3)]}, {"kind": "region", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]}]（行 → 列 → 区域の順）。'
+  target: Rules.filled_lines(b, level)
+  expect:
+  - 'Rules.filled_lines(b, level)'
+- id: R5
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "asteroids": [[3, 0]], "radar": [[2, 0, 1]]}) をする（(3, 0) は小惑星、(2, 0) は数字 1 のレーダー。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Rules = load("res://core/rules.gd")、var BS = load("res://core/board_state.gd") とし、var b = BS.new(4, 4) とする。b.apply("mark", 0, 0)、b.apply("place", 1, 0) を順にしたあと（行 0 は小惑星とレーダーを除くと (0, 0) の × と (1, 0) の宇宙人だけ）の Rules.filled_lines(b, level) は [{"kind": "row", "index": 0, "cells": [Vector2i(0, 0), Vector2i(1, 0)]}]。'
+  target: Rules.filled_lines(b, level)
+  expect:
+  - 'Rules.filled_lines(b, level)'
+extra_items: 0
+keep:
+  files: [game/session.gd, scenes/main.gd, scenes/sound.gd, scenes/board_view.gd]
+  other:
+  - 'core/rules.gd の Rules.conflicts と Rules.dead_marks は変えない'
+changing_tests: []
+unchanged_tests:
+  - 'test/cr/test_cr_1173.gd::test_dead_marks_basic'
+  - 'test/cr/test_cr_1173.gd::test_mark_color_at_dead_marks'
+```
