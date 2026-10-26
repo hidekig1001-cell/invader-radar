@@ -27,6 +27,6 @@ func test_main_vibrates_on_place_not_mark() -> void:
 	m.session.double_tap(0, 0)
 	assert_eq(m.sound.vibrations, [30])
 	
-	# Mark X (tap) -> should NOT add vibration
+	# Mark X (tap) -> should add vibration
 	m.session.tap(3, 3)
-	assert_eq(m.sound.vibrations, [30])
+	assert_eq(m.sound.vibrations, [30, 15])

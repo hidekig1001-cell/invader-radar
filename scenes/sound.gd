@@ -20,6 +20,7 @@ var music_name: String = ""
 var sfx_player: AudioStreamPlayer
 var music_player: AudioStreamPlayer
 var vibrations: Array = []
+var vibration_amplitudes: Array = []
 
 func setup() -> void:
 	sfx_player = AudioStreamPlayer.new()
@@ -115,6 +116,7 @@ static func bgm_for_size(size: int) -> String:
 	else:
 		return "bgm_stage4"
 
-func vibrate(ms: int) -> void:
+func vibrate(ms: int, amplitude: float = -1.0) -> void:
 	vibrations.append(ms)
-	Input.vibrate_handheld(ms)
+	vibration_amplitudes.append(amplitude)
+	Input.vibrate_handheld(ms, amplitude)
