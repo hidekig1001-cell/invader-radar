@@ -28,5 +28,5 @@
 ## 気づいたこと（直していない）
 - draft/line の下書きは、1179〜1182 が main に入る前に、見本のテスト（draft/cr1179・draft/cr1180 の probe）で書いた。
   - 音の CR の「変わる既存のテスト」は、仮の名前 test_cr_1179.gd::test_no_dead_on_row_with_alien と見本の値で書いてある。
-  - 実際の main b50af7e では、名前は test_cr_1179_main_dead_with_alien。CR-1182 の後なので、値も 250 の形になっている。
-  - 音の CR を作る前に、実際のテストに合わせて直す必要がある。頼まれれば直す。
+  - 実際の main b50af7e では、名前は test_cr_1179_main_dead_with_alien（値は下書きと同じ 15・250 の形）。
+  - 音の CR を作る前に、名前を実際のテストに合わせて直す必要がある。頼まれれば直す。
