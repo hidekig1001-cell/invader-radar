@@ -353,7 +353,7 @@ func _refresh() -> void:
 		elif sfx_name == "mark":
 			sound.vibrate(15, 0.4)
 		elif sfx_name == "dead":
-			sound.vibrate(120)
+			sound.vibrate(250, 0.3)
 		elif sfx_name == "wrong":
 			sound.vibrate(250, 0.3)
 			
