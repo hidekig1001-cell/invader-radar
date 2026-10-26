@@ -34,6 +34,7 @@ var language: String = "en"
 var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
+var last_dead: bool = false
 var save_path := ""
 var progress_store = null
 var clear_effect = null
@@ -338,12 +339,23 @@ func _refresh() -> void:
 		curr_snapshot = session.snapshot()
 		curr_conflicts = Rules.conflicts(session.board, session.level).size()
 	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
+	
+	var curr_dead := false
+	if not is_tutorial():
+		curr_dead = not Rules.dead_marks(session.board, session.level).is_empty()
+		if sfx_name == "mark" and not last_snapshot.is_empty() and not last_dead and curr_dead:
+			sfx_name = "dead"
+			
 	if sfx_name != "":
 		sound.play_sfx(sfx_name)
 		if sfx_name == "place":
 			sound.vibrate(30)
+		elif sfx_name == "dead":
+			sound.vibrate(120)
+			
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
+	last_dead = curr_dead
 
 	hud.update_from(curr_snapshot)
 	board_view.queue_redraw()
@@ -389,6 +401,7 @@ func start_tutorial() -> void:
 	board_view.session = tutorial.session
 	last_snapshot = tutorial.session.snapshot()
 	last_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
+	last_dead = false
 	tutorial.session.changed.connect(_refresh)
 	hud.set_tutorial_mode(true)
 	var step = tutorial.current_step()
@@ -409,6 +422,7 @@ func end_tutorial() -> void:
 	board_view.session = session
 	last_snapshot = session.snapshot()
 	last_conflicts = Rules.conflicts(session.board, session.level).size()
+	last_dead = not Rules.dead_marks(session.board, session.level).is_empty()
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
 	bubble.clear_text()
