@@ -91,5 +91,5 @@ func test_cr_1180_main_vibrate_on_dead_transition() -> void:
 	m.session.tap(0, 1)
 	assert_eq(m.sound.vibrations, [15, 15, 15])
 	m.session.tap(1, 1)
-	assert_eq(m.sound.vibrations, [15, 15, 15, 120])
-	assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250])
+	assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3])
