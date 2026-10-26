@@ -1,0 +1,91 @@
+× を付けたときも、宇宙人を置いたとき（30 ミリ秒）より小さく短く振動させて（ユーザーの Pixel の確かめ 10/26 22:5x「ｘをつけた時も、より小さく短く振動させたい。」）。
+「× を付けた手」は、Sound.sfx_for が "mark" を返す手（タップで × を付けた手、スワイプで × を 1 つ以上付けた手。スワイプは 1 手で 1 回だけ振動）。× を消す手・宇宙人を取る手では振動しない。チュートリアルの盤の手も同じに振動する（宇宙人を置いたときの振動と同じ扱い）。
+「小さく」は Input.vibrate_handheld(duration_ms, amplitude) の 2 つ目の引数 amplitude（0〜1 の強さ。-1.0 は端末の決まりの強さ）で弱める。× の手は 15 ミリ秒・強さ 0.4。宇宙人を置いた手の 30 ミリ秒は強さを渡さない（-1.0）。
+- scenes/sound.gd に var vibration_amplitudes: Array = [] を足し、func vibrate(ms: int) を func vibrate(ms: int, amplitude: float = -1.0) -> void に替える。vibrate は vibrations に ms を、vibration_amplitudes に amplitude を足してから Input.vibrate_handheld(ms, amplitude) を呼ぶ。
+- scenes/main.gd の func _refresh で sound.play_sfx(sfx_name) を呼んだあと、sfx_name が "mark" なら sound.vibrate(15, 0.4) を呼ぶ。
+- Sound.sfx_for、効果音の鳴らし方、宇宙人を置いたときの sound.vibrate(30)、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var S = load("res://scenes/sound.gd") とし、var s = S.new() を add_child_autofree(s) する。s.vibrate(30) をしてから s.vibrate(15, 0.4) をしたあとの s.vibrations は [30, 15]、s.vibration_amplitudes は [-1.0, 0.4]（強さを渡さないときは -1.0 を記録する）。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0) をしたあと（宇宙人を置いた）の m.sound.vibrations は [30]、m.sound.vibration_amplitudes は [-1.0]。続けて m.session.tap(3, 3) をしたあと（× を付けた）の m.sound.vibrations は [30, 15]、m.sound.vibration_amplitudes は [-1.0, 0.4]。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(3, 3) をしたあと（× を付けた）の m.sound.vibrations は [15]。続けて m.session.tap(3, 3) をしたあと（× を消した。消す手では振動しない）の m.sound.vibrations は [15]。続けて m.session.double_tap(0, 0) をしたあと（宇宙人を置いた）の m.sound.vibrations は [15, 30]。続けて m.session.double_tap(0, 0) をしたあと（宇宙人を取った。取る手では振動しない）の m.sound.vibrations は [15, 30]。続けて m.session.tap(3, 3) をしたあと（再び × を付けた）の m.sound.vibrations は [15, 30, 15]、m.sound.vibration_amplitudes は [0.4, -1.0, 0.4]。
+4. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.swipe([Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3)]) をしたあと（1 回のスワイプで × を 3 つ付けた。1 手なので振動は 1 回）の m.sound.vibrations は [15]、m.sound.vibration_amplitudes は [0.4]。
+5. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.start_tutorial() をしてから m.tutorial.session.double_tap(3, 1) をしたあと（チュートリアルの盤に宇宙人を置いた）の m.sound.vibrations は [30]。続けて m.tutorial.session.tap(0, 1) をしたあと（チュートリアルの盤に × を付けた）の m.sound.vibrations は [30, 15]、m.sound.vibration_amplitudes は [-1.0, 0.4]。
+
+変わる既存のテスト:
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — m.session.tap(3, 3) のあとの assert_eq(m.sound.vibrations, [30]) は assert_eq(m.sound.vibrations, [30, 15]) に変わる（× を付けた手でも 15 ミリ秒振動する。関数の名前と「× では振動しない」のコメントは古くなるが、名前は変えない）
+
+変わらない既存のテスト:
+- test/cr/test_cr_1177.gd::test_sound_vibrate_records_ms — s.vibrate(30) は amplitude を省いても呼べ、vibrations は [30]
+- test/cr/test_cr_1176.gd::test_vibrate_permission_is_true — 振動の許可は変えない
+- test/cr/test_cr_1033.gd::test_sfx_for_mark — Sound.sfx_for は変えない
+- test/cr/test_cr_1033.gd::test_main_played_mark_on_tap — 効果音は "mark" が鳴る。振動は見ていない
+- test/cr/test_cr_1038.gd::test_tutorial_mark_sound — チュートリアルの × の手も振動するが、見ているのは効果音だけ
+- test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — × を付ける手が振動するが、見ているのは吹き出しの文だけ
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "ｘをつけた時も、より小さく短く振動させたい。"
+  said_at: "2026-10-26 22:5x"
+  decision: "D-20261026-0622"
+  plan: "スマホの振動（置いたとき・× だけの組ができたとき・× を付けたとき・ぶつかったとき）"
+  step: "× を付けたとき 15 ミリ秒・強さ 0.4 で振動し、vibrate に強さを足す（CR 4 つ目）"
+title: "× を付けたとき小さく短く振動する"
+probe: req_cr1180_probe.gd
+decls:
+  scenes/sound.gd:
+  - "var vibration_amplitudes: Array = []"
+  - "func vibrate(ms: int, amplitude: float = -1.0) -> void"
+files:
+  edit: [scenes/sound.gd, scenes/main.gd]
+  new: []
+human:
+  - "Pixel で × をタップで付けると、宇宙人を置いたときより弱く短くブルッと振動することを見る。× を消したときは振動しないことを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var S = load("res://scenes/sound.gd") とし、var s = S.new() を add_child_autofree(s) する。s.vibrate(30) をしてから s.vibrate(15, 0.4) をしたあとの s.vibrations は [30, 15]、s.vibration_amplitudes は [-1.0, 0.4]（強さを渡さないときは -1.0 を記録する）。'
+  target: s.vibrate
+  expect:
+  - 's.vibrations'
+  - 's.vibration_amplitudes'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0) をしたあと（宇宙人を置いた）の m.sound.vibrations は [30]、m.sound.vibration_amplitudes は [-1.0]。続けて m.session.tap(3, 3) をしたあと（× を付けた）の m.sound.vibrations は [30, 15]、m.sound.vibration_amplitudes は [-1.0, 0.4]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(3, 3) をしたあと（× を付けた）の m.sound.vibrations は [15]。続けて m.session.tap(3, 3) をしたあと（× を消した。消す手では振動しない）の m.sound.vibrations は [15]。続けて m.session.double_tap(0, 0) をしたあと（宇宙人を置いた）の m.sound.vibrations は [15, 30]。続けて m.session.double_tap(0, 0) をしたあと（宇宙人を取った。取る手では振動しない）の m.sound.vibrations は [15, 30]。続けて m.session.tap(3, 3) をしたあと（再び × を付けた）の m.sound.vibrations は [15, 30, 15]、m.sound.vibration_amplitudes は [0.4, -1.0, 0.4]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+- id: R4
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.swipe([Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3)]) をしたあと（1 回のスワイプで × を 3 つ付けた。1 手なので振動は 1 回）の m.sound.vibrations は [15]、m.sound.vibration_amplitudes は [0.4]。'
+  target: m.session.swipe
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+- id: R5
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.start_tutorial() をしてから m.tutorial.session.double_tap(3, 1) をしたあと（チュートリアルの盤に宇宙人を置いた）の m.sound.vibrations は [30]。続けて m.tutorial.session.tap(0, 1) をしたあと（チュートリアルの盤に × を付けた）の m.sound.vibrations は [30, 15]、m.sound.vibration_amplitudes は [-1.0, 0.4]。'
+  target: m.tutorial.session.tap
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+extra_items: 0
+keep:
+  files: [core/rules.gd, game/session.gd, game/tutorial.gd, scenes/board_view.gd]
+  other:
+  - 'scenes/sound.gd の Sound.sfx_for と play_sfx は変えない'
+  - 'scenes/main.gd の宇宙人を置いたときの sound.vibrate(30) は変えない'
+changing_tests:
+  - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
+unchanged_tests:
+  - 'test/cr/test_cr_1177.gd::test_sound_vibrate_records_ms'
+  - 'test/cr/test_cr_1176.gd::test_vibrate_permission_is_true'
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_mark'
+  - 'test/cr/test_cr_1033.gd::test_main_played_mark_on_tap'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_mark_sound'
+  - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
+```
