@@ -36,7 +36,10 @@ probe: req_cr1180_probe.gd
 decls:
   scenes/sound.gd:
   - "var vibration_amplitudes: Array = []"
-  - "func vibrate(ms: int, amplitude: float = -1.0) -> void"
+changes:
+  scenes/sound.gd:
+  - from: "func vibrate(ms: int) -> void"
+    to: "func vibrate(ms: int, amplitude: float = -1.0) -> void"
 files:
   edit: [scenes/sound.gd, scenes/main.gd]
   new: []
