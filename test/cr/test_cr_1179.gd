@@ -44,12 +44,12 @@ func test_cr_1179_main_dead_transition() -> void:
 	m.session.tap(1, 0)
 	m.session.tap(0, 1)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [])
+	assert_eq(m.sound.vibrations, [15, 15, 15])
 	
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played[-1], "dead")
 	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120])
 
 ## CHECK: 3
 func test_cr_1179_main_dead_with_alien() -> void:
@@ -61,12 +61,12 @@ func test_cr_1179_main_dead_with_alien() -> void:
 	m.session.tap(2, 0)
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [30])
+	assert_eq(m.sound.vibrations, [30, 15, 15, 15])
 	
 	m.session.tap(2, 1)
 	m.session.tap(3, 1)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.vibrations, [30, 120])
+	assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120])
 
 ## CHECK: 4
 func test_cr_1179_main_dead_retrigger() -> void:
@@ -78,22 +78,22 @@ func test_cr_1179_main_dead_retrigger() -> void:
 	m.session.tap(0, 1)
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120])
 	
 	m.session.tap(2, 0)
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15])
 	
 	m.session.tap(1, 1)
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15])
 	
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played[-1], "dead")
 	assert_eq(m.sound.played.count("dead"), 2)
-	assert_eq(m.sound.vibrations, [120, 120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120])
 
 ## CHECK: 5
 func test_cr_1179_main_dead_swipe() -> void:
@@ -115,11 +115,11 @@ func test_cr_1179_main_dead_next_level() -> void:
 	m.session.tap(1, 0)
 	m.session.tap(0, 1)
 	m.session.tap(1, 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120])
 	
 	m.session.next_level()
 	assert_eq(m.session.level_index, 1)
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120])
 	
 	m.session.tap(0, 0)
 	m.session.tap(1, 0)
@@ -127,7 +127,7 @@ func test_cr_1179_main_dead_next_level() -> void:
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played[-1], "dead")
 	assert_eq(m.sound.played.count("dead"), 2)
-	assert_eq(m.sound.vibrations, [120, 120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120])
 
 ## CHECK: 7
 func test_cr_1179_main_dead_initial_state() -> void:
@@ -143,12 +143,12 @@ func test_cr_1179_main_dead_initial_state() -> void:
 	add_child_autofree(m)
 	await wait_frames(2)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [])
+	assert_eq(m.sound.vibrations, [15])
 	
 	m.session.tap(1, 1)
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 120])
 
 ## CHECK: 8
 func test_cr_1179_main_dead_tutorial() -> void:
@@ -158,7 +158,7 @@ func test_cr_1179_main_dead_tutorial() -> void:
 	m.start_tutorial()
 	m.tutorial.session.tap(0, 2)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [])
+	assert_eq(m.sound.vibrations, [15])
 	
 	m.end_tutorial()
 	m.session.tap(0, 0)
@@ -166,4 +166,4 @@ func test_cr_1179_main_dead_tutorial() -> void:
 	m.session.tap(0, 1)
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.vibrations, [120])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120])

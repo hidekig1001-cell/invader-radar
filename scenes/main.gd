@@ -350,6 +350,8 @@ func _refresh() -> void:
 		sound.play_sfx(sfx_name)
 		if sfx_name == "place":
 			sound.vibrate(30)
+		elif sfx_name == "mark":
+			sound.vibrate(15, 0.4)
 		elif sfx_name == "dead":
 			sound.vibrate(120)
 			
