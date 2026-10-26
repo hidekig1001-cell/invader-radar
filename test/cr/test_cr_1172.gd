@@ -22,6 +22,7 @@ func test_cr_1172_size_up_tile_ja() -> void:
 	await wait_frames(1)
 	s.next_level()
 	await wait_frames(1)
+	m.tick_size_up(0.7)
 	assert_true(m.bubble.tile_mode)
 	assert_eq(m.bubble.text, "この面からはマスが 5×5 になるよ。\nがんばって！  タップではじめる")
 	assert_eq(m.bubble.get_line_count(), 2)
@@ -30,6 +31,7 @@ func test_cr_1172_size_up_tile_ja() -> void:
 	down.index = 0
 	down.pressed = true
 	down.position = Vector2(540, 300)
+	m.tick_size_up(1.0)
 	m._input(down)
 	await wait_frames(1)
 	assert_false(m.bubble.tile_mode)
@@ -55,6 +57,7 @@ func test_cr_1172_size_up_tile_en() -> void:
 	await wait_frames(1)
 	s.next_level()
 	await wait_frames(1)
+	m.tick_size_up(0.7)
 	assert_true(m.bubble.tile_mode)
 	assert_eq(m.size_up_tile_text(), "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START")
 	assert_eq(m.bubble.text, "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START")

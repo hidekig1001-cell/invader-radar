@@ -49,6 +49,9 @@ var base_positions: Dictionary = {}
 var rules_panel = null
 var title_logo: TextureRect = null
 
+var size_up_wait: float = 0.0
+var size_up_age: float = 0.0
+
 
 func _ready() -> void:
 	sound = Sound.new()
@@ -245,7 +248,12 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_down(pos: Vector2) -> void:
 	_stroke = []
+	if not is_tutorial() and size_up_wait > 0.0:
+		return
+
 	if not is_tutorial() and bubble.tile_mode and size_up_tile_text() != "" and bubble.text == size_up_tile_text():
+		if size_up_age < 0.8:
+			return
 		bubble.clear_text()
 		show_help()
 		return
@@ -355,7 +363,7 @@ func _refresh() -> void:
 		bubble.clear_text()
 		var tile_text = size_up_tile_text()
 		if tile_text != "":
-			bubble.show_tile(tile_text, board_view.position + board_view.board_rect().get_center())
+			size_up_wait = 0.6
 		else:
 			show_help()
 	if session.current_hint.is_empty():
@@ -517,8 +525,19 @@ func on_title_requested() -> void:
 func _process(delta: float) -> void:
 	if session == null or is_tutorial() or rules_is_open():
 		return
+	tick_size_up(delta)
 	session.tick(delta)
 	hud.set_time(session.elapsed)
+
+func tick_size_up(delta: float) -> void:
+	if size_up_wait > 0.0:
+		size_up_wait -= delta
+		if size_up_wait <= 0.0:
+			size_up_wait = 0.0
+			size_up_age = 0.0
+			bubble.show_tile(size_up_tile_text(), board_view.position + board_view.board_rect().get_center())
+	elif bubble.tile_mode and bubble.text == size_up_tile_text():
+		size_up_age += delta
 
 func tutorial_accepts_cell(cell: Vector2i) -> bool:
 	if tutorial == null:
