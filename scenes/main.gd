@@ -332,6 +332,8 @@ func _refresh() -> void:
 	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
 	if sfx_name != "":
 		sound.play_sfx(sfx_name)
+		if sfx_name == "place":
+			sound.vibrate(30)
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
 
