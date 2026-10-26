@@ -246,3 +246,132 @@ static func dead_marks(board_state, level) -> Array:
 	)
 	
 	return result
+
+
+static func filled_lines(board_state, level) -> Array:
+	if board_state == null or level == null:
+		return []
+	
+	var width = level.width
+	var height = level.height
+	var results = []
+	
+	# Helper to check if a cell is an asteroid
+	var is_asteroid = func(x, y):
+		for a in level.asteroids:
+			if a.x == x and a.y == y:
+				return true
+		return false
+
+	# Helper to check if a cell is a radar number cell
+	var is_radar_cell = func(x, y):
+		for r in level.radar:
+			if r[0] == x and r[1] == y:
+				return true
+		return false
+
+	# Get conflicts to identify "red" aliens
+	var conflict_list = conflicts(board_state, level)
+	var conflict_set = {}
+	for c in conflict_list:
+		conflict_set[c] = true
+
+	# Check Rows
+	for y in range(height):
+		var cells = []
+		var alien_count = 0
+		var has_conflicting_alien = false
+		var valid = true
+		
+		for x in range(width):
+			if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+				continue
+			
+			var state = board_state.state_at(x, y)
+			if state == 0: # Empty
+				valid = false
+				break
+			elif state == 1: # Mark
+				cells.append(Vector2i(x, y))
+			elif state == 2: # Alien
+				alien_count += 1
+				cells.append(Vector2i(x, y))
+				if conflict_set.has(Vector2i(x, y)):
+					has_conflicting_alien = true
+		
+		if valid and alien_count == 1 and not has_conflicting_alien:
+			results.append({
+				"kind": "row",
+				"index": y,
+				"cells": cells
+			})
+
+	# Check Columns
+	for x in range(width):
+		var cells = []
+		var alien_count = 0
+		var has_conflicting_alien = false
+		var valid = true
+		
+		for y in range(height):
+			if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+				continue
+			
+			var state = board_state.state_at(x, y)
+			if state == 0: # Empty
+				valid = false
+				break
+			elif state == 1: # Mark
+				cells.append(Vector2i(x, y))
+			elif state == 2: # Alien
+				alien_count += 1
+				cells.append(Vector2i(x, y))
+				if conflict_set.has(Vector2i(x, y)):
+					has_conflicting_alien = true
+		
+		if valid and alien_count == 1 and not has_conflicting_alien:
+			results.append({
+				"kind": "column",
+				"index": x,
+				"cells": cells
+			})
+
+	# Check Regions
+	var region_count = level.region_count()
+	for r_id in range(region_count):
+		var cells = []
+		var alien_count = 0
+		var has_conflicting_alien = false
+		var valid = true
+		
+		for y in range(height):
+			for x in range(width):
+				if level.region_at(x, y) != r_id:
+					continue
+				
+				if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+					continue
+				
+				var state = board_state.state_at(x, y)
+				if state == 0: # Empty
+					valid = false
+					break
+				elif state == 1: # Mark
+					cells.append(Vector2i(x, y))
+				elif state == 2: # Alien
+					alien_count += 1
+					cells.append(Vector2i(x, y))
+					if conflict_set.has(Vector2i(x, y)):
+						has_conflicting_alien = true
+			
+			if not valid:
+				break
+		
+		if valid and alien_count == 1 and not has_conflicting_alien:
+			results.append({
+				"kind": "region",
+				"index": r_id,
+				"cells": cells
+			})
+
+	return results
