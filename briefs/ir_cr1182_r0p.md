@@ -1,0 +1,164 @@
+# クラウドへの依頼: InvaderRadar改修1182 の R0'（CR.md を読む）（2026-10-27 05:0x、Invader Radar29）
+
+リポジトリ hidekig1001-cell/invader-radar。読み比べに使う main は a12daf1（v1.89-cr1180）。アプリのコードは書き換えない。回答とファイルの文は日本語で。
+依頼は、あなたが直した draft/cr1180 の drafts/req_cr1182.txt（下に全文）。CR は AuteDev の CR を作る役（機械の経路、Ubuntu4 の Qwen-next-flash の役名）が作った。InvaderRadar改修1181（wrong の手で 250 ms・0.3）は run 中で、まだ main に無い。1182 の run は 1181 が main に入った後に流す。
+
+## AuteDev の決まり（読み違えないために）
+- CR の「変えないこと」に test/ があるのは AuteDev が機械で書く決まった欄。既存のテストの書き直しは run の段が「変わる既存のテスト」の節に従って行う。NG の理由にしない。
+- 新しいテストは run の中で tests/test_cr_<番号>.gd に作られ、取り込みで test/cr/ に入る。
+
+## 見ること
+1. CR の確かめる項目が、依頼の確かめる項目の手順と期待値を落とさず写しているか。依頼の中心の条件（× が赤くなる手＝ dead の手で 250 ms・強さ 0.3、スワイプで dead になる手も同じ、そのあとの × の手は 15 ms・0.4 のまま）を確かめる項目が無ければ NG。
+2. CR の変えること（dead の手の vibrate(120) を vibrate(250, 0.3) に）が依頼と合っているか。依頼に無い箇条・余計な変更・抜けが無いか。place・mark の振動を変えていないか。
+3. 「変わる既存のテスト」（test_cr_1179 の 7 つ、test_cr_1180 の test_cr_1180_main_vibrate_on_dead_transition、「A は B に変わる」の式）が、main a12daf1 の実際のテストの関数名・表明と合って CR に写っているか。「変わらない既存のテスト」の test_cr_1180 の 5 つも写っているか。
+4. 1181 が先に main に入っても、1182 の「変わる既存のテスト」と確かめる項目がそのまま成り立つか（1181 の probe・テストは wrong の手だけを見るはず）。
+
+## 終わりの条件（必ず守る）
+- 結果を、この branch（review/cr1182-r0p）のファイル results/cr1182_r0p.md に書いて commit・push する。1 行目は「R0' OK」か「R0' NG: <理由>」、続けて項目ごとの見立てを短く。main・ほかの branch には触らない。
+
+## 依頼（req_cr1182.txt）
+
+× が赤くなる手（CR-1179 の "dead" の手。行・列・区域のどれかが × だけで埋まった瞬間）の振動を、120 ミリ秒から弱め・長めの 250 ミリ秒・強さ 0.3 に替えて（ユーザーの Pixel の確かめ 10/26 22:5x「NGのとき（宇宙人が赤、ｘが赤になるとき）は弱めで長めの時間で振動させて」。宇宙人が赤くなる手は CR-1181 で足した）。
+dead を鳴らす決まり（Rules.dead_marks が空から空でなくなった手だけ。増えたときは鳴らさない。チュートリアルと最初の _refresh では鳴らさない）は CR-1179 で決めたものを使い、振動の長さと強さだけを替える。dead の手は効果音が mark ではないので、× を付けた 15 ミリ秒の振動は出さず、250 ミリ秒の振動だけを出す。
+- scenes/main.gd の func _refresh で sfx_name が "dead" のときに呼ぶ sound.vibrate(120) を sound.vibrate(250, 0.3) に替える（vibrate の amplitude は CR-1180 で足したもの）。
+- dead を鳴らす決まり、Sound.sfx_for、ほかの手の振動、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1) を順にしたあと（区域 0 の 3 マスが ×）の m.sound.vibrations は [15, 15, 15]。続けて m.session.tap(1, 1) をしたあと（区域 0 が × だけで埋まり、× が赤くなった）の m.sound.vibrations は [15, 15, 15, 250]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3]。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.swipe([Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]) をしたあと（1 回のスワイプで行 3 が × だけで埋まった）の m.sound.vibrations は [250]、m.sound.vibration_amplitudes は [0.3]。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が × だけで埋まった）の m.sound.vibrations は [15, 15, 15, 250]。続けて m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 も × だけになったが、× だけの組はその前からあったので dead ではなく mark の手）の m.sound.vibrations は [15, 15, 15, 250, 15, 15]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3, 0.4, 0.4]。
+
+変わる既存のテスト:
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — assert_eq(m.sound.vibrations, [15, 120]) は assert_eq(m.sound.vibrations, [15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0]) は assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3]) に変わる
+
+変わらない既存のテスト:
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — dead の手が無い
+- test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — dead の手が振動するが、見ているのは吹き出しの文だけ
+- test/cr/test_cr_1173.gd::test_dead_marks_basic — Rules.dead_marks は読むだけで変えない
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 振動は見ていない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — dead の手が無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — スワイプは × 3 つで dead の手ではない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — チュートリアルでは dead を鳴らさない
+- test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude — vibrate の記録だけを見ている
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "NGのとき（宇宙人が赤、ｘが赤になるとき）は弱めで長めの時間で振動させて"
+  said_at: "2026-10-26 22:5x"
+  decision: "D-20261026-0622"
+  plan: "スマホの振動（置いたとき・× だけの組ができたとき・× を付けたとき・ぶつかったとき）"
+  step: "× が赤くなる手（dead）の振動を 250 ミリ秒・強さ 0.3 に替える（CR 6 つ目。CR-1179・CR-1180 の後）"
+title: "× が赤くなったとき弱め・長めに振動する"
+probe: req_cr1182_probe.gd
+decls: {}
+files:
+  edit: [scenes/main.gd]
+  new: []
+human:
+  - "Pixel で区域・行・列のどれかを × だけで埋めた瞬間に、× を付けたときより長く弱めにブーッと振動することを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1) を順にしたあと（区域 0 の 3 マスが ×）の m.sound.vibrations は [15, 15, 15]。続けて m.session.tap(1, 1) をしたあと（区域 0 が × だけで埋まり、× が赤くなった）の m.sound.vibrations は [15, 15, 15, 250]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.swipe([Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]) をしたあと（1 回のスワイプで行 3 が × だけで埋まった）の m.sound.vibrations は [250]、m.sound.vibration_amplitudes は [0.3]。'
+  target: m.session.swipe
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が × だけで埋まった）の m.sound.vibrations は [15, 15, 15, 250]。続けて m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 も × だけになったが、× だけの組はその前からあったので dead ではなく mark の手）の m.sound.vibrations は [15, 15, 15, 250, 15, 15]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3, 0.4, 0.4]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.vibrations'
+  - 'm.sound.vibration_amplitudes'
+extra_items: 0
+keep:
+  files: [core/rules.gd, game/session.gd, game/tutorial.gd, scenes/board_view.gd, scenes/sound.gd]
+  other:
+  - 'scenes/main.gd の dead を鳴らす決まり（last_dead と curr_dead）は変えない'
+changing_tests:
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition'
+unchanged_tests:
+  - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
+  - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
+  - 'test/cr/test_cr_1173.gd::test_dead_marks_basic'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude'
+```
+
+## CR（CR-1182-1182v.local.md）
+
+# CR-1182: × が赤くなったとき弱め・長めに振動する
+
+## 変えること
+- scenes/main.gd の func _refresh で sfx_name が "dead" のときに呼ぶ sound.vibrate(120) を sound.vibrate(250, 0.3) に替える（vibrate の amplitude は CR-1180 で足したもの）。
+
+## 変えないこと
+- `README.md`、`SPEC.md`、`addons/`、`assets/`、`core/`、`data/`、`export_presets.cfg`、`game/`、`project.godot`、`scenes/app.gd`、`scenes/app.tscn`、`scenes/board_view.gd`、`scenes/button_style.gd`、`scenes/clear_effect.gd`、`scenes/cloud_store.gd`、`scenes/hud.gd`、`scenes/input_mapper.gd`、`scenes/licenses_panel.gd`、`scenes/main.tscn`、`scenes/message_bubble.gd`、`scenes/rules_label.gd`、`scenes/rules_pages.gd`、`scenes/rules_panel.gd`、`scenes/sound.gd`、`scenes/space_bg.gd`、`scenes/splash_screen.gd`、`scenes/title_screen.gd`、`test/`、`tools/`、`.autedev/`
+- `scenes/main.gd`: `tutorial_finished`、`title_requested`、`Session`、`InputMapper`、`RulesLabelScript`、`Tutorial`、`SpaceBg`、`Rules`、`Sound`、`TutorialSteps`、`SessionSave`、`RulesPanel`、`ProgressStore`、`HELP_TEXT`、`CLEARED_TEXT`、`ALL_CLEARED_TEXT`、`LOGO_GAP`、`rules_label`、`tutorial`、`start_with_tutorial`、`space_bg`、`language`、`last_snapshot`、`last_conflicts`、`last_dead`、`save_path`、`progress_store`、`clear_effect`、`last_status`、`last_tutorial_status`、`safe_top`、`board_view`、`hud`、`bubble`、`base_positions`、`rules_panel`、`title_logo`、`size_up_wait`、`size_up_age`、`current_store`、`save_progress`、`apply_screen_layout`、`place_title_logo`、`part_rects`、`to_board_pos`、`is_on_board`、`on_apply`、`start_tutorial`、`end_tutorial`、`open_rules`、`rules_is_open`、`is_tutorial`、`tutorial_input`、`show_help`、`help_text`、`dead_marks_text`、`size_up_text`、`size_up_tile_text`、`is_last_level`、`cleared_text`、`go_back`、`on_title_requested`、`tick_size_up`、`tutorial_accepts_cell`、`hint_text`、`update_music`
+- 依頼の欄: core/rules.gd は変えない（依頼の欄）。
+- 依頼の欄: game/session.gd は変えない（依頼の欄）。
+- 依頼の欄: game/tutorial.gd は変えない（依頼の欄）。
+- 依頼の欄: scenes/board_view.gd は変えない（依頼の欄）。
+- 依頼の欄: scenes/sound.gd は変えない（依頼の欄）。
+- 依頼の欄: scenes/main.gd の dead を鳴らす決まり（last_dead と curr_dead）は変えない（依頼の欄）
+
+## 新しい宣言
+なし
+
+## 自動で確かめること
+1. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1) を順にしたあと（区域 0 の 3 マスが ×）の m.sound.vibrations は [15, 15, 15]。続けて m.session.tap(1, 1) をしたあと（区域 0 が × だけで埋まり、× が赤くなった）の m.sound.vibrations は [15, 15, 15, 250]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3]。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.swipe([Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]) をしたあと（1 回のスワイプで行 3 が × だけで埋まった）の m.sound.vibrations は [250]、m.sound.vibration_amplitudes は [0.3]。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(0, 0)、m.session.tap(1, 0)、m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が × だけで埋まった）の m.sound.vibrations は [15, 15, 15, 250]。続けて m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 も × だけになったが、× だけの組はその前からあったので dead ではなく mark の手）の m.sound.vibrations は [15, 15, 15, 250, 15, 15]、m.sound.vibration_amplitudes は [0.4, 0.4, 0.4, 0.3, 0.4, 0.4]。
+4. 既存のテストがすべて合格する。
+
+## 人が確かめること
+- Pixel で区域・行・列のどれかを × だけで埋めた瞬間に、× を付けたときより長く弱めにブーッと振動することを見る。
+
+## 変わる既存のテスト
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — assert_eq(m.sound.vibrations, [120]) は assert_eq(m.sound.vibrations, [250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]（2 か所とも）) に、assert_eq(m.sound.vibrations, [15, 15, 15, 120, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — assert_eq(m.sound.vibrations, [15, 120]) は assert_eq(m.sound.vibrations, [15, 250]) に変わる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — assert_eq(m.sound.vibrations, [15, 15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 15, 250]) に変わる
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — assert_eq(m.sound.vibrations, [15, 15, 15, 120]) は assert_eq(m.sound.vibrations, [15, 15, 15, 250]) に、assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, -1.0]) は assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3]) に変わる
+
+## 変わらない既存のテスト
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — dead の手が無い
+- test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — dead の手が振動するが、見ているのは吹き出しの文だけ
+- test/cr/test_cr_1173.gd::test_dead_marks_basic — Rules.dead_marks は読むだけで変えない
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 振動は見ていない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — dead の手が無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — スワイプは × 3 つで dead の手ではない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — チュートリアルでは dead を鳴らさない
+- test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude — vibrate の記録だけを見ている
+
+## 対象の候補
+- edit: `scenes/main.gd`
