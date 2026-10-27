@@ -1,0 +1,142 @@
+立ち上げたとき・進み具合を読み直したとき（main の最初の _refresh）に、効果音と振動を出さないようにして（引き継ぎの候補: ぶつかった盤を読み直すと最初に 250 ミリ秒、× のある盤で 15 ミリ秒の振動が出る）。今は最初の _refresh で last_snapshot が空 {} なので、Sound.sfx_for が盤の宇宙人・×・ぶつかりを「この手で増えた」と読み、宇宙人がある盤では place（30 ミリ秒）、× だけの盤では mark（15 ミリ秒・0.4）、ぶつかった宇宙人がある盤では wrong（250 ミリ秒・0.3）を鳴らして振動する。line と dead への差し替えは、今も last_snapshot が空なら起きない。
+
+- scenes/main.gd の func _refresh で、Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts) で sfx_name を決めたすぐあとに、last_snapshot.is_empty() が true なら sfx_name を "" にする（最初の _refresh では効果音も振動も line の光も出さない）。
+- last_snapshot・last_conflicts・last_dead_marks・last_lines の入れ直し、dead と line に替える決まり、2 回目からの _refresh の効果音と振動、チュートリアル、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 2, 0) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（宇宙人 1 つと × 2 つの盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。続けて m.session.tap(3, 1) をしたあと（2 回目からは今までどおり鳴る）の m.sound.played は ["mark"]、m.sound.vibrations は [15]。
+2. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("place", 1, 1) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（斜め隣の 2 つの宇宙人がぶつかった盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。
+3. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("mark", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 0, 1)、m.session.board.apply("mark", 1, 1) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（区域 0 が × だけの盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。続けて m.session.tap(1, 1)、m.session.tap(1, 1) を順にしたあと（× を消して付け直し、区域 0 が再び × だけになった）の m.sound.played は ["dead"]、m.sound.vibrations は [250]。
+
+変わる既存のテスト:
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — 立ち上げたあとの assert_eq(m.sound.vibrations, [15]) は assert_eq(m.sound.vibrations, []) に、m.session.tap(1, 1)・m.session.tap(1, 1) のあとの assert_eq(m.sound.vibrations, [15, 250]) は assert_eq(m.sound.vibrations, [250]) に変わる（最初の _refresh で mark の 15 が出なくなる。ほかの表明は変えない）
+
+変わらない既存のテスト:
+- test/cr/test_cr_1184.gd::test_cr_1184_no_line_on_initial_load_with_lines — 見ているのは line の数だけ。立ち上げの place が鳴らなくなっても line の数は 0 のまま
+- test/cr/test_cr_1184.gd::test_cr_1184_line_on_completion_before_clear — 盤を置いてから立ち上げるが、見ているのは手のあとの played[-1]・line の数・status だけ
+- test/cr/test_cr_1033.gd::test_main_played_mark_on_tap — 空の盤で立ち上げるので最初の _refresh は今も何も鳴らない
+- test/cr/test_cr_1033.gd::test_button_sfx_in_main_and_title — button は _refresh を通らない
+- test/cr/test_cr_1033.gd::test_main_music_setup — 曲は play_music で、効果音ではない
+- test/cr/test_cr_1140.gd::test_update_music_changes_bgm — 同じ
+- test/cr/test_cr_1038.gd::test_tutorial_place_sound — チュートリアルは start_tutorial で last_snapshot を入れるので、最初の _refresh ではない
+- test/cr/test_cr_1038.gd::test_tutorial_mark_sound — 同じ
+- test/cr/test_cr_1038.gd::test_tutorial_wrong_sound — 同じ
+- test/cr/test_cr_1038.gd::test_tutorial_init_last_values — last_snapshot・last_conflicts の入れ方は変えない
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — 空の盤で立ち上げる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — 空の盤で立ち上げる
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — 同じ。面の切り替えは最初の _refresh ではない
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — 空の盤で立ち上げる
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — 同じ
+- test/cr/test_cr_1181.gd::test_cr_1181_diagonal_collision_vibration — 同じ
+- test/cr/test_cr_1181.gd::test_cr_1181_vertical_collision_and_removal_vibration — 同じ
+- test/cr/test_cr_1181.gd::test_cr_1181_tutorial_collision_vibration — 同じ
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_duration_and_amplitude — 同じ
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_on_swipe — 同じ
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_not_retriggered — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_line_on_place_completion — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_line_on_mark_completion_and_new_region — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_line_retrigger_on_mark_toggle — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_line_on_alien_removal_completion — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_line_on_alien_removal_and_mark_completion — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_no_line_in_tutorial — 同じ
+- test/cr/test_cr_1184.gd::test_cr_1184_dead_priority_over_line — 同じ
+- test/cr/test_cr_1185.gd::test_main_flash_on_line_completion — 同じ
+- test/cr/test_cr_1185.gd::test_main_flash_multiple_lines_order_and_unique_cells — 盤を置いてから立ち上げるが、最初の _refresh は今も last_snapshot が空なので line にならず光らない。見ているのは手のあとの flashes だけ
+- test/cr/test_cr_1185.gd::test_main_no_flash_on_dead_line_then_flash_on_region — 空の盤で立ち上げる
+- test/cr/test_cr_1187.gd::test_cr_1187_new_dead_group_region — 同じ
+- test/cr/test_cr_1187.gd::test_cr_1187_new_dead_group_line — 同じ
+- test/cr/test_cr_1187.gd::test_cr_1187_undo_dead_group — 同じ
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: '（引き継ぎの候補）ぶつかった盤を読み直すと最初に 250 ms、× のある盤で 15 ms が出る'
+  said_at: "2026-10-27 18:2x"
+  decision: "未定（ユーザーの判断の後に入れる）"
+  plan: "不具合の芽を先に直す（B 組）"
+  step: "立ち上げの最初の _refresh で音と振動を出さない"
+title: "立ち上げの最初の _refresh で音と振動を出さない"
+probe: req_quiet_first_refresh_probe.gd
+decls: {}
+files:
+  edit: [scenes/main.gd]
+  new: []
+human:
+  - "Pixel で、宇宙人や × やぶつかった宇宙人がある進み具合から続きを始めたとき、立ち上がった瞬間に効果音も振動も出ないことを見る。そのあとの手では今までどおり鳴って震えることを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 2, 0) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（宇宙人 1 つと × 2 つの盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。続けて m.session.tap(3, 1) をしたあと（2 回目からは今までどおり鳴る）の m.sound.played は ["mark"]、m.sound.vibrations は [15]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("place", 1, 1) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（斜め隣の 2 つの宇宙人がぶつかった盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。'
+  target: m.session
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd")、var Main = load("res://scenes/main.tscn") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("mark", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 0, 1)、m.session.board.apply("mark", 1, 1) をしておく（読み直した進み具合と同じ形の盤から始める）。add_child_autofree(m) をして await wait_frames(2) をする。そのあと（区域 0 が × だけの盤で立ち上げた）の m.sound.played は []、m.sound.vibrations は []。続けて m.session.tap(1, 1)、m.session.tap(1, 1) を順にしたあと（× を消して付け直し、区域 0 が再び × だけになった）の m.sound.played は ["dead"]、m.sound.vibrations は [250]。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+extra_items: 0
+keep:
+  files: [scenes/sound.gd, core/rules.gd, game/session.gd, scenes/board_view.gd]
+  other:
+  - 'scenes/sound.gd の Sound.sfx_for は変えない'
+  - 'scenes/main.gd の dead と line に替える決まりと、振動の長さと強さは変えない'
+changing_tests:
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
+unchanged_tests:
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_no_line_on_initial_load_with_lines'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_on_completion_before_clear'
+  - 'test/cr/test_cr_1033.gd::test_main_played_mark_on_tap'
+  - 'test/cr/test_cr_1033.gd::test_button_sfx_in_main_and_title'
+  - 'test/cr/test_cr_1033.gd::test_main_music_setup'
+  - 'test/cr/test_cr_1140.gd::test_update_music_changes_bgm'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_place_sound'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_mark_sound'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_wrong_sound'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_init_last_values'
+  - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_diagonal_collision_vibration'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_vertical_collision_and_removal_vibration'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_tutorial_collision_vibration'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_duration_and_amplitude'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_on_swipe'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_not_retriggered'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_on_place_completion'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_on_mark_completion_and_new_region'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_retrigger_on_mark_toggle'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_on_alien_removal_completion'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_line_on_alien_removal_and_mark_completion'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_no_line_in_tutorial'
+  - 'test/cr/test_cr_1184.gd::test_cr_1184_dead_priority_over_line'
+  - 'test/cr/test_cr_1185.gd::test_main_flash_on_line_completion'
+  - 'test/cr/test_cr_1185.gd::test_main_flash_multiple_lines_order_and_unique_cells'
+  - 'test/cr/test_cr_1185.gd::test_main_no_flash_on_dead_line_then_flash_on_region'
+  - 'test/cr/test_cr_1187.gd::test_cr_1187_new_dead_group_region'
+  - 'test/cr/test_cr_1187.gd::test_cr_1187_new_dead_group_line'
+  - 'test/cr/test_cr_1187.gd::test_cr_1187_undo_dead_group'
+```
