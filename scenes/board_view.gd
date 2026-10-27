@@ -552,40 +552,25 @@ func _draw() -> void:
 		var t_r := tile_rect(hint_cell.x, hint_cell.y)
 		_draw_round_rect(t_r, radius, Color(1.0, 0.9, 0.2), false, 12.0)
 
-	# 7. Draw Radar Labels (CR-1048)
-	if session != null and session.level != null:
-		var font_size := radar_font_size()
-		if font_size > 0.0:
-			for r in session.level.radar:
-				var rx := -1
-				var ry := -1
-				var rn := -1
+	# 7. Draw Radar Labels (CR-1048, CR-1196)
+	var font_size := radar_font_size()
+	if font_size > 0.0:
+		var font := ThemeDB.fallback_font
+		for y in range(gs.y):
+			for x in range(gs.x):
+				var text := rock_text(x, y)
+				if text == "":
+					continue
 				
-				if r is Array and r.size() >= 3:
-					rx = int(r[0])
-					ry = int(r[1])
-					rn = int(r[2])
-				elif r is Vector3i:
-					rx = r.x
-					ry = r.y
-					rn = r.z
+				var center := radar_label_center(x, y)
+				var color := rock_text_color(x, y)
 				
-				if rx >= 0 and ry >= 0 and rn >= 0:
-					var center := radar_label_center(rx, ry)
-					var color := radar_text_color(rx, ry)
-					var text := str(rn)
-					# Calculate position to center the text
-					# draw_string expects baseline position. 
-					# To center vertically, we need to account for font ascent/descent.
-					# A simple approximation for centering: y = center.y + font_size * 0.35 (approx baseline offset)
-					# And x = center.x - text_width / 2
-					var font := ThemeDB.fallback_font
-					var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-					var draw_pos := Vector2(center.x - text_width * 0.5, center.y + font_size * 0.35)
-					
-					# CR-1137: Draw outline before text
-					draw_string_outline(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, radar_outline_size(), radar_outline_color())
-					draw_string(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+				var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+				var draw_pos := Vector2(center.x - text_width * 0.5, center.y + font_size * 0.35)
+				
+				# CR-1137: Draw outline before text
+				draw_string_outline(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, radar_outline_size(), radar_outline_color())
+				draw_string(font, draw_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 
 func _draw_mark(r: Rect2, color: Color) -> void:
@@ -710,3 +695,24 @@ func flash_alpha(now: float) -> float:
 	if t < 0.0 or t >= 1.0:
 		return 0.0
 	return 0.5 * (1.0 - t)
+
+
+func rock_text(x: int, y: int) -> String:
+	if is_rock(x, y):
+		return "?"
+	if session == null or session.level == null:
+		return ""
+	for r in session.level.radar:
+		if r is Array and r.size() >= 3:
+			if int(r[0]) == x and int(r[1]) == y:
+				return str(int(r[2]))
+		elif r is Vector3i:
+			if r.x == x and r.y == y:
+				return str(r.z)
+	return ""
+
+
+func rock_text_color(x: int, y: int) -> Color:
+	if is_rock(x, y):
+		return Color(1, 1, 1)
+	return radar_text_color(x, y)
