@@ -542,9 +542,9 @@ func size_up_tile_text() -> String:
 		return ""
 	var w = session.level.width
 	if language == "ja":
-		return "この面からはマスが %d×%d になるよ。\nがんばって！  タップではじめる" % [w, w]
+		return "この面からはマスが %d×%d になるよ。\nがんばって！" % [w, w]
 	else:
-		return "THE BOARD IS %dx%d FROM HERE.\nGOOD LUCK!  TAP TO START" % [w, w]
+		return "THE BOARD IS %dx%d FROM HERE.\nGOOD LUCK!" % [w, w]
 
 
 func is_last_level() -> bool:
