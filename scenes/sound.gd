@@ -8,6 +8,7 @@ const SFX_WRONG := preload("res://assets/audio/wrong.wav")
 const SFX_LEVEL_CLEAR := preload("res://assets/audio/level_clear.wav")
 const SFX_BUTTON := preload("res://assets/audio/button.wav")
 const SFX_DEAD := preload("res://assets/audio/dead.wav")
+const SFX_LINE := preload("res://assets/audio/line.wav")
 const BGM_MAIN := preload("res://assets/audio/bgm_main.wav")
 const BGM_TITLE := preload("res://assets/audio/bgm_title.wav")
 const BGM_STAGE1 := preload("res://assets/audio/bgm_stage1.wav")
@@ -49,6 +50,8 @@ func play_sfx(sfx_name: String) -> void:
 			stream = SFX_BUTTON
 		"dead":
 			stream = SFX_DEAD
+		"line":
+			stream = SFX_LINE
 	if stream != null:
 		sfx_player.stream = stream
 		sfx_player.play()
