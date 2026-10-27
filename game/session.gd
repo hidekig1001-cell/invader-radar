@@ -89,7 +89,7 @@ static func load_default_levels() -> Array:
 func tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
 		return false
-	if is_asteroid(x, y) or is_given(x, y):
+	if is_asteroid(x, y) or is_given(x, y) or is_radar(x, y):
 		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY:
@@ -103,7 +103,7 @@ func tap(x: int, y: int) -> bool:
 func double_tap(x: int, y: int) -> bool:
 	if status != "playing" or board == null:
 		return false
-	if is_asteroid(x, y) or is_given(x, y):
+	if is_asteroid(x, y) or is_given(x, y) or is_radar(x, y):
 		return false
 	match board.state_at(x, y):
 		BoardState.EMPTY, BoardState.MARK:
@@ -119,7 +119,7 @@ func swipe(cells: Array) -> bool:
 		return false
 	var filtered_cells: Array = []
 	for c in cells:
-		if not is_asteroid(c.x, c.y) and not is_given(c.x, c.y):
+		if not is_asteroid(c.x, c.y) and not is_given(c.x, c.y) and not is_radar(c.x, c.y):
 			filtered_cells.append(c)
 	if filtered_cells.is_empty():
 		return false
@@ -201,6 +201,15 @@ func is_asteroid(x: int, y: int) -> bool:
 	var target_pos = Vector2i(x, y)
 	for a in level.asteroids:
 		if a == target_pos:
+			return true
+	return false
+
+
+func is_radar(x: int, y: int) -> bool:
+	if level == null:
+		return false
+	for r in level.radar:
+		if r[0] == x and r[1] == y:
 			return true
 	return false
 
