@@ -1,0 +1,275 @@
+# クラウドへの依頼: InvaderRadar改修1184 の R0'（CR.md を読む）（1 回目、2026-10-27 11:0x、Invader Radar30）
+
+リポジトリ hidekig1001-cell/invader-radar。読み比べに使う main は 5f52a46（v1.92-cr1183。1183 の Rules.filled_lines が入った版）。アプリのコードは書き換えない。回答とファイルの文は日本語で。
+依頼は、あなた（または前のクラウド）が下書きした draft/line の drafts/req_line_sound.txt を元に、変わる既存のテストの名前を実際のテスト名に直したもの。手触りの 2 本目「そろったら line の音と光」の 3 本のうちの 2 本目（音）。CR は AuteDev の CR を作る役（機械の経路、Ubuntu4 の Qwen-next-flash の役名）が作った。
+ユーザーの判断 D-20261027-0545＝A（提案どおり）: 答えとは比べない。line の手では × の 15 ms・宇宙人の 30 ms の振動を出さない。
+
+## AuteDev の決まり（読み違えないために）
+- CR の「変えないこと」に test/ があるのは AuteDev が機械で書く決まった欄。既存のテストの書き直しは run の段が「変わる既存のテスト」の節に従って行う。NG の理由にしない。
+- 新しいテストは run の中で tests/test_cr_<番号>.gd に作られ、取り込みで test/cr/ に入る。
+- 1183 で分かったこと: 依頼の頭の段落の決まりは CR に写らないことがある。決まり（効果音の順、clear・place・mark だけを line に替える、level_clear・dead の手では鳴らさない、チュートリアルと最初の _refresh では鳴らさない、last_snapshot が空でないとき）が CR の変えることか確かめる項目に写っているかを見る。
+
+## 見ること
+1. CR の確かめる項目が、依頼の確かめる項目 1〜10 の手順と期待値（m.sound.played[-1] と count("line") の両方、R8 は status と count）を落とさず写しているか。依頼の中心の条件（新しくそろった組で鳴る・別の組が新しくそろえば再び鳴る・くずれて再びそろえば再び鳴る・赤い宇宙人／宇宙人 2 つの組では鳴らない・面のクリアは level_clear・× だけの組ができた手は dead・チュートリアルと最初の _refresh では鳴らない）を確かめる項目が無ければ NG。
+2. CR の変えること（scenes/sound.gd の SFX_LINE と play_sfx の "line"、scenes/main.gd の last_lines・curr_lines・new_lines と sfx_name の差し替え、last_lines = curr_lines）が依頼と合っているか。依頼に無い箇条・余計な変更（Sound.sfx_for・Rules.filled_lines・dead の決まり・振動を変えるなど）・抜けが無いか。
+3. 「変わる既存のテスト」（test_cr_1179_main_dead_with_alien の振動の並び 2 か所）と「変わらない既存のテスト」が CR に写っているか。
+
+## 終わりの条件（必ず守る）
+- 結果を、この branch（review/cr1184-r0p）のファイル results/cr1184_r0p.md に書いて commit・push する。1 行目は「R0' OK」か「R0' NG: <理由>」、続けて項目ごとの見立てを短く。NG なら、依頼の「変えること」か「確かめる項目」をどう直せばよいかを、そのまま貼れる文で書く（決まりは箇条の中に書く。「上の」で頭の段落を指さない）。main・ほかの branch には触らない。
+## 依頼（req_cr1184.txt）
+
+行・列・色（区域）がそろった瞬間に、効果音 "line" を鳴らして（手触りの 2 本目の 2 つ目。Invader Radar29 の依頼 10/27 03:1x。そろった組は 1 つ目の CR で足した Rules.filled_lines(session.board, session.level) が返す組）。
+「そろった瞬間」は、1 回の手で Rules.filled_lines の中に、前の手のあとには無かった組が 1 つ以上できたとき。すでにそろっている組があっても、別の組が新しくそろえば鳴らす（例: 行 0 がそろったあと、区域 0 もそろえば再び鳴らす）。× を消して組がくずれ、再びそろえば再び鳴らす。宇宙人が 2 つの組、空のマスが残る組、宇宙人が赤い組はそろわない（Rules.filled_lines の決まりのとおり）。
+効果音の順は level_clear > wrong > hint > dead > line > clear > place > mark とする。新しくそろった組がある手で、効果音が clear・place・mark のどれかなら line に替える（例: 最後の空のマスに × を付けた手、最後の空のマスに宇宙人を置いた手、赤い宇宙人を取ってほかの宇宙人が赤くなくなった手）。面をクリアした手は level_clear、× だけの組ができた手は dead を鳴らし、line は鳴らさない。チュートリアルの間と、main を立ち上げた最初の _refresh では line を鳴らさない。line の手は効果音が mark・place ではないので、× の 15 ミリ秒・宇宙人の 30 ミリ秒の振動は出ない。効果音のファイル line.wav は place.wav と同じフォルダにある。
+- scenes/sound.gd に、place.wav と同じフォルダの line.wav を preload する const SFX_LINE を足し、func play_sfx の match に "line"（stream = SFX_LINE）を足す。
+- scenes/main.gd に var last_lines: Array = [] を足す。func _refresh で dead に替えるところのあと、var curr_lines を「チュートリアルでなければ Rules.filled_lines(session.board, session.level)、チュートリアルなら []」とし、var new_lines を curr_lines のうち last_lines に無い組の並びとする。sfx_name が "clear"・"place"・"mark" のどれかで、last_snapshot が空でなく、new_lines が空でなければ sfx_name を "line" にする。
+- scenes/main.gd の func _refresh で last_dead = curr_dead とするところのあとに last_lines = curr_lines とする。
+- Sound.sfx_for、Rules.filled_lines、dead を鳴らす決まり、振動の長さと強さ、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var S = load("res://scenes/sound.gd") とし、var s = S.new() を add_child_autofree(s) してから s.setup() をする。s.play_sfx("line") をしたあとの s.played は ["line"]（"line" の効果音を鳴らせる）。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 の (0, 0) が空）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 0) をしたあと（最後の空のマスに宇宙人を置き、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（最後の空のマスに × を付け、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（行 0 はそろっていて、区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。
+4. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 がそろった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（× を消して行 0 がくずれた）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（再び × を付け、行 0 が再びそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。
+5. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(0, 2)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（(0, 0) と (0, 2) は同じ列で 2 つとも赤い。行 0 は赤い宇宙人 1 つと × 3 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 2) をしたあと（(0, 2) の宇宙人を取り、(0, 0) が赤くなくなって行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+6. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(2, 0)、m.session.tap(1, 0)、m.session.tap(3, 0) を順にしたあと（行 0 は宇宙人 2 つと × 2 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(2, 0) をしたあと（(2, 0) の宇宙人を取り、(2, 0) が空になった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(2, 0) をしたあと（(2, 0) に × を付け、行 0 は宇宙人 1 つと × 3 つでそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+7. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 2, 0)、m.session.board.apply("mark", 3, 0) をしておく（行 0 がそろった盤から始める。読み直した進み具合と同じ形）。add_child_autofree(m) をして await wait_frames(2) をしたあと（最初の _refresh では line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0)、m.session.tap(3, 0) を順にしたあと（× を消して行 0 がくずれ、再び付けてそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+8. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 1, 0)、m.session.board.apply("place", 3, 1)、m.session.board.apply("place", 0, 2) をし、次の 11 マス (0, 0)・(2, 0)・(3, 0)・(0, 1)・(1, 1)・(2, 1)・(1, 2)・(3, 2)・(0, 3)・(1, 3)・(3, 3) のそれぞれに m.session.board.apply("mark", x, y) をしておく（空のマスは (2, 2) と (2, 3) だけになる）。add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(2, 2) をしたあと（行 2 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.double_tap(2, 3) をしたあと（最後の宇宙人を置いて面をクリアした。行 3・列 2・区域 3 も新しくそろったが、面のクリアの手は level_clear を鳴らす）の m.session.status は "cleared"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+9. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.start_tutorial() をしてから m.tutorial.session.double_tap(3, 1) をしたあと（チュートリアルの盤で 1 マスだけの区域 (3, 1) に宇宙人を置き、その区域がそろった。チュートリアルの間は line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.end_tutorial() をしてから m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（チュートリアルを終えたあとの面で行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+10. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 1)、m.session.tap(3, 2)、m.session.tap(3, 3) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（行 0 がそろい、同じ手で列 3 が × だけで埋まった。× だけの組ができた手は dead を鳴らす）の m.sound.played[-1] は "dead"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+
+変わる既存のテスト:
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — m.session.tap(3, 0) のあと（行 0 が宇宙人 1 つと × 3 つでそろい、効果音が mark ではなく line になるので、× の 15 の振動が 1 つ減る）の assert_eq(m.sound.vibrations, [30, 15, 15, 15]) は assert_eq(m.sound.vibrations, [30, 15, 15]) に、m.session.tap(3, 1) のあとの assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 250]) に変わる
+
+変わらない既存のテスト:
+- test/cr/test_cr_1033.gd::test_sfx_for_mark — Sound.sfx_for は変えない（line への差し替えは main.gd の _refresh でする）
+- test/cr/test_cr_1033.gd::test_sfx_for_place — 同じ
+- test/cr/test_cr_1033.gd::test_sfx_for_clear — 同じ
+- test/cr/test_cr_1033.gd::test_sfx_for_level_clear — 同じ
+- test/cr/test_cr_1033.gd::test_main_played_mark_on_tap — 最初の面の (0, 0) に × を 1 つ付けても、宇宙人が無いのでそろわない
+- test/cr/test_cr_1026.gd::test_main_cleared_text_ja — 答えの宇宙人を置く途中で 1 マスの区域がそろって line が鳴るが、見ているのは面のクリアと吹き出しの文だけ
+- test/cr/test_cr_1043.gd::test_double_tap_places_piece — 1 マスの区域 (3, 1) に宇宙人を置いて line が鳴るが、見ているのは盤の状態だけ
+- test/cr/test_cr_1038.gd::test_tutorial_place_sound — チュートリアルの間は line を鳴らさない（(3, 1) は 1 マスの区域で、置くとそろう）
+- test/cr/test_cr_1038.gd::test_tutorial_mark_sound — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1038.gd::test_tutorial_wrong_sound — チュートリアルの間は line を鳴らさない。最後の手は wrong
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — 宇宙人 1 つと × 1 つで、そろう組は無い
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 効果音を直に鳴らすだけ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — チュートリアルの間は鳴らさず、そのあとの面には宇宙人が無い
+- test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude — vibrate の記録だけを見ている
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — 宇宙人 1 つと × 1 つで、そろう組は無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1181.gd::test_cr_1181_diagonal_collision_vibration — × が無いのでそろう組は無い
+- test/cr/test_cr_1181.gd::test_cr_1181_vertical_collision_and_removal_vibration — 同じ
+- test/cr/test_cr_1181.gd::test_cr_1181_tutorial_collision_vibration — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_duration_and_amplitude — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_on_swipe — 同じ
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_not_retriggered — 同じ
+- test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — 宇宙人が無いのでそろう組は無い。見ているのは吹き出しの文
+- test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age — solve_now の手は level_clear
+- test/cr/test_cr_1151.gd::test_cr_1151_title_screen_sound_integration — "button" は _refresh を通らない
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "手触りの 2 本目: 行・列・色がそろったら line の音と光"
+  said_at: "2026-10-27 03:1x"
+  decision: "D-20261026-0622"
+  plan: "手触り（音・光・振動）"
+  step: "そろった瞬間に line を鳴らす（手触り 2 本目の 2 つ目）"
+title: "行・列・区域がそろった瞬間に line の音"
+probe: req_cr1184_probe.gd
+decls:
+  scenes/sound.gd:
+  - "const SFX_LINE"
+  scenes/main.gd:
+  - "var last_lines: Array = []"
+files:
+  edit: [scenes/sound.gd, scenes/main.gd]
+  new: []
+human:
+  - "Pixel で行・列・区域のどれかを宇宙人 1 つと × で埋めきった瞬間に、そろった音が鳴ることを見る。宇宙人が 2 つの行や、空のマスが残る行では鳴らないことを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var S = load("res://scenes/sound.gd") とし、var s = S.new() を add_child_autofree(s) してから s.setup() をする。s.play_sfx("line") をしたあとの s.played は ["line"]（"line" の効果音を鳴らせる）。'
+  target: s.play_sfx
+  expect:
+  - 's.played'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 の (0, 0) が空）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 0) をしたあと（最後の空のマスに宇宙人を置き、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.double_tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（最後の空のマスに × を付け、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（行 0 はそろっていて、区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R4
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 がそろった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（× を消して行 0 がくずれた）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（再び × を付け、行 0 が再びそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R5
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(0, 2)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（(0, 0) と (0, 2) は同じ列で 2 つとも赤い。行 0 は赤い宇宙人 1 つと × 3 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 2) をしたあと（(0, 2) の宇宙人を取り、(0, 0) が赤くなくなって行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.double_tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R6
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(2, 0)、m.session.tap(1, 0)、m.session.tap(3, 0) を順にしたあと（行 0 は宇宙人 2 つと × 2 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(2, 0) をしたあと（(2, 0) の宇宙人を取り、(2, 0) が空になった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(2, 0) をしたあと（(2, 0) に × を付け、行 0 は宇宙人 1 つと × 3 つでそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R7
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 2, 0)、m.session.board.apply("mark", 3, 0) をしておく（行 0 がそろった盤から始める。読み直した進み具合と同じ形）。add_child_autofree(m) をして await wait_frames(2) をしたあと（最初の _refresh では line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0)、m.session.tap(3, 0) を順にしたあと（× を消して行 0 がくずれ、再び付けてそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R8
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 1, 0)、m.session.board.apply("place", 3, 1)、m.session.board.apply("place", 0, 2) をし、次の 11 マス (0, 0)・(2, 0)・(3, 0)・(0, 1)・(1, 1)・(2, 1)・(1, 2)・(3, 2)・(0, 3)・(1, 3)・(3, 3) のそれぞれに m.session.board.apply("mark", x, y) をしておく（空のマスは (2, 2) と (2, 3) だけになる）。add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(2, 2) をしたあと（行 2 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.double_tap(2, 3) をしたあと（最後の宇宙人を置いて面をクリアした。行 3・列 2・区域 3 も新しくそろったが、面のクリアの手は level_clear を鳴らす）の m.session.status は "cleared"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.double_tap
+  expect:
+  - 'm.session.status'
+- id: R9
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.start_tutorial() をしてから m.tutorial.session.double_tap(3, 1) をしたあと（チュートリアルの盤で 1 マスだけの区域 (3, 1) に宇宙人を置き、その区域がそろった。チュートリアルの間は line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.end_tutorial() をしてから m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（チュートリアルを終えたあとの面で行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+- id: R10
+  text: 'テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 1)、m.session.tap(3, 2)、m.session.tap(3, 3) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（行 0 がそろい、同じ手で列 3 が × だけで埋まった。× だけの組ができた手は dead を鳴らす）の m.sound.played[-1] は "dead"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。'
+  target: m.session.tap
+  expect:
+  - 'm.sound.played[-1]'
+extra_items: 0
+keep:
+  files: [core/rules.gd, game/session.gd, game/tutorial.gd, scenes/board_view.gd]
+  other:
+  - 'scenes/sound.gd の Sound.sfx_for は変えない'
+  - 'scenes/main.gd の dead を鳴らす決まり（last_dead・curr_dead）と振動の長さと強さは変えない'
+changing_tests:
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien'
+unchanged_tests:
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_mark'
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_place'
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_clear'
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_level_clear'
+  - 'test/cr/test_cr_1033.gd::test_main_played_mark_on_tap'
+  - 'test/cr/test_cr_1026.gd::test_main_cleared_text_ja'
+  - 'test/cr/test_cr_1043.gd::test_double_tap_places_piece'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_place_sound'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_mark_sound'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_wrong_sound'
+  - 'test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state'
+  - 'test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial'
+  - 'test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_diagonal_collision_vibration'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_vertical_collision_and_removal_vibration'
+  - 'test/cr/test_cr_1181.gd::test_cr_1181_tutorial_collision_vibration'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_duration_and_amplitude'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_on_swipe'
+  - 'test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_not_retriggered'
+  - 'test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning'
+  - 'test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age'
+  - 'test/cr/test_cr_1151.gd::test_cr_1151_title_screen_sound_integration'
+```
+
+## CR（CR-1184-1184v.local.md）
+
+# CR-1184: 行・列・区域がそろった瞬間に line の音
+
+## 変えること
+- scenes/sound.gd に、place.wav と同じフォルダの line.wav を preload する const SFX_LINE を足し、func play_sfx の match に "line"（stream = SFX_LINE）を足す。
+- scenes/main.gd に var last_lines: Array = [] を足す。func _refresh で dead に替えるところのあと、var curr_lines を「チュートリアルでなければ Rules.filled_lines(session.board, session.level)、チュートリアルなら []」とし、var new_lines を curr_lines のうち last_lines に無い組の並びとする。sfx_name が "clear"・"place"・"mark" のどれかで、last_snapshot が空でなく、new_lines が空でなければ sfx_name を "line" にする。
+- scenes/main.gd の func _refresh で last_dead = curr_dead とするところのあとに last_lines = curr_lines とする。
+
+## 変えないこと
+- `README.md`、`SPEC.md`、`addons/`、`assets/`、`core/`、`data/`、`export_presets.cfg`、`game/`、`project.godot`、`scenes/app.gd`、`scenes/app.tscn`、`scenes/board_view.gd`、`scenes/button_style.gd`、`scenes/clear_effect.gd`、`scenes/cloud_store.gd`、`scenes/hud.gd`、`scenes/input_mapper.gd`、`scenes/licenses_panel.gd`、`scenes/main.tscn`、`scenes/message_bubble.gd`、`scenes/rules_label.gd`、`scenes/rules_pages.gd`、`scenes/rules_panel.gd`、`scenes/space_bg.gd`、`scenes/splash_screen.gd`、`scenes/title_screen.gd`、`test/`、`tools/`、`.autedev/`
+- `scenes/sound.gd`: `SFX_PLACE`、`SFX_MARK`、`SFX_CLEAR`、`SFX_HINT`、`SFX_WRONG`、`SFX_LEVEL_CLEAR`、`SFX_BUTTON`、`SFX_DEAD`、`BGM_MAIN`、`BGM_TITLE`、`BGM_STAGE1`、`BGM_STAGE2`、`BGM_STAGE3`、`BGM_STAGE4`、`music_name`、`sfx_player`、`music_player`、`vibrations`、`vibration_amplitudes`、`play_music`、`stop_music`、`sfx_for`、`bgm_for_size`、`vibrate`
+- `scenes/main.gd`: `tutorial_finished`、`title_requested`、`Session`、`InputMapper`、`RulesLabelScript`、`Tutorial`、`SpaceBg`、`Sound`、`TutorialSteps`、`SessionSave`、`RulesPanel`、`ProgressStore`、`HELP_TEXT`、`CLEARED_TEXT`、`ALL_CLEARED_TEXT`、`LOGO_GAP`、`rules_label`、`start_with_tutorial`、`space_bg`、`language`、`last_conflicts`、`save_path`、`progress_store`、`clear_effect`、`last_status`、`last_tutorial_status`、`safe_top`、`board_view`、`hud`、`bubble`、`base_positions`、`rules_panel`、`title_logo`、`size_up_wait`、`size_up_age`、`current_store`、`save_progress`、`apply_screen_layout`、`place_title_logo`、`part_rects`、`to_board_pos`、`is_on_board`、`on_apply`、`open_rules`、`rules_is_open`、`is_tutorial`、`tutorial_input`、`show_help`、`help_text`、`dead_marks_text`、`size_up_text`、`size_up_tile_text`、`is_last_level`、`cleared_text`、`go_back`、`on_title_requested`、`tick_size_up`、`tutorial_accepts_cell`、`hint_text`、`update_music`
+- 依頼の欄: core/rules.gd は変えない（依頼の欄）。
+- 依頼の欄: game/session.gd は変えない（依頼の欄）。
+- 依頼の欄: game/tutorial.gd は変えない（依頼の欄）。
+- 依頼の欄: scenes/board_view.gd は変えない（依頼の欄）。
+- 依頼の欄: scenes/sound.gd の Sound.sfx_for は変えない（依頼の欄）
+- 依頼の欄: scenes/main.gd の dead を鳴らす決まり（last_dead・curr_dead）と振動の長さと強さは変えない（依頼の欄）
+
+## 新しい宣言
+- `res://scenes/sound.gd` に足す（既存のファイルに足す）
+  - `const SFX_LINE`
+- `res://scenes/main.gd` に足す（既存のファイルに足す）
+  - `var last_lines: Array = []`
+
+## 自動で確かめること
+1. テストの関数の中で var S = load("res://scenes/sound.gd") とし、var s = S.new() を add_child_autofree(s) してから s.setup() をする。s.play_sfx("line") をしたあとの s.played は ["line"]（"line" の効果音を鳴らせる）。
+2. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 の (0, 0) が空）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 0) をしたあと（最後の空のマスに宇宙人を置き、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+3. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（最後の空のマスに × を付け、行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（行 0 はそろっていて、区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。
+4. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（行 0 がそろった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（× を消して行 0 がくずれた）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.tap(3, 0) をしたあと（再び × を付け、行 0 が再びそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 2。
+5. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(0, 2)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（(0, 0) と (0, 2) は同じ列で 2 つとも赤い。行 0 は赤い宇宙人 1 つと × 3 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(0, 2) をしたあと（(0, 2) の宇宙人を取り、(0, 0) が赤くなくなって行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+6. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.double_tap(2, 0)、m.session.tap(1, 0)、m.session.tap(3, 0) を順にしたあと（行 0 は宇宙人 2 つと × 2 つで、そろっていない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.double_tap(2, 0) をしたあと（(2, 0) の宇宙人を取り、(2, 0) が空になった）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(2, 0) をしたあと（(2, 0) に × を付け、行 0 は宇宙人 1 つと × 3 つでそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+7. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 0, 0)、m.session.board.apply("mark", 1, 0)、m.session.board.apply("mark", 2, 0)、m.session.board.apply("mark", 3, 0) をしておく（行 0 がそろった盤から始める。読み直した進み具合と同じ形）。add_child_autofree(m) をして await wait_frames(2) をしたあと（最初の _refresh では line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0)、m.session.tap(3, 0) を順にしたあと（× を消して行 0 がくずれ、再び付けてそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+8. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とする。add_child_autofree(m) の前に m.session.board.apply("place", 1, 0)、m.session.board.apply("place", 3, 1)、m.session.board.apply("place", 0, 2) をし、次の 11 マス (0, 0)・(2, 0)・(3, 0)・(0, 1)・(1, 1)・(2, 1)・(1, 2)・(3, 2)・(0, 3)・(1, 3)・(3, 3) のそれぞれに m.session.board.apply("mark", x, y) をしておく（空のマスは (2, 2) と (2, 3) だけになる）。add_child_autofree(m) をして await wait_frames(2) をする。m.session.tap(2, 2) をしたあと（行 2 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。続けて m.session.double_tap(2, 3) をしたあと（最後の宇宙人を置いて面をクリアした。行 3・列 2・区域 3 も新しくそろったが、面のクリアの手は level_clear を鳴らす）の m.session.status は "cleared"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+9. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.start_tutorial() をしてから m.tutorial.session.double_tap(3, 1) をしたあと（チュートリアルの盤で 1 マスだけの区域 (3, 1) に宇宙人を置き、その区域がそろった。チュートリアルの間は line を鳴らさない）の m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.end_tutorial() をしてから m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 0) を順にしたあと（チュートリアルを終えたあとの面で行 0 がそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+10. テストの関数の中で var Level = load("res://game/level.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]}) をする（区域 0 は (0, 0)・(1, 0)・(0, 1)・(1, 1)、区域 1 は (2, 0)・(3, 0)・(2, 1)・(3, 1)、区域 2 は (0, 2)・(1, 2)・(0, 3)・(1, 3)、区域 3 は (2, 2)・(3, 2)・(2, 3)・(3, 3)。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var Main = load("res://scenes/main.tscn")、var SessionScript = load("res://game/session.gd") とする。var m = Main.instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.double_tap(0, 0)、m.session.tap(1, 0)、m.session.tap(2, 0)、m.session.tap(3, 1)、m.session.tap(3, 2)、m.session.tap(3, 3) を順にしたあとの m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(3, 0) をしたあと（行 0 がそろい、同じ手で列 3 が × だけで埋まった。× だけの組ができた手は dead を鳴らす）の m.sound.played[-1] は "dead"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 0。続けて m.session.tap(0, 1)、m.session.tap(1, 1) を順にしたあと（区域 0 が新しくそろった）の m.sound.played[-1] は "line"、m.sound.played の中の "line" の数（m.sound.played.count("line")） は 1。
+11. 既存のテストがすべて合格する。
+
+## 人が確かめること
+- Pixel で行・列・区域のどれかを宇宙人 1 つと × で埋めきった瞬間に、そろった音が鳴ることを見る。宇宙人が 2 つの行や、空のマスが残る行では鳴らないことを見る。
+
+## 変わる既存のテスト
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_with_alien — m.session.tap(3, 0) のあと（行 0 が宇宙人 1 つと × 3 つでそろい、効果音が mark ではなく line になるので、× の 15 の振動が 1 つ減る）の assert_eq(m.sound.vibrations, [30, 15, 15, 15]) は assert_eq(m.sound.vibrations, [30, 15, 15]) に、m.session.tap(3, 1) のあとの assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250]) は assert_eq(m.sound.vibrations, [30, 15, 15, 15, 250]) に変わる
+
+## 変わらない既存のテスト
+- test/cr/test_cr_1033.gd::test_sfx_for_mark — Sound.sfx_for は変えない（line への差し替えは main.gd の _refresh でする）
+- test/cr/test_cr_1033.gd::test_sfx_for_place — 同じ
+- test/cr/test_cr_1033.gd::test_sfx_for_clear — 同じ
+- test/cr/test_cr_1033.gd::test_sfx_for_level_clear — 同じ
+- test/cr/test_cr_1033.gd::test_main_played_mark_on_tap — 最初の面の (0, 0) に × を 1 つ付けても、宇宙人が無いのでそろわない
+- test/cr/test_cr_1026.gd::test_main_cleared_text_ja — 答えの宇宙人を置く途中で 1 マスの区域がそろって line が鳴るが、見ているのは面のクリアと吹き出しの文だけ
+- test/cr/test_cr_1043.gd::test_double_tap_places_piece — 1 マスの区域 (3, 1) に宇宙人を置いて line が鳴るが、見ているのは盤の状態だけ
+- test/cr/test_cr_1038.gd::test_tutorial_place_sound — チュートリアルの間は line を鳴らさない（(3, 1) は 1 マスの区域で、置くとそろう）
+- test/cr/test_cr_1038.gd::test_tutorial_mark_sound — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1038.gd::test_tutorial_wrong_sound — チュートリアルの間は line を鳴らさない。最後の手は wrong
+- test/cr/test_cr_1177.gd::test_main_vibrates_on_place_not_mark — 宇宙人 1 つと × 1 つで、そろう組は無い
+- test/cr/test_cr_1179.gd::test_cr_1179_sound_dead_sfx — 効果音を直に鳴らすだけ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_transition — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_retrigger — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_swipe — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_next_level — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_initial_state — 同じ
+- test/cr/test_cr_1179.gd::test_cr_1179_main_dead_tutorial — チュートリアルの間は鳴らさず、そのあとの面には宇宙人が無い
+- test/cr/test_cr_1180.gd::test_cr_1180_sound_vibrate_amplitude — vibrate の記録だけを見ている
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_place_and_mark — 宇宙人 1 つと × 1 つで、そろう組は無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_sequence — 同じ
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_swipe — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_in_tutorial — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1180.gd::test_cr_1180_main_vibrate_on_dead_transition — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1181.gd::test_cr_1181_diagonal_collision_vibration — × が無いのでそろう組は無い
+- test/cr/test_cr_1181.gd::test_cr_1181_vertical_collision_and_removal_vibration — 同じ
+- test/cr/test_cr_1181.gd::test_cr_1181_tutorial_collision_vibration — チュートリアルの間は line を鳴らさない
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_duration_and_amplitude — 宇宙人が無いのでそろう組は無い
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_on_swipe — 同じ
+- test/cr/test_cr_1182.gd::test_cr_1182_dead_vibration_not_retriggered — 同じ
+- test/cr/test_cr_1174.gd::test_cr_1174_dead_marks_warning — 宇宙人が無いのでそろう組は無い。見ているのは吹き出しの文
+- test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age — solve_now の手は level_clear
+- test/cr/test_cr_1151.gd::test_cr_1151_title_screen_sound_integration — "button" は _refresh を通らない
+
+## 対象の候補
+- edit: `scenes/sound.gd`、`scenes/main.gd`
