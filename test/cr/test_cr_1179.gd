@@ -82,18 +82,18 @@ func test_cr_1179_main_dead_retrigger() -> void:
 	
 	m.session.tap(2, 0)
 	m.session.tap(3, 0)
-	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15])
+	assert_eq(m.sound.played.count("dead"), 2)
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 250])
 	
 	m.session.tap(1, 1)
 	m.session.tap(3, 0)
-	assert_eq(m.sound.played.count("dead"), 1)
-	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15])
+	assert_eq(m.sound.played.count("dead"), 2)
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 250])
 	
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.played.count("dead"), 2)
-	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 250])
+	assert_eq(m.sound.played.count("dead"), 3)
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 250, 250])
 
 ## CHECK: 5
 func test_cr_1179_main_dead_swipe() -> void:
