@@ -1,0 +1,71 @@
+盤が大きくなる面の金色のお知らせから「タップではじめる」を消して（ユーザーの指示 10/27 21:0x「８　OK,「タップで始める」はいらない。」。8 は 6 面に進んだときの金色のお知らせ、CR-1188）。
+- scenes/main.gd の func size_up_tile_text が返す文の終わりの「  タップではじめる」（日本語）と「  TAP TO START」（英語）を消し、"この面からはマスが %d×%d になるよ。\nがんばって！" と "THE BOARD IS %dx%d FROM HERE.\nGOOD LUCK!" を返す。札が出て 0.8 秒たったらタップで消える決まり、金色の札・弾み・音と振動、size_up_text とほかの札（クリア・全部クリア）の文、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、4×4 の面 l1（l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})）と、5×5 の面 l2・l3（id 2・3、width 5、height 5、target 5、regions は行ごとに 0〜4 の区域）を作る。var m = load("res://scenes/main.tscn").instantiate() として m.language = "ja"、m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと、位置 Vector2(540, 300) を押す InputEventScreenTouch（index 0、pressed true）を m._input に渡し（クリアの札を消して 5×5 の面に進む）、m.tick_size_up(0.7) をする（0.6 秒の待ちが過ぎて、お知らせの札が出る）。そのあとの m.size_up_tile_text() と m.bubble.text は "この面からはマスが 5×5 になるよ。\nがんばって！"、m.bubble.size_up_mode は true、m.bubble.get_line_count() は 2。
+2. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、4×4 の面 l1（l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})）と、5×5 の面 l2・l3（id 2・3、width 5、height 5、target 5、regions は行ごとに 0〜4 の区域）を作る。var m = load("res://scenes/main.tscn").instantiate() として m.language = "en"、m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと、位置 Vector2(540, 300) を押す InputEventScreenTouch（index 0、pressed true）を m._input に渡し（クリアの札を消して 5×5 の面に進む）、m.tick_size_up(0.7) をする（0.6 秒の待ちが過ぎて、お知らせの札が出る）。そのあとの m.size_up_tile_text() と m.bubble.text は "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!"、m.bubble.size_up_mode は true、m.bubble.get_line_count() は 2。
+
+変わる既存のテスト:
+- test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja — 27 行目の m.bubble.text の期待値 "この面からはマスが 5×5 になるよ。\nがんばって！  タップではじめる" は "この面からはマスが 5×5 になるよ。\nがんばって！" に変わる
+- test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_en — 62 行目の m.size_up_tile_text() の期待値と 63 行目の m.bubble.text の期待値 "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START" は "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!" に変わる
+- test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age — 39 行目の m.bubble.text の期待値 "この面からはマスが 5×5 になるよ。\nがんばって！  タップではじめる" は "この面からはマスが 5×5 になるよ。\nがんばって！" に変わる
+
+変わらない既存のテスト:
+- test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_ja — size_up_text（札でない文）は変えない
+- test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_en — size_up_text（札でない文）は変えない
+- test/cr/test_cr_1188.gd::test_cr_1188_show_size_up_state — show_size_up の決まり（金色・字の大きさ）は変えない
+- test/cr/test_cr_1188.gd::test_cr_1188_size_up_pop_scale — 弾みの決まりは変えない
+- test/cr/test_cr_1188.gd::test_cr_1188_step_pop — 弾みの決まりは変えない
+- test/cr/test_cr_1188.gd::test_cr_1188_clear_text_restores_size_up — clear_text の決まりは変えない
+- test/cr/test_cr_1188.gd::test_cr_1188_main_integration — 札の文そのものは見ず、size_up_mode・0.8 秒・音と振動を見る
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "８　OK,「タップで始める」はいらない。"
+  said_at: "2026-10-27 21:0x"
+  decision: "未定（Invader Radar31 が入れる）"
+  plan: "Pixel の確かめで出た追加の依頼（C 組）"
+  step: "大きくなる面のお知らせから「タップではじめる」を消す（C 組の 2 本目）"
+title: "大きくなる面のお知らせからタップを消す"
+probe: req_size_up_no_tap_probe.gd
+decls: {}
+files:
+  edit: [scenes/main.gd]
+  new: []
+human:
+  - "Pixel で 6 面に進んで、金色のお知らせが 2 行で「タップではじめる」が無いこと、0.8 秒たってタップで消えることを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、4×4 の面 l1（l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})）と、5×5 の面 l2・l3（id 2・3、width 5、height 5、target 5、regions は行ごとに 0〜4 の区域）を作る。var m = load("res://scenes/main.tscn").instantiate() として m.language = "ja"、m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと、位置 Vector2(540, 300) を押す InputEventScreenTouch（index 0、pressed true）を m._input に渡し（クリアの札を消して 5×5 の面に進む）、m.tick_size_up(0.7) をする（0.6 秒の待ちが過ぎて、お知らせの札が出る）。そのあとの m.size_up_tile_text() と m.bubble.text は "この面からはマスが 5×5 になるよ。\nがんばって！"、m.bubble.size_up_mode は true、m.bubble.get_line_count() は 2。'
+  target: m.size_up_tile_text
+  expect:
+  - 'm.size_up_tile_text()'
+  - 'm.bubble.text'
+  - 'm.bubble.get_line_count()'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、4×4 の面 l1（l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})）と、5×5 の面 l2・l3（id 2・3、width 5、height 5、target 5、regions は行ごとに 0〜4 の区域）を作る。var m = load("res://scenes/main.tscn").instantiate() として m.language = "en"、m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと、位置 Vector2(540, 300) を押す InputEventScreenTouch（index 0、pressed true）を m._input に渡し（クリアの札を消して 5×5 の面に進む）、m.tick_size_up(0.7) をする（0.6 秒の待ちが過ぎて、お知らせの札が出る）。そのあとの m.size_up_tile_text() と m.bubble.text は "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!"、m.bubble.size_up_mode は true、m.bubble.get_line_count() は 2。'
+  target: m.size_up_tile_text
+  expect:
+  - 'm.size_up_tile_text()'
+  - 'm.bubble.text'
+  - 'm.bubble.get_line_count()'
+extra_items: 0
+keep:
+  files: [scenes/message_bubble.gd, scenes/sound.gd, game/session.gd]
+  other:
+  - 'size_up_text と、クリア・全部クリアの札の文は変えない'
+  - 'show_size_up の字の大きさ（上限 52・下限 36）は変えない'
+changing_tests:
+  - 'test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja'
+  - 'test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_en'
+  - 'test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age'
+unchanged_tests:
+  - 'test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_ja'
+  - 'test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_en'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_show_size_up_state'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_size_up_pop_scale'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_step_pop'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_clear_text_restores_size_up'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_main_integration'
+```

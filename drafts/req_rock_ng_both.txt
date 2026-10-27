@@ -1,0 +1,120 @@
+岩のマス（数字付きの岩・数字の無い岩）をタップ・ダブルタップしたら、NG の音と振動を出して（ユーザーの指示 10/27 21:0x「１　OK　２　OK　→追加依頼、１，２に該当する場合に、NG音と振動を入れたい」。1 は「数字付きの岩をタップしても × が付かない」、2 は「ダブルタップしても宇宙人が付かない」。数字の無い岩も同じにする、決め D-20261027-2103＝A）。
+今は Session.tap・double_tap が岩のマスを弾き、何も付けず手数も増やさないので、音も振動も出ない。
+- scenes/main.gd に func rock_ng(x: int, y: int) -> bool を足す。チュートリアル中（is_tutorial()）か session が null なら false。session.is_radar(x, y) か session.is_asteroid(x, y) なら sound.play_sfx("wrong") と sound.vibrate(250, 0.3) を 1 回ずつして true、ほかのマスは何もせず false。盤・手数・元に戻すの記録は変えない。
+- scenes/main.gd の func _on_touch_up の "tap" の所の、チュートリアルでないときの session.tap(c.x, c.y) の前で rock_ng(c.x, c.y) を呼ぶ。"double_tap" と "swipe" の所では呼ばない（ダブルタップは 1 回目のタップで鳴るので、鳴るのは 1 回だけ。なぞりは鳴らさない）。
+- Session の tap・double_tap・swipe・is_radar・is_asteroid、wrong の音の名前と振動の長さ・強さ、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m.rock_ng(0, 0) は true、そのあとの m.sound.played は ["wrong"]、m.sound.vibrations は [250]。続けて m.rock_ng(3, 3) は true、m.sound.played は ["wrong", "wrong"]、m.sound.vibrations は [250, 250]。続けて m.rock_ng(1, 0) は false（岩でないマス）、m.sound.played は ["wrong", "wrong"]。m.session.board.state_at(0, 0) と m.session.board.state_at(3, 3) は 0、m.session.moves は 0。
+2. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(0, 0))・m._on_touch_up(p(0, 0)) をしたあと（数字付きの岩をタップ）の m.sound.played は ["wrong"]、m.sound.vibrations は [250]、m.session.board.state_at(0, 0) は 0、m.session.moves は 0。続けて m._on_touch_down(p(1, 0))・m._on_touch_up(p(1, 0)) をしたあと（岩でないマスをタップ）の m.sound.played は ["wrong", "mark"]、m.sound.vibrations は [250, 15]。
+3. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(3, 3))・m._on_touch_up(p(3, 3)) を 2 回すぐに続けてしたあと（数字の無い岩をダブルタップ）の m.sound.played は ["wrong"]、m.sound.vibrations は [250]（1 回だけ）、m.session.board.state_at(3, 3) は 0、m.session.moves は 0。
+4. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(0, 0))・m._on_touch_up(p(0, 0)) をしたあとの m.sound.played は ["wrong"]。続けて m._on_touch_down(p(0, 1)) をし、index 0 の InputEventScreenDrag を位置 p(0, 0)、p(1, 0) で順に m._input に渡して、m._on_touch_up(p(1, 0)) をしたあと（(0, 1) から岩の (0, 0) を通って (1, 0) までなぞる）の m.sound.played は ["wrong", "mark"]、m.sound.vibrations は [250, 15]、m.session.board.state_at(0, 0) は 0、m.session.board.state_at(0, 1) は 1、m.session.board.state_at(1, 0) は 1。
+
+変わる既存のテスト: なし。
+
+変わらない既存のテスト:
+- test/cr/test_cr_1186.gd::test_is_radar — Session.is_radar は変えない
+- test/cr/test_cr_1186.gd::test_tap_and_double_tap_on_radar — Session.tap・double_tap を直接呼び、main の入力を通らないので、音と振動は出ない。盤と手数の決まりは変えない
+- test/cr/test_cr_1186.gd::test_swipe_on_radar — なぞりでは rock_ng を呼ばない。Session.swipe は変えない
+- test/cr/test_cr_1020.gd::test_is_asteroid — Session.is_asteroid は変えない
+- test/cr/test_cr_1020.gd::test_tap_on_asteroid — Session.tap を直接呼び、main の入力を通らない
+- test/cr/test_cr_1020.gd::test_double_tap_on_asteroid — Session.double_tap を直接呼び、main の入力を通らない
+- test/cr/test_cr_1020.gd::test_swipe_on_asteroid_only — なぞりでは rock_ng を呼ばない
+- test/cr/test_cr_1020.gd::test_swipe_mixed_asteroid_and_empty — なぞりでは rock_ng を呼ばない
+- test/cr/test_cr_1033.gd::test_sfx_for_wrong — Sound.sfx_for の wrong は変えない
+- test/cr/test_cr_1038.gd::test_tutorial_wrong_sound — wrong の音と振動の決まり（_refresh）は変えない
+- test/cr/test_cr_1043.gd::test_touch_down_up_marks_correct_cell — 岩の無い面のタップで、rock_ng は false
+- test/cr/test_cr_1043.gd::test_double_tap_places_piece — 岩の無い面のダブルタップで、rock_ng は false
+- test/cr/test_cr_1043.gd::test_drag_stroke_marks_cells — なぞりでは rock_ng を呼ばない
+- test/cr/test_cr_1043.gd::test_is_on_board_false_outside — 盤の外のタップの決まりは変えない
+- test/cr/test_cr_1043.gd::test_tutorial_input_transforms_coordinates — チュートリアル中は rock_ng を呼ばない
+- test/unit/test_main_scene.gd::test_touch_gestures_reach_session — 岩でないマスのタップ・ダブルタップ・なぞりで、rock_ng は false
+- test/cr/test_cr_1012.gd::test_tutorial_input_next_via_touch_outside_board — チュートリアル中は rock_ng を呼ばない
+- test/cr/test_cr_1083.gd::test_cr_1083_check_1 — チュートリアル中は rock_ng を呼ばない
+- test/cr/test_cr_1083.gd::test_cr_1083_check_2 — チュートリアル中は rock_ng を呼ばない
+- test/cr/test_cr_1051.gd::test_cr1051_3_save_on_next_level — クリアの札を消すタッチは、盤のマスのタップに届く前に返る
+- test/cr/test_cr_1100.gd::test_cr1100_1_last_level_clear_and_title — クリアの札を消すタッチは、盤のマスのタップに届く前に返る
+- test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja — お知らせの札を消すタッチは、盤のマスのタップに届く前に返る
+- test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age — お知らせの札を消すタッチは、盤のマスのタップに届く前に返る
+- test/cr/test_cr_1188.gd::test_cr_1188_main_integration — お知らせの札を消すタッチは、盤のマスのタップに届く前に返る
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "１　OK　２　OK　→追加依頼、１，２に該当する場合に、NG音と振動を入れたい"
+  said_at: "2026-10-27 21:0x"
+  decision: "D-20261027-2103＝A（数字の無い岩も同じ）"
+  plan: "Pixel の確かめで出た追加の依頼（C 組）"
+  step: "岩のタップ・ダブルタップで NG の音と振動（C 組の 1 本目、数字の無い岩も同じ）"
+title: "岩をタップしたら NG の音と振動"
+probe: req_rock_ng_both_probe.gd
+decls:
+  scenes/main.gd:
+  - "func rock_ng(x: int, y: int) -> bool"
+files:
+  edit: [scenes/main.gd]
+  new: []
+human:
+  - "Pixel で、数字付きの岩と数字の無い岩をタップ・ダブルタップして、NG の音と振動が 1 回ずつ出ること、なぞりでは鳴らないことを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m.rock_ng(0, 0) は true、そのあとの m.sound.played は ["wrong"]、m.sound.vibrations は [250]。続けて m.rock_ng(3, 3) は true、m.sound.played は ["wrong", "wrong"]、m.sound.vibrations は [250, 250]。続けて m.rock_ng(1, 0) は false（岩でないマス）、m.sound.played は ["wrong", "wrong"]。m.session.board.state_at(0, 0) と m.session.board.state_at(3, 3) は 0、m.session.moves は 0。'
+  target: m.rock_ng
+  expect:
+  - 'm.rock_ng(0, 0)'
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+- id: R2
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(0, 0))・m._on_touch_up(p(0, 0)) をしたあと（数字付きの岩をタップ）の m.sound.played は ["wrong"]、m.sound.vibrations は [250]、m.session.board.state_at(0, 0) は 0、m.session.moves は 0。続けて m._on_touch_down(p(1, 0))・m._on_touch_up(p(1, 0)) をしたあと（岩でないマスをタップ）の m.sound.played は ["wrong", "mark"]、m.sound.vibrations は [250, 15]。'
+  target: m._on_touch_up
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+  - 'm.session.moves'
+- id: R3
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(3, 3))・m._on_touch_up(p(3, 3)) を 2 回すぐに続けてしたあと（数字の無い岩をダブルタップ）の m.sound.played は ["wrong"]、m.sound.vibrations は [250]（1 回だけ）、m.session.board.state_at(3, 3) は 0、m.session.moves は 0。'
+  target: m._on_touch_up
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+  - 'm.session.moves'
+- id: R4
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var level = Level.new() として level.parse({"width": 4, "height": 4, "target": 4, "regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]], "radar": [[0, 0, 1]], "asteroids": [[3, 3]]}) をする（(0, 0) は数字 1 のレーダーの岩、(3, 3) は数字の無い岩（小惑星）。マスは (x, y) で、x は左から数えた列、y は上から数えた行）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([level]) とし、add_child_autofree(m) をして await wait_frames(2) をする（始めの m.sound.played と m.sound.vibrations は []）。マス (x, y) の画面の位置 p(x, y) は m.board_view.global_position + m.board_view.cell_rect(x, y).get_center() とする。m._on_touch_down(p(0, 0))・m._on_touch_up(p(0, 0)) をしたあとの m.sound.played は ["wrong"]。続けて m._on_touch_down(p(0, 1)) をし、index 0 の InputEventScreenDrag を位置 p(0, 0)、p(1, 0) で順に m._input に渡して、m._on_touch_up(p(1, 0)) をしたあと（(0, 1) から岩の (0, 0) を通って (1, 0) までなぞる）の m.sound.played は ["wrong", "mark"]、m.sound.vibrations は [250, 15]、m.session.board.state_at(0, 0) は 0、m.session.board.state_at(0, 1) は 1、m.session.board.state_at(1, 0) は 1。'
+  target: m._on_touch_up
+  expect:
+  - 'm.sound.played'
+  - 'm.sound.vibrations'
+  - 'm.session.board.state_at'
+extra_items: 0
+keep:
+  files: [game/session.gd, scenes/sound.gd, scenes/input_mapper.gd, scenes/board_view.gd]
+  other:
+  - 'Session の tap・double_tap・swipe・is_radar・is_asteroid は変えない'
+  - 'wrong の振動の長さ 250・強さ 0.3 は変えない'
+changing_tests: []
+unchanged_tests:
+  - 'test/cr/test_cr_1186.gd::test_is_radar'
+  - 'test/cr/test_cr_1186.gd::test_tap_and_double_tap_on_radar'
+  - 'test/cr/test_cr_1186.gd::test_swipe_on_radar'
+  - 'test/cr/test_cr_1020.gd::test_is_asteroid'
+  - 'test/cr/test_cr_1020.gd::test_tap_on_asteroid'
+  - 'test/cr/test_cr_1020.gd::test_double_tap_on_asteroid'
+  - 'test/cr/test_cr_1020.gd::test_swipe_on_asteroid_only'
+  - 'test/cr/test_cr_1020.gd::test_swipe_mixed_asteroid_and_empty'
+  - 'test/cr/test_cr_1033.gd::test_sfx_for_wrong'
+  - 'test/cr/test_cr_1038.gd::test_tutorial_wrong_sound'
+  - 'test/cr/test_cr_1043.gd::test_touch_down_up_marks_correct_cell'
+  - 'test/cr/test_cr_1043.gd::test_double_tap_places_piece'
+  - 'test/cr/test_cr_1043.gd::test_drag_stroke_marks_cells'
+  - 'test/cr/test_cr_1043.gd::test_is_on_board_false_outside'
+  - 'test/cr/test_cr_1043.gd::test_tutorial_input_transforms_coordinates'
+  - 'test/unit/test_main_scene.gd::test_touch_gestures_reach_session'
+  - 'test/cr/test_cr_1012.gd::test_tutorial_input_next_via_touch_outside_board'
+  - 'test/cr/test_cr_1083.gd::test_cr_1083_check_1'
+  - 'test/cr/test_cr_1083.gd::test_cr_1083_check_2'
+  - 'test/cr/test_cr_1051.gd::test_cr1051_3_save_on_next_level'
+  - 'test/cr/test_cr_1100.gd::test_cr1100_1_last_level_clear_and_title'
+  - 'test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja'
+  - 'test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age'
+  - 'test/cr/test_cr_1188.gd::test_cr_1188_main_integration'
+```
