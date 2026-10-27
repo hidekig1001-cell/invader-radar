@@ -61,12 +61,12 @@ func test_cr_1179_main_dead_with_alien() -> void:
 	m.session.tap(2, 0)
 	m.session.tap(3, 0)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [30, 15, 15, 15])
+	assert_eq(m.sound.vibrations, [30, 15, 15])
 	
 	m.session.tap(2, 1)
 	m.session.tap(3, 1)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.vibrations, [30, 15, 15, 15, 15, 250])
+	assert_eq(m.sound.vibrations, [30, 15, 15, 15, 250])
 
 ## CHECK: 4
 func test_cr_1179_main_dead_retrigger() -> void:

@@ -35,6 +35,7 @@ var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
 var last_dead: bool = false
+var last_lines: Array = []
 var save_path := ""
 var progress_store = null
 var clear_effect = null
@@ -346,6 +347,20 @@ func _refresh() -> void:
 		if sfx_name == "mark" and not last_snapshot.is_empty() and not last_dead and curr_dead:
 			sfx_name = "dead"
 			
+	var curr_lines: Array = []
+	if not is_tutorial():
+		curr_lines = Rules.filled_lines(session.board, session.level)
+	else:
+		curr_lines = []
+		
+	var new_lines: Array = []
+	for line in curr_lines:
+		if not last_lines.has(line):
+			new_lines.append(line)
+			
+	if sfx_name in ["clear", "place", "mark"] and not last_snapshot.is_empty() and not new_lines.is_empty():
+		sfx_name = "line"
+			
 	if sfx_name != "":
 		sound.play_sfx(sfx_name)
 		if sfx_name == "place":
@@ -360,6 +375,7 @@ func _refresh() -> void:
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
 	last_dead = curr_dead
+	last_lines = curr_lines
 
 	hud.update_from(curr_snapshot)
 	board_view.queue_redraw()
@@ -406,6 +422,7 @@ func start_tutorial() -> void:
 	last_snapshot = tutorial.session.snapshot()
 	last_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
 	last_dead = false
+	last_lines = []
 	tutorial.session.changed.connect(_refresh)
 	hud.set_tutorial_mode(true)
 	var step = tutorial.current_step()
@@ -427,6 +444,7 @@ func end_tutorial() -> void:
 	last_snapshot = session.snapshot()
 	last_conflicts = Rules.conflicts(session.board, session.level).size()
 	last_dead = not Rules.dead_marks(session.board, session.level).is_empty()
+	last_lines = Rules.filled_lines(session.board, session.level)
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
 	bubble.clear_text()
