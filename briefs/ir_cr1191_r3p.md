@@ -1,0 +1,84 @@
+# クラウドへの依頼: InvaderRadar改修1191 の R3'（テストを読む）（1 回目、2026-10-27 20:3x、Invader Radar31）
+
+依頼と CR は branch review/cr1191-r0p-2 の briefs/ir_cr1191_r0p-2.md（R0' は 2 回目で OK、results/cr1191_r0p_2.md）。main は 8111de3（v2.00-cr1192。1189・1190・1192 が入った版）。アプリのコードは書き換えない。回答とファイルの文は日本語で。
+この run は AuteDev の新しい版（release_ae2d582）で流れた。材料に「注意（機械の印）」の節があれば、それも読んで、当たっているかを書く。
+AuteDev の決まり: 新しいテストは run の中で tests/test_cr_<番号>.gd に作られ、取り込みで test/cr/ に入る。置き場所は NG の理由にしない。既存のテストの書き直しは tests/existing/ に置かれ、ファイル名の __ は / の代わり。CR の「変えないこと」の test/ は機械の決まった欄で、NG の理由にしない。
+これまでの読みで分かった決まり: 既存のテストに依頼に無い表明を足していたら NG（1182）。新しいテストの途中の段の表明は、依頼の流れで必ず成り立つ値なら OK。期待値を「数と各キー」・「数と各要素」に分けた形は NG（1183・1190）。まだ無い関数をファイルの頭の preload の const から呼ぶと、ファイルごと Parse Error になり GUT が飛ばして「全部通過」に見える（1188）。
+
+見ること:
+1. 各 CHECK の関数が、依頼の確かめる項目 1・2 の手順と期待値（"last_dead" in m が false、"last_dead_marks" in m が true、区域 0・区域 3 を × で埋めると dead が 1 回・2 回、振動 [15, 15, 15, 250, 15, 15, 15, 250]、チュートリアルの前後でも false、そのあと dead 1 回と [15, 15, 15, 250]）をそのまま写しているか。足りない手順・違う期待値・依頼に無い手や表明が無いか。
+2. 期待値が今の main（8111de3）でも成り立ってしまわないか（どの関数も今の main で落ちるか。"last_dead" in m が今の main では true なので落ちるはず）。
+3. 既存のテストの書き直しが無いこと（依頼は「変わる既存のテスト: なし」）。
+
+終わりの条件: 結果を branch review/cr1191-r3p のファイル results/cr1191_r3p.md に書いて commit・push。1 行目は「R3' OK」か「R3' NG: <理由>」。NG なら、どの関数のどの表明かを `関数名` で書く（差し戻しに使う）。main・ほかの branch には触らない。
+
+## 材料（run の新しいテストと、既存のテストの書き直しの main との差分）
+run: 20261027-2023-CR-1191
+== tests/test_cr_1191.gd
+extends GutTest
+
+const Level = preload("res://game/level.gd")
+const SessionScript = preload("res://game/session.gd")
+const MainScene = preload("res://scenes/main.tscn")
+
+
+func _make_level() -> Level:
+	var level = Level.new()
+	level.parse({
+		"width": 4,
+		"height": 4,
+		"target": 4,
+		"regions": [[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3]]
+	})
+	return level
+
+
+func _make_main(level: Level) -> Node:
+	var m = MainScene.instantiate()
+	m.session = SessionScript.new([level])
+	add_child_autofree(m)
+	await wait_frames(2)
+	return m
+
+
+## CHECK: 1
+func test_cr_1191_last_dead_removed_and_dead_sound_twice() -> void:
+	var level = _make_level()
+	var m = await _make_main(level)
+
+	assert_false("last_dead" in m, "last_dead should be removed")
+	assert_true("last_dead_marks" in m, "last_dead_marks should remain")
+
+	m.session.tap(0, 0)
+	m.session.tap(1, 0)
+	m.session.tap(0, 1)
+	m.session.tap(1, 1)
+	assert_eq(m.sound.played.count("dead"), 1, "first dead group should play 'dead' once")
+
+	m.session.tap(2, 2)
+	m.session.tap(3, 2)
+	m.session.tap(2, 3)
+	m.session.tap(3, 3)
+	assert_eq(m.sound.played.count("dead"), 2, "second dead group should play 'dead' again")
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15, 15, 250], "vibration pattern for two dead groups")
+
+
+## CHECK: 2
+func test_cr_1191_tutorial_last_dead_removed_and_dead_sound() -> void:
+	var level = _make_level()
+	var m = await _make_main(level)
+
+	m.start_tutorial()
+	assert_false("last_dead" in m, "last_dead should be removed after start_tutorial")
+
+	m.end_tutorial()
+	assert_false("last_dead" in m, "last_dead should be removed after end_tutorial")
+
+	m.session.tap(0, 0)
+	m.session.tap(1, 0)
+	m.session.tap(0, 1)
+	m.session.tap(1, 1)
+	assert_eq(m.sound.played.count("dead"), 1, "dead sound should play once after tutorial ends")
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250], "vibration pattern for one dead group after tutorial")
+== 既存のテストの書き直し
+== 終わり
