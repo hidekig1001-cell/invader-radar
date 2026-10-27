@@ -29,6 +29,8 @@ var score_label: Label
 var hint_label: Label
 var moves_label: Label
 var time_label: Label
+var aliens_name_label: Label
+var aliens_label: Label
 var undo_button: Button
 var settings_button: Button
 var hint_button: Button
@@ -69,6 +71,9 @@ func _ready() -> void:
 	
 	time_name_label = make_table_label(table_cell_rect(2, 1), HORIZONTAL_ALIGNMENT_LEFT)
 	time_label = make_table_label(table_cell_rect(2, 1), HORIZONTAL_ALIGNMENT_RIGHT)
+	
+	aliens_name_label = make_table_label(table_cell_rect(0, 1), HORIZONTAL_ALIGNMENT_LEFT)
+	aliens_label = make_table_label(table_cell_rect(0, 1), HORIZONTAL_ALIGNMENT_RIGHT)
 	
 	set_table_names()
 
@@ -135,6 +140,7 @@ func update_from(snap: Dictionary) -> void:
 	score_label.text = str(int(snap.get("score", 0)))
 	hint_label.text = str(int(snap.get("hints", 0)))
 	moves_label.text = str(int(snap.get("moves", 0)))
+	aliens_label.text = str(aliens_left(snap))
 	hint_button.text = localized("HINT (%d)", "ヒント (%d)") % int(snap.get("hints", 0))
 	hint_button.disabled = tutorial_mode or int(snap.get("hints", 0)) <= 0 or snap.get("status", "") != "playing"
 	undo_button.disabled = tutorial_mode or snap.get("status", "") != "playing"
@@ -242,6 +248,7 @@ func set_table_names() -> void:
 	hint_name_label.text = localized("HINTS LEFT", "残りヒント")
 	moves_name_label.text = localized("MOVES", "手数")
 	time_name_label.text = localized("TIME", "経過時間")
+	aliens_name_label.text = localized("ALIENS LEFT", "残り宇宙人")
 
 
 func table_box() -> StyleBoxFlat:
@@ -294,3 +301,15 @@ func sound_label() -> String:
 			return "音 OFF"
 		else:
 			return "SOUND OFF"
+
+
+static func aliens_left(snap: Dictionary) -> int:
+	var board = snap.get("board", null)
+	if board == null:
+		return 0
+	var width = int(board.get("width", 0))
+	var pieces = int(board.get("pieces", 0))
+	var left = width - pieces
+	if left < 0:
+		return 0
+	return left
