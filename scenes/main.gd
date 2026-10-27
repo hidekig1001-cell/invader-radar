@@ -298,6 +298,8 @@ func _on_touch_up(pos: Vector2) -> void:
 				else:
 					tutorial_input("tap", c)
 			else:
+				if rock_ng(c.x, c.y):
+					return
 				session.tap(c.x, c.y)
 		"double_tap":
 			if is_tutorial():
@@ -618,3 +620,15 @@ func update_music() -> void:
 	if session != null and session.level != null:
 		var size = max(session.level.width, session.level.height)
 		sound.play_music(Sound.bgm_for_size(size))
+
+
+func rock_ng(x: int, y: int) -> bool:
+	if is_tutorial():
+		return false
+	if session == null:
+		return false
+	if session.is_radar(x, y) or session.is_asteroid(x, y):
+		sound.play_sfx("wrong")
+		sound.vibrate(250, 0.3)
+		return true
+	return false
