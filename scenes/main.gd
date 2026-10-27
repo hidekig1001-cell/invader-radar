@@ -110,6 +110,7 @@ func _ready() -> void:
 	rules_label.add_theme_font_size_override("font_size", 32)
 	rules_label.position = Vector2(54, 1732)
 	rules_label.size = Vector2(972, 128)
+	update_rules_label()
 
 	title_logo = TextureRect.new()
 	title_logo.texture = load("res://assets/title_logo/title_logo_1000x200.png")
@@ -423,6 +424,7 @@ func _refresh() -> void:
 			if current_text == HELP_TEXT or current_text == ja_help or current_text == dead_marks_text():
 				show_help()
 
+	update_rules_label()
 	update_music()
 
 
@@ -628,3 +630,14 @@ func rock_ng(x: int, y: int) -> bool:
 		sound.vibrate(250, 0.3)
 		return true
 	return false
+
+func update_rules_label() -> void:
+	if rules_label == null:
+		return
+	var level = null
+	if is_tutorial():
+		level = tutorial.session.level
+	else:
+		if session != null:
+			level = session.level
+	rules_label.apply_level(level)
