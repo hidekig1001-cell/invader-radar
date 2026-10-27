@@ -165,12 +165,13 @@ static func dead_marks(board_state, level) -> Array:
 		var marks_in_row = []
 		
 		for x in range(width):
+			if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+				continue
+			
 			var state = board_state.state_at(x, y)
 			if state == 2: # Alien/Piece
 				has_alien = true
 				break
-			elif is_asteroid.call(x, y) or is_radar_cell.call(x, y):
-				continue
 			elif state == 1: # Mark
 				marks_in_row.append(Vector2i(x, y))
 			else:
@@ -188,12 +189,13 @@ static func dead_marks(board_state, level) -> Array:
 		var marks_in_col = []
 		
 		for y in range(height):
+			if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+				continue
+			
 			var state = board_state.state_at(x, y)
 			if state == 2: # Alien/Piece
 				has_alien = true
 				break
-			elif is_asteroid.call(x, y) or is_radar_cell.call(x, y):
-				continue
 			elif state == 1: # Mark
 				marks_in_col.append(Vector2i(x, y))
 			else:
@@ -216,12 +218,13 @@ static func dead_marks(board_state, level) -> Array:
 				if level.region_at(x, y) != r_id:
 					continue
 				
+				if is_asteroid.call(x, y) or is_radar_cell.call(x, y):
+					continue
+				
 				var state = board_state.state_at(x, y)
 				if state == 2: # Alien/Piece
 					has_alien = true
 					break
-				elif is_asteroid.call(x, y) or is_radar_cell.call(x, y):
-					continue
 				elif state == 1: # Mark
 					marks_in_region.append(Vector2i(x, y))
 				else:
