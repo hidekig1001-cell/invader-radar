@@ -583,7 +583,9 @@ func tick_size_up(delta: float) -> void:
 		if size_up_wait <= 0.0:
 			size_up_wait = 0.0
 			size_up_age = 0.0
-			bubble.show_tile(size_up_tile_text(), board_view.position + board_view.board_rect().get_center())
+			bubble.show_size_up(size_up_tile_text(), board_view.position + board_view.board_rect().get_center())
+			sound.play_sfx("line")
+			sound.vibrate(60, 0.6)
 	elif bubble.tile_mode and bubble.text == size_up_tile_text():
 		size_up_age += delta
 

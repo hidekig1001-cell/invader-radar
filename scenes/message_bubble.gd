@@ -16,12 +16,18 @@ const TEXT_MIN_FONT_SIZE := 24
 const PANEL_MAX_FONT_SIZE := 48
 const PANEL_MIN_FONT_SIZE := 20
 
+const SIZE_UP_BG := Color8(255, 215, 64)
+const SIZE_UP_BORDER := Color8(230, 110, 20)
+const SIZE_UP_POP_TIME := 0.3
+
 var _time_left: float = 0.0
 var tile_mode: bool = false
 var panel_mode: bool = false
 var blink_time: float = 0.0
 var normal_position: Vector2 = Vector2.ZERO
 var normal_box: StyleBox = null
+var size_up_mode: bool = false
+var pop_age: float = -1.0
 
 
 func _ready() -> void:
@@ -103,6 +109,11 @@ func clear_text() -> void:
 		set_normal_font_look()
 		add_theme_font_size_override("font_size", FONT_SIZE)
 	if tile_mode:
+		if size_up_mode:
+			size_up_mode = false
+			pop_age = -1.0
+			scale = Vector2.ONE
+			add_theme_font_size_override("font_size", FONT_SIZE)
 		tile_mode = false
 		position = normal_position
 		size = BOX.size
@@ -161,6 +172,7 @@ func step_blink(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	step_blink(delta)
+	step_pop(delta)
 	if visible and _time_left > 0.0:
 		_time_left -= delta
 		if _time_left <= 0.0:
@@ -175,3 +187,41 @@ func clear_tile_box() -> StyleBoxFlat:
 	box.set_corner_radius_all(24)
 	box.anti_aliasing = true
 	return box
+
+
+func size_up_box() -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = SIZE_UP_BG
+	box.border_color = SIZE_UP_BORDER
+	box.set_border_width_all(8)
+	box.set_corner_radius_all(24)
+	box.anti_aliasing = true
+	return box
+
+
+func show_size_up(text_to_show: String, center: Vector2) -> void:
+	show_tile(text_to_show, center)
+	size_up_mode = true
+	add_theme_stylebox_override("normal", size_up_box())
+	add_theme_font_size_override("font_size", fit_font_size(text_to_show, TILE_SIZE, 52, 36))
+	pivot_offset = TILE_SIZE / 2.0
+	pop_age = 0.0
+	scale = Vector2.ONE
+
+
+static func size_up_pop_scale(age: float) -> float:
+	if age < 0.0 or age >= SIZE_UP_POP_TIME:
+		return 1.0
+	return 1.0 + 0.25 * sin(PI * age / SIZE_UP_POP_TIME)
+
+
+func step_pop(delta: float) -> void:
+	if pop_age < 0.0:
+		return
+	pop_age += delta
+	if pop_age >= SIZE_UP_POP_TIME:
+		pop_age = -1.0
+		scale = Vector2.ONE
+	else:
+		var s := size_up_pop_scale(pop_age)
+		scale = Vector2(s, s)
