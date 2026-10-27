@@ -32,6 +32,22 @@ func parse(d: Dictionary) -> bool:
 	var rad = parse_radar(d.get("radar", []), w, h)
 	if ast == null or rad == null:
 		return false
+	
+	# CR-1190: 区域の番号を詰め直す
+	var unique_ids := {}
+	for y in range(h):
+		for x in range(w):
+			unique_ids[g.get_cell(x, y)] = true
+	var sorted_ids := unique_ids.keys()
+	sorted_ids.sort()
+	var remap := {}
+	for i in range(sorted_ids.size()):
+		remap[sorted_ids[i]] = i
+	
+	for y in range(h):
+		for x in range(w):
+			g.set_cell(x, y, remap[g.get_cell(x, y)])
+
 	id = int(d.get("id", 0))
 	width = w
 	height = h
