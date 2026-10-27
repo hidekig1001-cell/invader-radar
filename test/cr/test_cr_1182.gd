@@ -57,5 +57,5 @@ func test_cr_1182_dead_vibration_not_retriggered() -> void:
 	assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3])
 	m.session.tap(2, 0)
 	m.session.tap(3, 0)
-	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 15])
-	assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3, 0.4, 0.4])
+	assert_eq(m.sound.vibrations, [15, 15, 15, 250, 15, 250])
+	assert_eq(m.sound.vibration_amplitudes, [0.4, 0.4, 0.4, 0.3, 0.4, 0.3])

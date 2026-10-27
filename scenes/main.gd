@@ -35,6 +35,7 @@ var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
 var last_dead: bool = false
+var last_dead_marks: Array = []
 var last_lines: Array = []
 var save_path := ""
 var progress_store = null
@@ -341,10 +342,15 @@ func _refresh() -> void:
 		curr_conflicts = Rules.conflicts(session.board, session.level).size()
 	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
 	
-	var curr_dead := false
+	var curr_dead_marks: Array = []
 	if not is_tutorial():
-		curr_dead = not Rules.dead_marks(session.board, session.level).is_empty()
-		if sfx_name == "mark" and not last_snapshot.is_empty() and not last_dead and curr_dead:
+		curr_dead_marks = Rules.dead_marks(session.board, session.level)
+		var has_new_dead := false
+		for mark in curr_dead_marks:
+			if not last_dead_marks.has(mark):
+				has_new_dead = true
+				break
+		if (sfx_name == "mark" or sfx_name == "clear") and not last_snapshot.is_empty() and has_new_dead:
 			sfx_name = "dead"
 			
 	var curr_lines: Array = []
@@ -376,7 +382,8 @@ func _refresh() -> void:
 			
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
-	last_dead = curr_dead
+	last_dead = not curr_dead_marks.is_empty()
+	last_dead_marks = curr_dead_marks
 	last_lines = curr_lines
 
 	hud.update_from(curr_snapshot)
@@ -424,6 +431,7 @@ func start_tutorial() -> void:
 	last_snapshot = tutorial.session.snapshot()
 	last_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
 	last_dead = false
+	last_dead_marks = []
 	last_lines = []
 	tutorial.session.changed.connect(_refresh)
 	hud.set_tutorial_mode(true)
@@ -445,7 +453,9 @@ func end_tutorial() -> void:
 	board_view.session = session
 	last_snapshot = session.snapshot()
 	last_conflicts = Rules.conflicts(session.board, session.level).size()
-	last_dead = not Rules.dead_marks(session.board, session.level).is_empty()
+	var marks = Rules.dead_marks(session.board, session.level)
+	last_dead = not marks.is_empty()
+	last_dead_marks = marks
 	last_lines = Rules.filled_lines(session.board, session.level)
 	board_view.highlight_cells = []
 	hud.set_tutorial_mode(false)
