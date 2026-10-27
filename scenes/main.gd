@@ -53,6 +53,7 @@ var title_logo: TextureRect = null
 
 var size_up_wait: float = 0.0
 var size_up_age: float = 0.0
+var dead_hold: float = 0.0
 
 
 func _ready() -> void:
@@ -298,9 +299,7 @@ func _on_touch_up(pos: Vector2) -> void:
 				else:
 					tutorial_input("tap", c)
 			else:
-				if rock_ng(c.x, c.y):
-					return
-				session.tap(c.x, c.y)
+				on_board_tap(c)
 		"double_tap":
 			if is_tutorial():
 				var step = tutorial.current_step()
@@ -349,11 +348,20 @@ func _refresh() -> void:
 	var curr_dead_marks: Array = []
 	if not is_tutorial():
 		curr_dead_marks = Rules.dead_marks(session.board, session.level)
-		var has_new_dead := false
+		var new_dead: Array = []
 		for mark in curr_dead_marks:
 			if not last_dead_marks.has(mark):
-				has_new_dead = true
-				break
+				new_dead.append(mark)
+		
+		if dead_hold > 0.0:
+			var held = board_view.held_marks.duplicate()
+			for m in new_dead:
+				if not held.has(m):
+					held.append(m)
+			board_view.held_marks = held
+			new_dead = []
+			
+		var has_new_dead := not new_dead.is_empty()
 		if (sfx_name == "mark" or sfx_name == "clear") and not last_snapshot.is_empty() and has_new_dead:
 			sfx_name = "dead"
 			
@@ -508,7 +516,12 @@ func show_help() -> void:
 func help_text() -> String:
 	if not is_tutorial() and session != null and session.board != null and session.level != null:
 		var dead = Rules.dead_marks(session.board, session.level)
-		if not dead.is_empty():
+		var held = board_view.held_marks
+		var visible_dead = []
+		for d in dead:
+			if not held.has(d):
+				visible_dead.append(d)
+		if not visible_dead.is_empty():
 			return dead_marks_text()
 	
 	if language == "ja":
@@ -576,6 +589,7 @@ func _process(delta: float) -> void:
 	if session == null or is_tutorial() or rules_is_open():
 		return
 	tick_size_up(delta)
+	tick_dead_hold(delta)
 	session.tick(delta)
 	hud.set_time(session.elapsed)
 
@@ -641,3 +655,38 @@ func update_rules_label() -> void:
 		if session != null:
 			level = session.level
 	rules_label.apply_level(level)
+
+func on_board_tap(c: Vector2i) -> void:
+	if rock_ng(c.x, c.y):
+		return
+	dead_hold = InputMapper.DOUBLE_TAP_MS / 1000.0
+	session.tap(c.x, c.y)
+
+func tick_dead_hold(delta: float) -> void:
+	if dead_hold <= 0.0:
+		return
+	dead_hold -= delta
+	if dead_hold > 0.0:
+		return
+	dead_hold = 0.0
+	
+	var held = board_view.held_marks.duplicate()
+	board_view.held_marks = []
+	
+	if is_tutorial():
+		return
+		
+	var current_dead = Rules.dead_marks(session.board, session.level)
+	var has_dead = false
+	for h in held:
+		if current_dead.has(h):
+			has_dead = true
+			break
+			
+	if has_dead:
+		sound.play_sfx("dead")
+		sound.vibrate(250, 0.3)
+		
+		var ja_help = "タップ: ×   ダブルタップ: 宇宙人\nスワイプ: ×"
+		if bubble.text == HELP_TEXT or bubble.text == ja_help:
+			show_help()

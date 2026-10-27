@@ -99,6 +99,10 @@ const LINE_FLASH_TIME := 0.3
 var flashes: Array = []
 var flash_cells: Array = []
 var flash_start: float = -1.0
+var held_marks: Array = []:
+	set(value):
+		held_marks = value
+		queue_redraw()
 
 
 # 盤の大きさ（マス）。session がなければ 0。
@@ -432,6 +436,8 @@ func has_radar(x: int, y: int) -> bool:
 # CR-1130: 指定したマスに描く × の色を返す。
 # CR-1137: Always return mark_color() to unify X color.
 func mark_color_at(x: int, y: int) -> Color:
+	if Vector2i(x, y) in held_marks:
+		return mark_color()
 	if session != null and session.level != null:
 		var dead := Rules.dead_marks(session.board, session.level)
 		if Vector2i(x, y) in dead:
