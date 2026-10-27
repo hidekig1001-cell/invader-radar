@@ -34,7 +34,6 @@ var language: String = "en"
 var sound = null
 var last_snapshot: Dictionary = {}
 var last_conflicts: int = 0
-var last_dead: bool = false
 var last_dead_marks: Array = []
 var last_lines: Array = []
 var save_path := ""
@@ -384,7 +383,6 @@ func _refresh() -> void:
 			
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
-	last_dead = not curr_dead_marks.is_empty()
 	last_dead_marks = curr_dead_marks
 	last_lines = curr_lines
 
@@ -432,7 +430,6 @@ func start_tutorial() -> void:
 	board_view.session = tutorial.session
 	last_snapshot = tutorial.session.snapshot()
 	last_conflicts = Rules.conflicts(tutorial.session.board, tutorial.session.level).size()
-	last_dead = false
 	last_dead_marks = []
 	last_lines = []
 	tutorial.session.changed.connect(_refresh)
@@ -456,7 +453,6 @@ func end_tutorial() -> void:
 	last_snapshot = session.snapshot()
 	last_conflicts = Rules.conflicts(session.board, session.level).size()
 	var marks = Rules.dead_marks(session.board, session.level)
-	last_dead = not marks.is_empty()
 	last_dead_marks = marks
 	last_lines = Rules.filled_lines(session.board, session.level)
 	board_view.highlight_cells = []
