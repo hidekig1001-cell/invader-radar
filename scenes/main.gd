@@ -341,6 +341,8 @@ func _refresh() -> void:
 		curr_snapshot = session.snapshot()
 		curr_conflicts = Rules.conflicts(session.board, session.level).size()
 	var sfx_name = Sound.sfx_for(last_snapshot, curr_snapshot, last_conflicts, curr_conflicts)
+	if last_snapshot.is_empty():
+		sfx_name = ""
 	
 	var curr_dead_marks: Array = []
 	if not is_tutorial():

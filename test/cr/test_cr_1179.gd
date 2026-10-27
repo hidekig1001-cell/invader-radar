@@ -143,12 +143,12 @@ func test_cr_1179_main_dead_initial_state() -> void:
 	add_child_autofree(m)
 	await wait_frames(2)
 	assert_eq(m.sound.played.count("dead"), 0)
-	assert_eq(m.sound.vibrations, [15])
+	assert_eq(m.sound.vibrations, [])
 	
 	m.session.tap(1, 1)
 	m.session.tap(1, 1)
 	assert_eq(m.sound.played[-1], "dead")
-	assert_eq(m.sound.vibrations, [15, 250])
+	assert_eq(m.sound.vibrations, [250])
 
 ## CHECK: 8
 func test_cr_1179_main_dead_tutorial() -> void:
