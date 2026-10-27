@@ -95,6 +95,10 @@ var pose_rng := RandomNumberGenerator.new()
 const PIECE_POP_TIME := 0.15
 var piece_pop_start: Dictionary = {}
 var pop_clock: float = 0.0
+const LINE_FLASH_TIME := 0.3
+var flashes: Array = []
+var flash_cells: Array = []
+var flash_start: float = -1.0
 
 
 # 盤の大きさ（マス）。session がなければ 0。
@@ -527,6 +531,13 @@ func _draw() -> void:
 						var target_rect := scaled_rect(piece_image_rect(r), pop_scale)
 						draw_texture_rect(piece_texture(x, y), target_rect, false)
 
+	# CR-1185: Draw Line Flash
+	var fa := flash_alpha(pop_clock)
+	if fa > 0.0:
+		for cell in flash_cells:
+			var t_r := tile_rect(cell.x, cell.y)
+			_draw_round_rect(t_r, radius, Color(1, 1, 1, fa), true)
+
 	# 5. Draw Highlight/Darkening (CR-1022)
 	if highlight_cells.size() > 0:
 		for y in range(gs.y):
@@ -669,9 +680,33 @@ func _process(delta: float) -> void:
 		if pop_clock - piece_pop_start[key] < PIECE_POP_TIME + delta:
 			needs_redraw = true
 			break
+	if flash_start >= 0.0 and pop_clock - flash_start < LINE_FLASH_TIME + delta:
+		needs_redraw = true
 	if needs_redraw:
 		queue_redraw()
 
 
 func rock_image_at(x: int, y: int) -> bool:
 	return is_rock(x, y) or has_radar(x, y)
+
+
+func flash_lines(lines: Array) -> void:
+	flashes.clear()
+	flash_cells.clear()
+	for line in lines:
+		var cells: Array = line["cells"]
+		flashes.append(cells)
+		for cell in cells:
+			if not (cell in flash_cells):
+				flash_cells.append(cell)
+	flash_start = pop_clock
+	queue_redraw()
+
+
+func flash_alpha(now: float) -> float:
+	if flash_start < 0.0:
+		return 0.0
+	var t := (now - flash_start) / LINE_FLASH_TIME
+	if t < 0.0 or t >= 1.0:
+		return 0.0
+	return 0.5 * (1.0 - t)

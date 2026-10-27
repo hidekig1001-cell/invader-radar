@@ -371,6 +371,8 @@ func _refresh() -> void:
 			sound.vibrate(250, 0.3)
 		elif sfx_name == "wrong":
 			sound.vibrate(250, 0.3)
+		if sfx_name == "line":
+			board_view.flash_lines(new_lines)
 			
 	last_snapshot = curr_snapshot
 	last_conflicts = curr_conflicts
