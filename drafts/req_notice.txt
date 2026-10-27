@@ -1,0 +1,108 @@
+盤が大きくなる面のお知らせ（CR-1178 で盤を見せて 0.6 秒後に出す）を、もっと派手に、見た目で分かりやすくして（ユーザーの Pixel の確かめ 10/27 15:5x「１１７８　もっとはでに見た目がわかりやすく。」）。
+今のお知らせは、面のクリアと同じピンクのタイル（show_tile）で、音も振動も動きも無い。お知らせだけを、金色の地・太い濃い橙の縁のタイルにして、出たときに 0.3 秒ぽんと弾ませ（いちばん大きいとき 1.25 倍）、そろった音 "line" を鳴らし、60 ミリ秒・強さ 0.6 で振動させる。字は 2 行に収まる大きさ（上限 52）にする。面のクリアのタイルは今のピンクにして、2 つを見分けられるようにする。
+- scenes/message_bubble.gd に const SIZE_UP_BG := Color8(255, 215, 64)、const SIZE_UP_BORDER := Color8(230, 110, 20)、const SIZE_UP_POP_TIME := 0.3、var size_up_mode: bool = false、var pop_age: float = -1.0 を足す。func size_up_box() -> StyleBoxFlat を足し、地の色 SIZE_UP_BG・縁の色 SIZE_UP_BORDER・縁の太さ 8（4 辺とも）・角の丸み 24（4 隅とも）・anti_aliasing true の新しい StyleBoxFlat を返す。
+- scenes/message_bubble.gd に func show_size_up(text_to_show: String, center: Vector2) -> void を足す。show_tile(text_to_show, center) を呼んだあと、size_up_mode = true とし、"normal" の stylebox を size_up_box() に、"font_size" を fit_font_size(text_to_show, TILE_SIZE, 52, 36) にし、pivot_offset = TILE_SIZE / 2.0、pop_age = 0.0、scale = Vector2.ONE とする。
+- scenes/message_bubble.gd に static func size_up_pop_scale(age: float) -> float を足す（age が 0 未満か SIZE_UP_POP_TIME 以上なら 1.0、ほかは 1.0 + 0.25 * sin(PI * age / SIZE_UP_POP_TIME)）。func step_pop(delta: float) -> void を足す（pop_age が 0 未満なら何もしない。pop_age に delta を足し、SIZE_UP_POP_TIME 以上になったら pop_age = -1.0・scale = Vector2.ONE、ほかは scale = Vector2(s, s)。s は size_up_pop_scale(pop_age)）。func _process で step_blink(delta) のあとに step_pop(delta) を呼ぶ。func clear_text で、tile_mode を戻す前に、size_up_mode が true なら size_up_mode = false・pop_age = -1.0・scale = Vector2.ONE・"font_size" を FONT_SIZE にする。
+- scenes/main.gd の func tick_size_up で、bubble.show_tile(size_up_tile_text(), board_view.position + board_view.board_rect().get_center()) の代わりに bubble.show_size_up(size_up_tile_text(), board_view.position + board_view.board_rect().get_center()) を呼び、続けて sound.play_sfx("line") と sound.vibrate(60, 0.6) を呼ぶ。
+- show_tile と面のクリアのタイルの色、吹き出しとチュートリアルのパネル、size_up_wait・size_up_age の決まり（0.6 秒待つ・0.8 秒は消さない）、ほかのファイルは変えない。
+
+確かめてほしいこと（自動で確かめる項目。依頼の中心）:
+1. テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。そのあとの b.size_up_mode は true、b.tile_mode は true、b.text は "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START"。b.get_theme_stylebox("normal") の bg_color は Color8(255, 215, 64)（金色）、border_color は Color8(230, 110, 20)（濃い橙）、border_width_top は 8。b.get_theme_font_size("font_size") は b.fit_font_size("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", B.TILE_SIZE, 52, 36) と同じ値。b.pivot_offset は Vector2(450, 80)（タイルの真ん中）、b.pop_age は 0.0（誤差 0.001 まで）。
+2. テストの関数の中で var B = load("res://scenes/message_bubble.gd") とする。B.size_up_pop_scale(0.15) は 1.25、B.size_up_pop_scale(0.075) は 1.1768、B.size_up_pop_scale(0.0) は 1.0、B.size_up_pop_scale(0.3) は 1.0、B.size_up_pop_scale(-1.0) は 1.0（どれも誤差 0.001 まで。0.15 秒でいちばん大きく 1.25 倍になり、0.3 秒で元の大きさに戻る）。
+3. テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。続けて b.step_pop(0.15) をしたあとの b.pop_age は 0.15（誤差 0.001 まで）、b.scale は Vector2(1.25, 1.25)（誤差 0.001 まで）。続けて b.step_pop(0.2) をしたあと（0.3 秒を過ぎた）の b.pop_age は -1.0（誤差 0.001 まで）、b.scale は Vector2(1, 1)。
+4. テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。続けて b.step_pop(0.1) をしてから b.clear_text() をしたあとの b.size_up_mode は false、b.tile_mode は false、b.pop_age は -1.0（誤差 0.001 まで）、b.scale は Vector2(1, 1)、b.get_theme_stylebox("normal") は b.normal_box と同じもの、b.get_theme_font_size("font_size") は B.FONT_SIZE と同じ値。
+5. テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var l1 = Level.new() に l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})、var l2 = Level.new() に l2.parse({"id": 2, "width": 5, "height": 5, "target": 5, "regions": [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [2, 2, 2, 2, 2], [3, 3, 3, 3, 3], [4, 4, 4, 4, 4]]})、var l3 = Level.new() に l2 と同じ形で id だけ 3 の parse をする（面は 3 つ。2 つ目の面から盤が 5×5 になる）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと（1 つ目の面をクリアした。クリアのタイルは金色にしない）の m.bubble.tile_mode は true、m.bubble.size_up_mode は false。var down = InputEventScreenTouch.new() として down.index = 0、down.pressed = true、down.position = Vector2(540, 300) とし、m._input(down) をしたあと（2 つ目の面に進んだ）の m.session.level_index は 1、m.sound.played の中の "line" の数（m.sound.played.count("line")）は 0。続けて m.tick_size_up(0.7) をしたあと（0.6 秒待って、お知らせが出た）の m.bubble.size_up_mode は true、m.bubble.text は m.size_up_tile_text() と同じ文、m.bubble.get_theme_stylebox("normal") の bg_color は Color8(255, 215, 64)、m.sound.played の中の "line" の数は 1、m.sound.vibrations の最後は 60、m.sound.vibration_amplitudes の最後は 0.6（誤差 0.001 まで）。
+
+変わる既存のテスト: なし。
+
+変わらない既存のテスト:
+- test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age — 0.6 秒待って出る・0.8 秒は消さない決まりは変えない。tile_mode と文は今と同じ
+- test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja — 字の大きさの上限 52 で、日本語のお知らせは 2 行に収まる（get_line_count は 2）
+- test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_en — お知らせの文は変えない
+- test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_ja — size_up_text は変えない
+- test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_en — 同じ
+- test/cr/test_cr_1076.gd::test_show_tile_and_clear_text — show_tile は変えない
+- test/cr/test_cr_1076.gd::test_main_integration_tile — 面のクリアのタイルは show_tile で出す
+- test/cr/test_cr_1095.gd::test_cr_1095_clear_tile_box_style — ピンクのタイル（clear_tile_box）は変えない
+- test/cr/test_cr_1141.gd::test_cr_1141_clear_text_restores_normal_style — clear_text は、金色のタイルのときだけ戻すものを足す。ふつうの吹き出しの戻し方は変えない
+- test/cr/test_pixel_1023.gd::test_pixel_1023_bubble_is_orange_with_white_text — 吹き出しの色は変えない
+- test/cr/test_cr_1091.gd::test_cr_1091_step_blink_panel_mode — パネルの点滅（step_blink）は変えない
+- test/cr/test_cr_1086.gd::test_cr_1086_show_panel_and_clear_text_style — パネルは変えない
+
+## 依頼の欄（YAML）
+```yaml
+origin:
+  user_text: "１１７８　もっとはでに見た目がわかりやすく。"
+  said_at: "2026-10-27 15:5x"
+  decision: "D-20261027-155x"
+  plan: "手触り（盤が大きくなる面のお知らせ）"
+  step: "お知らせを金色のタイルにして弾ませ、音と振動を出す（案 A）"
+title: "盤が大きくなる面のお知らせを派手にする"
+probe: req_notice_probe.gd
+decls:
+  scenes/message_bubble.gd:
+  - "const SIZE_UP_BG := Color8(255, 215, 64)"
+  - "const SIZE_UP_BORDER := Color8(230, 110, 20)"
+  - "const SIZE_UP_POP_TIME := 0.3"
+  - "var size_up_mode: bool = false"
+  - "var pop_age: float = -1.0"
+  - "func size_up_box() -> StyleBoxFlat"
+  - "func show_size_up(text_to_show: String, center: Vector2) -> void"
+  - "static func size_up_pop_scale(age: float) -> float"
+  - "func step_pop(delta: float) -> void"
+files:
+  edit: [scenes/message_bubble.gd, scenes/main.gd]
+  new: []
+human:
+  - "Pixel で 4×4 の最後の面をクリアして次の面に進み、盤が見えてから金色のお知らせがぽんと弾んで出て、音と短い振動が来ることを見る。面のクリアのタイル（ピンク）と見分けられるかを見る。"
+checks:
+- id: R1
+  text: 'テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。そのあとの b.size_up_mode は true、b.tile_mode は true、b.text は "THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START"。b.get_theme_stylebox("normal") の bg_color は Color8(255, 215, 64)（金色）、border_color は Color8(230, 110, 20)（濃い橙）、border_width_top は 8。b.get_theme_font_size("font_size") は b.fit_font_size("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", B.TILE_SIZE, 52, 36) と同じ値。b.pivot_offset は Vector2(450, 80)（タイルの真ん中）、b.pop_age は 0.0（誤差 0.001 まで）。'
+  target: b.show_size_up
+  expect:
+  - 'b.size_up_mode'
+  - 'b.get_theme_stylebox("normal")'
+- id: R2
+  text: 'テストの関数の中で var B = load("res://scenes/message_bubble.gd") とする。B.size_up_pop_scale(0.15) は 1.25、B.size_up_pop_scale(0.075) は 1.1768、B.size_up_pop_scale(0.0) は 1.0、B.size_up_pop_scale(0.3) は 1.0、B.size_up_pop_scale(-1.0) は 1.0（どれも誤差 0.001 まで。0.15 秒でいちばん大きく 1.25 倍になり、0.3 秒で元の大きさに戻る）。'
+  target: B.size_up_pop_scale
+  expect:
+  - 'B.size_up_pop_scale'
+- id: R3
+  text: 'テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。続けて b.step_pop(0.15) をしたあとの b.pop_age は 0.15（誤差 0.001 まで）、b.scale は Vector2(1.25, 1.25)（誤差 0.001 まで）。続けて b.step_pop(0.2) をしたあと（0.3 秒を過ぎた）の b.pop_age は -1.0（誤差 0.001 まで）、b.scale は Vector2(1, 1)。'
+  target: b.step_pop
+  expect:
+  - 'b.pop_age'
+  - 'b.scale'
+- id: R4
+  text: 'テストの関数の中で var B = load("res://scenes/message_bubble.gd") とし、var b = B.new() を add_child_autofree(b) する。b.show_size_up("THE BOARD IS 5x5 FROM HERE.\nGOOD LUCK!  TAP TO START", Vector2(540, 980)) をする（英語のお知らせの文。\n は改行）。続けて b.step_pop(0.1) をしてから b.clear_text() をしたあとの b.size_up_mode は false、b.tile_mode は false、b.pop_age は -1.0（誤差 0.001 まで）、b.scale は Vector2(1, 1)、b.get_theme_stylebox("normal") は b.normal_box と同じもの、b.get_theme_font_size("font_size") は B.FONT_SIZE と同じ値。'
+  target: b.clear_text
+  expect:
+  - 'b.size_up_mode'
+  - 'b.scale'
+- id: R5
+  text: 'テストの関数の中で var Level = load("res://game/level.gd")、var SessionScript = load("res://game/session.gd") とし、var l1 = Level.new() に l1.parse({"id": 1, "width": 4, "height": 4, "target": 4, "regions": [[0, 0, 0, 0], [0, 0, 0, 2], [3, 1, 1, 1], [1, 1, 1, 1]]})、var l2 = Level.new() に l2.parse({"id": 2, "width": 5, "height": 5, "target": 5, "regions": [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [2, 2, 2, 2, 2], [3, 3, 3, 3, 3], [4, 4, 4, 4, 4]]})、var l3 = Level.new() に l2 と同じ形で id だけ 3 の parse をする（面は 3 つ。2 つ目の面から盤が 5×5 になる）。var m = load("res://scenes/main.tscn").instantiate() として m.session = SessionScript.new([l1, l2, l3]) とし、add_child_autofree(m) をして await wait_frames(2) をする。m.session.solve_now() をしたあと（1 つ目の面をクリアした。クリアのタイルは金色にしない）の m.bubble.tile_mode は true、m.bubble.size_up_mode は false。var down = InputEventScreenTouch.new() として down.index = 0、down.pressed = true、down.position = Vector2(540, 300) とし、m._input(down) をしたあと（2 つ目の面に進んだ）の m.session.level_index は 1、m.sound.played の中の "line" の数（m.sound.played.count("line")）は 0。続けて m.tick_size_up(0.7) をしたあと（0.6 秒待って、お知らせが出た）の m.bubble.size_up_mode は true、m.bubble.text は m.size_up_tile_text() と同じ文、m.bubble.get_theme_stylebox("normal") の bg_color は Color8(255, 215, 64)、m.sound.played の中の "line" の数は 1、m.sound.vibrations の最後は 60、m.sound.vibration_amplitudes の最後は 0.6（誤差 0.001 まで）。'
+  target: m.tick_size_up
+  expect:
+  - 'm.bubble.size_up_mode'
+  - 'm.sound.vibrations'
+extra_items: 0
+keep:
+  files: [core/rules.gd, game/session.gd, scenes/board_view.gd, scenes/sound.gd]
+  other:
+  - 'scenes/message_bubble.gd の show_tile・clear_tile_box・show_panel・step_blink は変えない'
+  - 'scenes/main.gd の size_up_wait・size_up_age の決まりと、面のクリアのタイルの出し方は変えない'
+changing_tests: []
+unchanged_tests:
+  - 'test/cr/test_cr_1178.gd::test_cr_1178_size_up_wait_and_age'
+  - 'test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_ja'
+  - 'test/cr/test_cr_1172.gd::test_cr_1172_size_up_tile_en'
+  - 'test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_ja'
+  - 'test/cr/test_cr_1167.gd::test_cr_1167_size_up_text_en'
+  - 'test/cr/test_cr_1076.gd::test_show_tile_and_clear_text'
+  - 'test/cr/test_cr_1076.gd::test_main_integration_tile'
+  - 'test/cr/test_cr_1095.gd::test_cr_1095_clear_tile_box_style'
+  - 'test/cr/test_cr_1141.gd::test_cr_1141_clear_text_restores_normal_style'
+  - 'test/cr/test_pixel_1023.gd::test_pixel_1023_bubble_is_orange_with_white_text'
+  - 'test/cr/test_cr_1091.gd::test_cr_1091_step_blink_panel_mode'
+  - 'test/cr/test_cr_1086.gd::test_cr_1086_show_panel_and_clear_text_style'
+```
