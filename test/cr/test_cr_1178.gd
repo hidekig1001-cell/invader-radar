@@ -36,7 +36,7 @@ func test_cr_1178_size_up_wait_and_age() -> void:
 	m.tick_size_up(0.7)
 
 	assert_true(m.bubble.tile_mode)
-	assert_eq(m.bubble.text, "この面からはマスが 5×5 になるよ。\nがんばって！  タップではじめる")
+	assert_eq(m.bubble.text, "この面からはマスが 5×5 になるよ。\nがんばって！")
 
 	m._input(down)
 
