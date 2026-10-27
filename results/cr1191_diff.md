@@ -25,7 +25,7 @@ merge-base は 8111de3。commit は 372d724 の 1 つ。依頼と CR は branch 
 - branch 全体を `\blast_dead\b` で git grep した（briefs・results・drafts を除く）。
   - 当たるのは test/cr/test_cr_1191.gd の `"last_dead" in m` の 3 か所だけ。どれも文字で有る無しを調べるだけで、名前で読まないので Parse Error にならない。
   - main.gd・ほかの scenes・game・core・ほかのテストに、last_dead を読む所・書く所は無い。
-- .autedev/ は branch に入っている（allow.json・notes/ など）が、.autedev/shot.gd は無い。上の git grep は .autedev/ も含めて調べていて、last_dead を読む所は無い。
+- .autedev/shot.gd は branch に入っている。.autedev/ の中を last_dead で git grep しても 0 件で、shot.gd にも last_dead を読む所は無い。
 
 ## 4. 下書きの try_cleanup_last_dead_patch.py（draft/next-a）との比べ
 - main.gd の部分は、下書きの 4 つの置き換え（宣言と 3 行を "" にする）と、行も中身も同じ。
